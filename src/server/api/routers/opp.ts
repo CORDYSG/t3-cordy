@@ -74,4 +74,68 @@ export const oppRouter = createTRPCRouter({
 
       return { opps: enrichedOpps, totalOpps };
     }),
+  searchOpportunities: publicProcedure
+    .input(
+      z.object({
+        search: z.string().optional().default(""),
+        filter: z.string().optional().default("All"),
+        zoneIds: z.array(z.string()).optional().default([]),
+        page: z.number().optional().default(1),
+        limit: z.number().optional().default(8),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const { search, filter, zoneIds, page, limit } = input;
+      const skip = (page - 1) * limit;
+
+      // Base query
+      const whereClause = {};
+
+      // Add search condition
+      if (search && search.trim() !== "") {
+        whereClause.OR = [
+          { name: { contains: search, mode: "insensitive" } },
+          { caption: { contains: search, mode: "insensitive" } },
+          // Add more fields as needed
+        ];
+      }
+
+      // Add filter condition
+      // if (filter && filter !== "All") {
+      //   whereClause.status = filter.toUpperCase();
+      // }
+
+      // Add zone filter
+      if (zoneIds && zoneIds.length > 0) {
+        whereClause.zones = {
+          some: {
+            id: { in: zoneIds },
+          },
+        };
+      }
+
+      // Execute search query
+      const opps = await ctx.db.opps.findMany({
+        where: whereClause,
+        skip,
+        take: limit,
+        include: {
+          zones: true,
+          // Include other relations as needed
+        },
+        orderBy: {
+          created_at: "desc",
+        },
+      });
+
+      // Get filtered count for pagination
+      const totalOpps = await ctx.db.opps.count({
+        where: whereClause,
+      });
+
+      return {
+        opps,
+        totalOpps,
+      };
+    }),
 });

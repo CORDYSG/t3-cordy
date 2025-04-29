@@ -1,4 +1,4 @@
-import type { Opps, Tags, Zones } from "@prisma/client";
+import type { Opps, Types, Zones } from "@prisma/client";
 
 declare global {
   type OpportunityType = Opps & {
@@ -6,6 +6,7 @@ declare global {
   };
   type TagType = Tags;
   type ZoneType = Zones;
+  type TagTypes = Types;
 
   type OppWithZoneType = Prisma.OppsGetPayload<{
     include: { zones: true };

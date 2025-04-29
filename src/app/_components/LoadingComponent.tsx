@@ -1,3 +1,5 @@
+"use client";
+
 import { NewtonsCradle } from "ldrs/react";
 import "ldrs/react/NewtonsCradle.css";
 

@@ -40,7 +40,9 @@ yarn-error.log*
 .vercel
 
 # typescript
-*.tsbuildinfo
+*.tsbuildinfo# logs
+/logs
+*.log
 
 # idea files
 .idea
