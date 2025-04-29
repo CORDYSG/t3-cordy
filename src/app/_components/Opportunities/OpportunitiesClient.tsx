@@ -72,7 +72,7 @@ const OpportunitiesClient = ({
     if (currentQueryPage !== page) {
       setPage(currentQueryPage);
     }
-  }, [currentQueryPage]);
+  }, [currentQueryPage, page]);
 
   // Determine if we should be using filtered data
   useEffect(() => {
@@ -167,12 +167,12 @@ const OpportunitiesClient = ({
                 </p>
               ))}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 gap-y-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {displayedOpps.length > 0 ? (
                 displayedOpps.map((opp) => (
                   <div
                     key={opp.id}
-                    className="flex items-center justify-center"
+                    className="flex items-center justify-center px-8"
                   >
                     <EventCard opp={opp} static />
                   </div>

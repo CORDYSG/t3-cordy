@@ -53,7 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
               </div>
 
               {/* Navigation Links */}
-              <div className="absolute top-1/2 left-1/2 hidden -translate-x-1/2 -translate-y-1/2 md:block">
+              <div className="hidden md:block lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2">
                 <div className="flex items-baseline space-x-4 uppercase">
                   <Link
                     href="/opportunities/for-you"

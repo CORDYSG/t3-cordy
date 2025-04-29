@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+
 import Link from "next/link";
 
 type EventCardProps = {
@@ -25,7 +25,6 @@ export default function EventCard({
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
 
-  const router = useRouter();
   // Function to format the date
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
@@ -44,11 +43,11 @@ export default function EventCard({
   // Sort zones by name length - shortest first to maximize visibility
   const sortedZones = useMemo(
     () =>
-      [...opp.zones].sort((a: ZoneType, b: ZoneType) => {
+      ([...opp.zones] as ZoneType[]).sort((a: ZoneType, b: ZoneType) => {
         const nameA = a.name ?? "";
         const nameB = b.name ?? "";
         return nameA.length - nameB.length;
-      }) as ZoneType[],
+      }),
     [opp.zones],
   );
 
@@ -64,9 +63,10 @@ export default function EventCard({
 
       // Simple width estimation - this is a rough approximation
       // We use 8px per character plus 24px padding/margins
+
       for (let i = 0; i < sortedZones.length; i++) {
         // Estimate zone width: text width + padding + gap
-        const estimatedWidth = sortedZones[i].name.length * 8 + 24;
+        const estimatedWidth = (sortedZones[i]?.name ?? "").length * 8 + 24;
 
         if (i < sortedZones.length - 1) {
           // Not the last zone - check if we need space for "more"
@@ -79,11 +79,8 @@ export default function EventCard({
           } else {
             break;
           }
-        } else {
-          // Last zone - no need for "more" indicator
-          if (totalWidth + estimatedWidth <= containerWidth) {
-            visibleCount++;
-          }
+        } else if (totalWidth + estimatedWidth <= containerWidth) {
+          visibleCount++;
         }
       }
 

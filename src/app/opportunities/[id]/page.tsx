@@ -26,7 +26,7 @@ const OpportunityDetail = async ({
       )
     : [];
 
-  const { opps = [], totalOpps = 0 } = await api.opp.searchOpportunities({
+  const { opps = [] } = await api.opp.searchOpportunities({
     search: "",
     type: opp?.types?.map((t: TagType) => t.alias) ?? [],
     zoneIds:
@@ -34,21 +34,23 @@ const OpportunityDetail = async ({
         ?.map((z: ZoneType) => z.name)
         .filter((name: string): name is string => name !== null) ?? [],
     page: 1,
-    limit: 3,
+    limit: 6,
     excludeOppIds: [opp.airtable_id],
   });
 
   return (
-    <div className="container mx-auto flex flex-col items-center justify-center gap-4 p-8 md:w-3/4">
+    <div className="container mx-auto flex flex-col items-center justify-center gap-4 p-8 md:w-5/6">
       <Suspense fallback={<LoadingComponent />}>
         <OpportunityDetailCard opp={opp} types={types} />
 
-        <div className="my-4 w-full text-left font-bold">
+        <div className="my-4 flex h-full w-full grid-rows-2 flex-col justify-center text-left font-bold">
           <h3 className="mb-8 text-2xl">Similar Opportunities</h3>
-          <div className="flex w-full justify-between gap-5">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {opps.length > 0 &&
               opps.map((opp: OppWithZoneType) => (
-                <EventCard key={opp.id} opp={opp} static />
+                <div className="flex items-center justify-center" key={opp.id}>
+                  <EventCard opp={opp} static />
+                </div>
               ))}
           </div>
         </div>

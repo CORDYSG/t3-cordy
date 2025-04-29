@@ -43,7 +43,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
             />
           )}
         </div>
-        <div className="items-center space-y-2">
+        <div className="mb-2 items-center space-y-4 md:mb-0">
           <h2 className="text-2xl font-bold">{opp.name}</h2>
           <div className="space-x-2">
             {" "}

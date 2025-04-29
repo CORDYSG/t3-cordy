@@ -3,14 +3,14 @@ import { api } from "@/trpc/server";
 import OpportunitiesClient from "../_components/Opportunities/OpportunitiesClient";
 import LoadingComponent from "../_components/LoadingComponent";
 
-const OpportunitiesPage = async({
+const OpportunitiesPage = async ({
   searchParams,
 }: {
   searchParams: { page?: string };
-}) =>{
+}) => {
   // Parse page from search params with fallback to 1
   const page = parseInt(searchParams.page ?? "1") || 1;
-  const limit = 8;
+  const limit = 12;
 
   // Server-side data fetching
   const { opps = [], totalOpps = 0 } =
@@ -18,7 +18,7 @@ const OpportunitiesPage = async({
       limit,
       page,
     });
-  
+
   const types = await api.type.getAllTypes();
 
   // Fetch available zones for filters (if you need them)
@@ -33,14 +33,11 @@ const OpportunitiesPage = async({
           initialPage={page}
           limit={limit}
           zones={zones}
-          types ={types}
+          types={types}
         />
       </Suspense>
     </div>
-);
-  
-}
+  );
+};
 
 export default OpportunitiesPage;
-
-
