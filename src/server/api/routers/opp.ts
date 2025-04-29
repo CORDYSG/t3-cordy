@@ -30,7 +30,7 @@ export const oppRouter = createTRPCRouter({
       };
     });
 
-    return enrichedOpps as OppWithZoneType[];
+    return enrichedOpps;
   }),
 
   getAllOpportunitiesWithZonesLimit: publicProcedure
@@ -78,40 +78,46 @@ export const oppRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().optional().default(""),
-        filter: z.string().optional().default("All"),
+        type: z.string().optional().default(""),
         zoneIds: z.array(z.string()).optional().default([]),
         page: z.number().optional().default(1),
         limit: z.number().optional().default(8),
       }),
     )
     .query(async ({ ctx, input }) => {
-      const { search, filter, zoneIds, page, limit } = input;
+      const { search, type, zoneIds, page, limit } = input;
       const skip = (page - 1) * limit;
 
-      // Base query
-      const whereClause = {};
+      // Define the where clause with proper typing
+      const whereClause: Prisma.OppsWhereInput = {};
 
       // Add search condition
       if (search && search.trim() !== "") {
         whereClause.OR = [
-          { name: { contains: search, mode: "insensitive" } },
-          { caption: { contains: search, mode: "insensitive" } },
+          {
+            name: { contains: search, mode: "insensitive" as Prisma.QueryMode },
+          },
+          {
+            caption: {
+              contains: search,
+              mode: "insensitive" as Prisma.QueryMode,
+            },
+          },
           // Add more fields as needed
         ];
       }
 
-      // Add filter condition
-      // if (filter && filter !== "All") {
-      //   whereClause.status = filter.toUpperCase();
-      // }
+      // Add type filter if provided
+      if (type && type !== "") {
+        whereClause.type = { has: type };
+      }
 
-      // Add zone filter
       if (zoneIds && zoneIds.length > 0) {
-        whereClause.zones = {
-          some: {
-            id: { in: zoneIds },
-          },
-        };
+        if (zoneIds && zoneIds.length > 0) {
+          whereClause.zone = {
+            hasSome: zoneIds, // matches any zone name in the array
+          };
+        }
       }
 
       // Execute search query
@@ -119,13 +125,29 @@ export const oppRouter = createTRPCRouter({
         where: whereClause,
         skip,
         take: limit,
-        include: {
-          zones: true,
-          // Include other relations as needed
-        },
         orderBy: {
           created_at: "desc",
         },
+      });
+
+      //fetching zones for enriched opps
+      const zones = await db.zones.findMany({});
+      // Create a quick lookup map for zone names
+      const zoneMap = new Map<string, (typeof zones)[number]>();
+      for (const zone of zones) {
+        if (zone.name) {
+          zoneMap.set(zone.name, zone);
+        }
+      }
+      // For each opportunity, map zone names to zone objects
+      const enrichedOpps = opps.map((opp) => {
+        const oppZones = (opp.zone ?? [])
+          .map((zoneName) => zoneMap.get(zoneName))
+          .filter(Boolean);
+        return {
+          ...opp,
+          zones: oppZones, // we add a new field 'zones' which has the full zone objects
+        };
       });
 
       // Get filtered count for pagination
@@ -134,7 +156,7 @@ export const oppRouter = createTRPCRouter({
       });
 
       return {
-        opps,
+        opps: enrichedOpps,
         totalOpps,
       };
     }),

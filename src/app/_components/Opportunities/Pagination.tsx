@@ -8,7 +8,11 @@ type PaginationProps = {
   onPageChange: (page: number) => void;
 };
 
-const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) => {
+const Pagination = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) => {
   return (
     <div className="container my-16 flex w-3/4 flex-col justify-center">
       <div className="mb-8 flex w-full justify-between">
@@ -37,17 +41,19 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
           )}
         </div>
       </div>
-      
+
       <div className="flex items-center justify-center">
-        <p className="mr-5 hidden font-semibold text-black md:block">
-          Page
-        </p>
+        <p className="mr-5 hidden font-semibold text-black md:block">Page</p>
         {(() => {
           const maxRange = 1;
           let pages = [];
 
           // Add pages before the current page
-          for (let i = Math.max(1, currentPage - maxRange); i < currentPage; i++) {
+          for (
+            let i = Math.max(1, currentPage - maxRange);
+            i < currentPage;
+            i++
+          ) {
             pages.push(i);
           }
 
@@ -75,8 +81,7 @@ const Pagination = ({ currentPage, totalPages, onPageChange }: PaginationProps) 
             <button
               key={index}
               onClick={() =>
-                typeof pageNumber === "number" &&
-                onPageChange(pageNumber)
+                typeof pageNumber === "number" && onPageChange(pageNumber)
               }
               className={`cursor-pointer text-lg ${
                 currentPage === pageNumber

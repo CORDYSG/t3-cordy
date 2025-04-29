@@ -1,12 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect, useRef } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { api } from "@/trpc/react";
 import SearchBar from "./SearchBar";
 import EventCard from "../../_components/EventCard";
 import LoadingComponent from "../../_components/LoadingComponent";
 import Pagination from "./Pagination";
+import Image from "next/image";
 
 type OpportunitiesClientProps = {
   initialOpps: OpportunityType[];
@@ -25,51 +26,83 @@ const OpportunitiesClient = ({
   zones,
   types,
 }: OpportunitiesClientProps) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedZone, setSelectedZone] = useState<ZoneType[]>([]);
-  const [opps, setOpps] = useState<OpportunityType[]>(initialOpps);
   const [page, setPage] = useState(initialPage);
-  const [isSearching, setIsSearching] = useState(false);
+  const [isFiltered, setIsFiltered] = useState(false);
 
-  const router = useRouter();
+  const currentQueryPage = parseInt(searchParams.get("page") ?? "1") || 1;
+  const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Client-side data fetching for search & filters
-  const { data: searchResults, isLoading: searchLoading } =
-    api.opp.searchOpportunities.useQuery(
-      {
-        search,
-        type: selectedType,
-        zoneIds: selectedZone?.map((z) => z.id) || [],
-        page,
-        limit,
-      },
-      {
-        enabled: isSearching,
-      },
-    );
+  // Setup the TRPC query properly at component level
+  const {
+    data: searchResults,
+    isLoading,
+    refetch,
+  } = api.opp.searchOpportunities.useQuery(
+    {
+      search,
+      type: selectedType,
+      zoneIds:
+        selectedZone
+          ?.map((z) => z.name)
+          .filter((name): name is string => name !== null) || [],
+      page,
+      limit,
+    },
+    {
+      enabled: isFiltered,
+      initialData: isFiltered
+        ? undefined
+        : {
+            opps: initialOpps.map((opp) => ({
+              ...opp,
+              zones: [], // Add an empty zones array or populate it as needed
+            })),
+            totalOpps: totalOpps,
+          },
+    },
+  );
 
+  // Update page when URL changes
   useEffect(() => {
-    if (searchResults) {
-      setOpps(searchResults.opps);
-      setIsSearching(false);
+    if (currentQueryPage !== page) {
+      setPage(currentQueryPage);
     }
-  }, [searchResults]);
+  }, [currentQueryPage]);
 
-  // When search or filters change, update the search state
+  // Determine if we should be using filtered data
   useEffect(() => {
-    if (search || selectedType !== "" || selectedZone.length > 0) {
-      setIsSearching(true);
-    }
+    const hasFilters =
+      search !== "" || selectedType !== "" || selectedZone.length > 0;
+    setIsFiltered(hasFilters);
   }, [search, selectedType, selectedZone]);
+
+  // Debounce search
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+
+    if (isFiltered) {
+      searchDebounceRef.current = setTimeout(() => {
+        void refetch();
+      }, 300);
+    }
+
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [search, selectedType, selectedZone, page, isFiltered, refetch]);
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
     router.push(`/opportunities?page=${newPage}`);
-    // If we're not searching, we let the server handle pagination
-    // If we are searching, the client-side query will update
-    if (!search && selectedType === "" && selectedZone.length === 0) {
-      router.refresh(); // Trigger a server refresh to get new data
+
+    // If not filtering, let server handle pagination
+    if (!isFiltered) {
+      router.refresh();
     }
   };
 
@@ -105,9 +138,10 @@ const OpportunitiesClient = ({
     return placeholders;
   };
 
-  const isLoading = searchLoading && isSearching;
-  const displayedOpps = opps;
-  const totalPages = Math.ceil(totalOpps / limit);
+  // Calculate display data based on filters
+  const displayedOpps = isFiltered ? (searchResults?.opps ?? []) : initialOpps;
+  const displayTotal = isFiltered ? (searchResults?.totalOpps ?? 0) : totalOpps;
+  const totalPages = Math.ceil(displayTotal / limit);
 
   return (
     <>
@@ -133,30 +167,48 @@ const OpportunitiesClient = ({
         />
       </div>
 
-      <div className="container mt-8 w-3/4">
+      <div className="container mt-8 min-h-46 w-3/4">
         {isLoading ? (
           <LoadingComponent />
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {displayedOpps.length > 0 ? (
-              displayedOpps.map((opp) => (
-                <div key={opp.id} className="flex items-center justify-center">
-                  <EventCard opp={opp} static />
-                </div>
-              ))
-            ) : (
-              <>
-                {renderPlaceholders()}
-                <div className="col-span-full flex h-32 items-center justify-center text-2xl font-bold text-gray-500">
-                  No Opportunities Found
-                </div>
-              </>
+          <>
+            {searchResults?.opps.length != 0 && (
+              <p className="mb-4 font-semibold">{totalOpps} Opportunities</p>
             )}
-          </div>
+
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+              {displayedOpps.length > 0 ? (
+                displayedOpps.map((opp) => (
+                  <div
+                    key={opp.id}
+                    className="flex items-center justify-center"
+                  >
+                    <EventCard opp={opp} static />
+                  </div>
+                ))
+              ) : (
+                <div className="text-md col-span-full flex h-full flex-col items-center justify-center space-y-2 font-bold">
+                  <Image
+                    src={
+                      "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
+                    }
+                    height="400"
+                    width="400"
+                    alt="No Opportunities Found"
+                    className="h-32 w-32"
+                  />
+                  <span className="font-medium italic">
+                    &quot;Shucks!&quot;
+                  </span>
+                  <p className="font-semibold">No Opportunities Found.</p>
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
 
-      {!isLoading && totalOpps > limit && (
+      {!isLoading && displayTotal > limit && (
         <Pagination
           currentPage={page}
           totalPages={totalPages}

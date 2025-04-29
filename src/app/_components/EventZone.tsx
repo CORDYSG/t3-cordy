@@ -3,6 +3,7 @@ interface EventTagProps {
   small?: boolean;
   interactive?: boolean;
   onClickZone?: () => void;
+  active?: boolean;
 }
 
 const EventTag: React.FC<EventTagProps> = ({
@@ -10,6 +11,7 @@ const EventTag: React.FC<EventTagProps> = ({
   small,
   interactive,
   onClickZone,
+  active,
 }) => {
   return (
     <button onClick={onClickZone}>
@@ -17,7 +19,7 @@ const EventTag: React.FC<EventTagProps> = ({
         className={`rounded-full border-2 border-black px-2 py-1 font-semibold whitespace-nowrap text-black ${small ? "text-[0.65rem]" : "text-xs"} ${
           interactive &&
           "cursor-pointer hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-        }`}
+        } ${active && "shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"}`}
         style={{
           backgroundColor:
             zone.colour as React.CSSProperties["backgroundColor"],

@@ -5,6 +5,7 @@ import { Menu, UserCircle } from "lucide-react";
 
 import { FaTelegramPlane } from "react-icons/fa";
 import type { Session } from "next-auth";
+
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -118,12 +119,21 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                     src={session?.user.image ?? "/default-avatar.png"}
                     alt={session?.user.name ?? "User"}
                   />
+
                   <AvatarFallback>{userInitials} </AvatarFallback>
                 </Avatar>
               </div>
-              <div className="text-center font-semibold">
-                {session?.user.name}
-              </div>
+              {session ? (
+                <div className="text-center font-semibold">
+                  {session?.user.name}
+                </div>
+              ) : (
+                <Link href="/api/auth/signin" className="w-full">
+                  <button className="btn-brand-primary text-sm uppercase">
+                    Sign in
+                  </button>
+                </Link>
+              )}
             </div>
             <div className="h-[0.5px] w-full bg-black"></div>
             <ul className="font-medium">

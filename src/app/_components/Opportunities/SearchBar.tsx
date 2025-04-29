@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  X,
+  Clock,
+  CalendarPlus,
+  FunnelX,
+  Funnel,
+} from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -13,11 +21,13 @@ type SearchBarProps = {
   search: string;
   onSearchChange: (search: string) => void;
   selectedType: string;
-  onTypeChange: (filter: string) => void;
+  onTypeChange: (type: string) => void;
   zones: ZoneType[];
   selectedZones: ZoneType[];
   onZoneSelect: (zone: ZoneType) => void;
   types: TagTypes[];
+  onSortChange?: (sortType: string) => void;
+  onClearFilters?: () => void;
 };
 
 const SearchBar = ({
@@ -32,18 +42,37 @@ const SearchBar = ({
 }: SearchBarProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
+  const handleClearSearch = () => {
+    onSearchChange("");
+  };
+
+  const handleClearAllFilters = () => {
+    onSearchChange("");
+    onTypeChange("");
+  };
+
   return (
     <div className="container mt-4 flex w-3/4 flex-col">
       <div className="flex flex-row rounded-lg border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         {/* Search Bar */}
         <div className="w-10 border-r-2 border-black"></div>
-        <input
-          type="text"
-          placeholder="Search..."
-          value={search}
-          onChange={(e) => onSearchChange(e.target.value)}
-          className="w-3/4 border-r-2 border-black px-4 py-2 focus:outline-none md:w-5/6"
-        />
+        <div className="relative flex w-3/4 border-r-2 border-black md:w-5/6">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={search}
+            onChange={(e) => onSearchChange(e.target.value)}
+            className="w-full px-4 py-2 focus:outline-none"
+          />
+          {search && (
+            <button
+              onClick={handleClearSearch}
+              className="absolute top-1/2 right-2 -translate-y-1/2 cursor-pointer rounded-full p-1 hover:bg-gray-100"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
 
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
@@ -70,13 +99,13 @@ const SearchBar = ({
                 <div className="mt-2 flex max-h-40 flex-col gap-1 overflow-y-auto">
                   {types.length > 0 ? (
                     types.map((type) => (
-                      <div
+                      <button
                         key={type.id}
-                        onClick={() => onZoneSelect(type)}
-                        className="cursor-pointer rounded-md py-1 pl-2 hover:bg-gray-100"
+                        onClick={() => onTypeChange(type.alias ?? "")}
+                        className={`${selectedType === type.alias ? "bg-gray-50" : ""} cursor-pointer rounded-md py-1 pl-2 text-left outline-none hover:bg-gray-100`}
                       >
                         {type.name}
-                      </div>
+                      </button>
                     ))
                   ) : (
                     <p className="text-sm text-gray-400">No zones available</p>
@@ -86,8 +115,17 @@ const SearchBar = ({
             </div>
           </PopoverContent>
         </Popover>
+        {selectedType != "" && (
+          <button
+            className="flex cursor-pointer items-center rounded-r-md border-l-2 px-4 hover:bg-gray-100"
+            onClick={handleClearAllFilters}
+          >
+            <FunnelX size={24} />
+          </button>
+        )}
       </div>
-      <div className="mt-8 flex justify-center gap-4">
+
+      <div className="mt-8 flex flex-wrap justify-center gap-4">
         {zones.length > 0 &&
           zones.map((zone) => (
             <div key={zone.id}>
@@ -95,6 +133,7 @@ const SearchBar = ({
                 zone={zone}
                 interactive
                 onClickZone={() => onZoneSelect(zone)}
+                active={selectedZones.some((z) => z.id === zone.id)}
               />
             </div>
           ))}
