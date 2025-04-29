@@ -7,26 +7,28 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
-
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type EventCardProps = {
   opp: OppWithZoneType;
   static?: boolean; // <-- add static prop
   pointerNone?: boolean; // <-- add pointerNone prop
+  button?: boolean; // <-- add button prop
 };
 
 export default function EventCard({
   opp,
   static: isStatic,
   pointerNone,
+  button,
 }: Readonly<EventCardProps>): JSX.Element {
   const calculateDaysLeft = (deadline: Date): number => {
     const now = new Date();
     const timeDiff = deadline.getTime() - now.getTime();
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
-
+  const router = useRouter();
   // Function to format the date
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
@@ -117,10 +119,13 @@ export default function EventCard({
     };
   }, [sortedZones]); // Only depend on sortedZones, which is memoized
 
+  const handleButtonClick = (airtable_id: string) => {
+    router.push(`/opportunities/${airtable_id}`);
+  };
   return (
-    <Link
-      className={`card outline-none ${pointerNone && "pointer-events-none touch-none select-none"}${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
-      href={`/opportunities/${opp.airtable_id}`}
+    <button
+      className={`card cursor-pointer outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
+      onClick={() => handleButtonClick(opp.airtable_id)}
     >
       <div
         className={`bg-grey-500 relative rounded-lg border-[2px] p-4 ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
@@ -142,7 +147,7 @@ export default function EventCard({
       </div>
       <div
         ref={zonesContainerRef}
-        className="relative my-2 h-8 overflow-hidden"
+        className="relative my-2 mt-4 h-8 overflow-hidden"
       >
         <div ref={zonesRef} className="absolute flex flex-nowrap gap-2">
           {visibleZones.map((zone: ZoneType) => (
@@ -158,27 +163,29 @@ export default function EventCard({
       </div>
 
       <h2
-        className={`text-md mb-2 line-clamp-1 font-bold ${isStatic ? "text-sm" : "text-md"}`}
+        className={`text-md mb-2 line-clamp-1 text-left font-bold ${isStatic ? "text-sm" : "text-md"}`}
       >
         {opp.name}
       </h2>
       <p
-        className={`mb-4 line-clamp-3 text-gray-700 ${isStatic ? "text-sm" : "text-md"}`}
+        className={`mb-4 line-clamp-3 text-left text-gray-700 ${isStatic ? "text-sm" : "text-md"}`}
       >
         {opp.caption}
       </p>
       <div>
-        <p className="text-sm text-gray-500">
+        <p className="text-left text-sm text-gray-500">
           {opp.deadline ? formatDate(opp.deadline) : "Forever"}
         </p>
         {daysLeft !== null ? (
-          <p className="text-primary text-sm font-bold">
+          <p className="text-primary text-left text-sm font-bold">
             {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
           </p>
         ) : (
-          <p className="text-sm font-bold text-gray-700">No deadline</p>
+          <p className="not-first: text-left text-sm font-bold text-gray-700">
+            No deadline
+          </p>
         )}
       </div>
-    </Link>
+    </button>
   );
 }

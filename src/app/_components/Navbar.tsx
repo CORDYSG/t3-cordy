@@ -102,6 +102,13 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 <button
                   type="button"
                   className="btn-brand-blue hidden text-sm uppercase md:block"
+                  onClick={() => {
+                    window.open(
+                      "https://t.me/CordySGBot?start=64943e76d32eee6db0007ad5",
+                      "_blank",
+                      "noopener,noreferrer",
+                    );
+                  }}
                 >
                   Get cordy in Telegram
                 </button>
@@ -188,6 +195,13 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
               <button
                 type="button"
                 className="btn-brand-blue w-full text-xs uppercase"
+                onClick={() => {
+                  window.open(
+                    "https://t.me/CordySGBot?start=64943e76d32eee6db0007ad5",
+                    "_blank",
+                    "noopener,noreferrer",
+                  );
+                }}
               >
                 Telegram
               </button>

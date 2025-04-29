@@ -14,9 +14,9 @@ const EventTag: React.FC<EventTagProps> = ({
   active,
 }) => {
   return (
-    <button onClick={onClickZone}>
+    <div onClick={onClickZone}>
       <span
-        className={`rounded-full border-2 border-black px-2 py-1 font-semibold whitespace-nowrap text-black ${small ? "text-[0.65rem]" : "text-xs"} ${
+        className={`rounded-full border-2 border-black px-2 py-1 font-semibold whitespace-nowrap text-black transition-all ${small ? "text-[0.65rem]" : "text-xs"} ${
           interactive &&
           "cursor-pointer hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
         } ${active && "shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"}`}
@@ -27,7 +27,7 @@ const EventTag: React.FC<EventTagProps> = ({
       >
         {zone.name}
       </span>
-    </button>
+    </div>
   );
 };
 

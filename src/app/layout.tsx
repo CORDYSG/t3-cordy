@@ -6,6 +6,7 @@ import { TRPCReactProvider } from "@/trpc/react";
 import { auth } from "@/server/auth";
 import Navbar from "./_components/Navbar";
 import Footer from "./_components/Footer";
+import { SessionProvider } from "next-auth/react";
 
 export const metadata: Metadata = {
   title: "CORDY",
@@ -25,11 +26,13 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();
   return (
     <html lang="en" className={`${dmSans.variable}`}>
-      <body>
+      <body className="w-screen overflow-x-hidden">
         <TRPCReactProvider>
-          <Navbar session={session} />
-          {children}
-          <Footer />
+          <SessionProvider session={session}>
+            <Navbar session={session} />
+            {children}
+            <Footer />
+          </SessionProvider>
         </TRPCReactProvider>
       </body>
     </html>

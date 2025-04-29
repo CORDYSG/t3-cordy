@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import Link from "next/link";
 import { FaInstagram } from "react-icons/fa";
@@ -38,7 +39,16 @@ const Footer: React.FC = () => {
         </div>
 
         {/* Right side - Image placeholder */}
-        <div className="h-full">
+        <button
+          className="h-full cursor-pointer transition-transform duration-300 ease-in-out hover:scale-105"
+          onClick={() => {
+            window.open(
+              "https://t.me/CordySGBot?start=64943e76d32eee6db0007ad5",
+              "_blank",
+              "noopener,noreferrer",
+            );
+          }}
+        >
           <div className="h-48 md:h-64">
             <Image
               src={
@@ -53,7 +63,7 @@ const Footer: React.FC = () => {
           <p className="my-4 text-center text-sm font-black text-white uppercase md:text-xl">
             GET CORDY IN <br /> YOUR PHONE!
           </p>
-        </div>
+        </button>
       </div>
     </footer>
   );

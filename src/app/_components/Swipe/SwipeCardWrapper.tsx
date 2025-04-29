@@ -239,7 +239,11 @@ const OpportunitiesPage = () => {
         </div>
       )}
 
-      <div ref={containerRef} className="relative min-h-[520px] w-1/4 max-w-sm">
+      <div
+        style={{ minHeight: "450px" }}
+        ref={containerRef}
+        className="relative flex min-h-[450px] w-1/4 max-w-sm items-center"
+      >
         {isFetchingRef.current && visibleOpps.length === 0 ? (
           <div className="flex h-full items-center justify-center">
             <LoadingComponent />
@@ -357,7 +361,7 @@ const OpportunitiesPage = () => {
           })
         )}
         {!isFetchingRef.current && visibleOpps.length === 0 && (
-          <div className="flex min-h-[800px] flex-col items-center justify-center py-4 text-center text-xl">
+          <div className="flex h-full w-full flex-col items-center justify-center py-4 text-center text-xl">
             <Image
               src={
                 "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
