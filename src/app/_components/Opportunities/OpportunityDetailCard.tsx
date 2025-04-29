@@ -29,7 +29,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
 
   return (
     <div className="shadow-brand w-full rounded-md border-2 bg-white p-5">
-      <div className="flex flex-col items-center gap-8 md:flex-row">
+      <div className="flex flex-col gap-8 md:flex-row md:items-center">
         <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48 md:max-w-80">
           {opp.thumbnail_url && (
             <Image
@@ -43,7 +43,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
             />
           )}
         </div>
-        <div className="mb-2 items-center space-y-4 md:mb-0">
+        <div className="mb-2 space-y-4 md:mb-0">
           <h2 className="text-2xl font-bold">{opp.name}</h2>
           <div className="space-x-2">
             {" "}
@@ -69,7 +69,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
       </div>
       <div className="mt-4 mb-8 w-full border-1"></div>
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold">{opp.name}</h2>
+        <h2 className="hidden text-2xl font-bold md:block">{opp.name}</h2>
         <div className="flex gap-2">
           {types.map((type) => (
             <span

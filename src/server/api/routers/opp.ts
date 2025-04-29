@@ -66,7 +66,7 @@ export const oppRouter = createTRPCRouter({
       return enrichedOpp;
     }),
   getAllOpportunitiesWithZonesLimit: publicProcedure
-    .input(z.object({ limit: z.number(), page: z.number().min(1) })) // Added page parameter
+    .input(z.object({ limit: z.number(), page: z.number().min(1).max(100) })) // Added page parameter
     .query(async ({ input }) => {
       const { limit, page } = input;
       const skip = (page - 1) * limit; // Calculate the number of records to skip

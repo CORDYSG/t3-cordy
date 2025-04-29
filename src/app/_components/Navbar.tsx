@@ -159,7 +159,10 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
             <div className="h-[0.5px] w-full bg-black"></div>
             <ul className="font-medium">
               <li className="mb-4">
-                <Link href="/for-you" className="hover:text-primary text-black">
+                <Link
+                  href="/opportunities/for-you"
+                  className="hover:text-primary text-black"
+                >
                   For You
                 </Link>
               </li>
