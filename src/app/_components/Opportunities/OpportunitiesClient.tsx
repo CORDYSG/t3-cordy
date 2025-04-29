@@ -45,7 +45,7 @@ const OpportunitiesClient = ({
   } = api.opp.searchOpportunities.useQuery(
     {
       search,
-      type: selectedType,
+      type: selectedType != "" ? [selectedType] : [],
       zoneIds:
         selectedZone
           ?.map((z) => z.name)
@@ -125,19 +125,6 @@ const OpportunitiesClient = ({
     setPage(1); // Reset to first page on zone change
   };
 
-  const renderPlaceholders = () => {
-    const placeholders = [];
-    for (let i = 0; i < 4; i++) {
-      placeholders.push(
-        <div
-          key={`placeholder-${i}`}
-          className="h-64 w-full rounded-lg border-2 border-dashed border-gray-300"
-        ></div>,
-      );
-    }
-    return placeholders;
-  };
-
   // Calculate display data based on filters
   const displayedOpps = isFiltered ? (searchResults?.opps ?? []) : initialOpps;
   const displayTotal = isFiltered ? (searchResults?.totalOpps ?? 0) : totalOpps;
@@ -172,11 +159,15 @@ const OpportunitiesClient = ({
           <LoadingComponent />
         ) : (
           <>
-            {searchResults?.opps.length != 0 && (
-              <p className="mb-4 font-semibold">{totalOpps} Opportunities</p>
-            )}
+            {search != "" ||
+              selectedType != "" ||
+              (selectedZone.length != 0 && displayTotal != totalOpps && (
+                <p className="mb-4 font-semibold">
+                  {displayTotal} Opportunities Found
+                </p>
+              ))}
 
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {displayedOpps.length > 0 ? (
                 displayedOpps.map((opp) => (
                   <div

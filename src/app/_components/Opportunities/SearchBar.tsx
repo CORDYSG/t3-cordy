@@ -88,10 +88,17 @@ const SearchBar = ({
 
           <PopoverContent
             className="mt-2 border-2 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
-            data-side="right"
             align="end"
           >
             <div className="space-y-4">
+              {selectedType != "" && (
+                <button
+                  className="flex cursor-pointer items-center space-x-2 rounded-r-md text-left font-semibold text-gray-500 uppercase"
+                  onClick={handleClearAllFilters}
+                >
+                  <X size={16} /> <p>Clear all</p>
+                </button>
+              )}
               <div>
                 <p className="text-md font-medium text-gray-500">
                   Type of Event
@@ -102,7 +109,7 @@ const SearchBar = ({
                       <button
                         key={type.id}
                         onClick={() => onTypeChange(type.alias ?? "")}
-                        className={`${selectedType === type.alias ? "bg-gray-50" : ""} cursor-pointer rounded-md py-1 pl-2 text-left outline-none hover:bg-gray-100`}
+                        className={`${selectedType === type.alias ? "bg-gray-100" : ""} cursor-pointer rounded-md py-1 pl-2 text-left outline-none hover:bg-gray-100`}
                       >
                         {type.name}
                       </button>
@@ -115,14 +122,6 @@ const SearchBar = ({
             </div>
           </PopoverContent>
         </Popover>
-        {selectedType != "" && (
-          <button
-            className="flex cursor-pointer items-center rounded-r-md border-l-2 px-4 hover:bg-gray-100"
-            onClick={handleClearAllFilters}
-          >
-            <FunnelX size={24} />
-          </button>
-        )}
       </div>
 
       <div className="mt-8 flex flex-wrap justify-center gap-4">

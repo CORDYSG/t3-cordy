@@ -9,4 +9,14 @@ export const typesRouter = createTRPCRouter({
     if (types.length === 0) return [];
     return types;
   }),
+
+  getTypeById: publicProcedure
+
+    .input(z.object({ typeId: z.string() }))
+    .query(async ({ input }) => {
+      const type = await db.types.findFirst({
+        where: { airtable_id: input.typeId },
+      });
+      return type;
+    }),
 });

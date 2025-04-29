@@ -6,10 +6,19 @@ import { Menu, UserCircle } from "lucide-react";
 import { FaTelegramPlane } from "react-icons/fa";
 import type { Session } from "next-auth";
 
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 interface NavbarProps {
   session?: Session | null;
 }
@@ -64,13 +73,24 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
               {/* User Section */}
               <div className="ml-4 hidden items-center gap-4 md:ml-6 md:flex">
                 {session ? (
-                  <Avatar>
-                    <AvatarImage
-                      src={session.user.image ?? "/default-avatar.png"}
-                      alt={session.user.name ?? "User"}
-                    />
-                    <AvatarFallback>{userInitials} </AvatarFallback>
-                  </Avatar>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Avatar>
+                        <AvatarImage
+                          src={session.user.image ?? "/default-avatar.png"}
+                          alt={session.user.name ?? "User"}
+                        />
+                        <AvatarFallback>{userInitials} </AvatarFallback>
+                      </Avatar>
+                    </PopoverTrigger>
+                    <PopoverContent className="mt-3 flex w-fit items-center justify-center p-3">
+                      <Link href="/api/auth/signout">
+                        <button className="btn-brand-primary text-sm uppercase">
+                          Log Out
+                        </button>
+                      </Link>
+                    </PopoverContent>
+                  </Popover>
                 ) : (
                   <Link href="/api/auth/signin">
                     <button className="btn-brand-primary text-sm uppercase">
@@ -109,7 +129,8 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
       </div>
 
       <SheetContent>
-        <div className="bg-secondary flex h-full w-full flex-col border-l-2">
+        <SheetTitle className="hidden">Menu</SheetTitle>
+        <div className="bg-background flex h-full w-full flex-col border-l-2">
           <div className="flex flex-grow flex-col items-center gap-4 p-7">
             <div className="space-y-2">
               <div className="aspect-square w-36 rounded-full border-black bg-white">
@@ -128,8 +149,8 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                   {session?.user.name}
                 </div>
               ) : (
-                <Link href="/api/auth/signin" className="w-full">
-                  <button className="btn-brand-primary text-sm uppercase">
+                <Link href="/api/auth/signin" className="w-full outline-none">
+                  <button className="btn-brand-primary my-4 w-full text-sm uppercase">
                     Sign in
                   </button>
                 </Link>
@@ -138,19 +159,29 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
             <div className="h-[0.5px] w-full bg-black"></div>
             <ul className="font-medium">
               <li className="mb-4">
-                <Link href="/" className="hover:text-primary text-black">
+                <Link href="/for-you" className="hover:text-primary text-black">
                   For You
                 </Link>
               </li>
               <li className="mb-4">
-                <Link href="/about" className="hover:text-primary text-black">
+                <Link
+                  href="/opportunities"
+                  className="hover:text-primary text-black"
+                >
                   Opportunities
                 </Link>
               </li>
             </ul>
 
             {/* 👇 This pushes it to the bottom */}
-            <div className="mt-auto w-full text-center">
+            <div className="mt-auto flex w-full flex-col text-center">
+              {session && (
+                <Link href="/api/auth/signout" className="w-full">
+                  <button className="btn-brand-primary my-4 w-full text-sm uppercase">
+                    Log Out
+                  </button>
+                </Link>
+              )}
               <button
                 type="button"
                 className="btn-brand-blue w-full text-xs uppercase"

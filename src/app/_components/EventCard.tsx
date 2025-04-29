@@ -7,6 +7,8 @@
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -23,6 +25,7 @@ export default function EventCard({
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
 
+  const router = useRouter();
   // Function to format the date
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
@@ -116,8 +119,9 @@ export default function EventCard({
   }, [sortedZones]); // Only depend on sortedZones, which is memoized
 
   return (
-    <div
-      className={`card ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
+    <Link
+      className={`card outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
+      href={`/opportunities/${opp.airtable_id}`}
     >
       <div
         className={`bg-grey-500 relative rounded-lg border-[2px] p-4 ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
@@ -176,6 +180,6 @@ export default function EventCard({
           <p className="text-sm font-bold text-gray-700">No deadline</p>
         )}
       </div>
-    </div>
+    </Link>
   );
 }
