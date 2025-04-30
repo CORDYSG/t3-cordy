@@ -8,6 +8,7 @@ import EventCard from "../../_components/EventCard";
 import LoadingComponent from "../../_components/LoadingComponent";
 import Pagination from "./Pagination";
 import Image from "next/image";
+import Head from "next/head";
 
 type OpportunitiesClientProps = {
   initialOpps: OpportunityType[];
@@ -98,12 +99,28 @@ const OpportunitiesClient = ({
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);
-    router.push(`/opportunities?page=${newPage}`);
+
+    // Update URL with filters as query parameters for better SEO and sharing
+    const params = new URLSearchParams();
+    params.set("page", newPage.toString());
+
+    if (search) params.set("q", search);
+    if (selectedType) params.set("type", selectedType);
+    if (selectedZone.length > 0) {
+      selectedZone.forEach((zone) => {
+        params.append("zone", zone.id.toString());
+      });
+    }
+
+    router.push(`/opportunities?${params.toString()}`);
 
     // If not filtering, let server handle pagination
     if (!isFiltered) {
       router.refresh();
     }
+
+    // Scroll to top for better UX
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const handleSearch = (searchText: string) => {
@@ -130,17 +147,42 @@ const OpportunitiesClient = ({
   const displayTotal = isFiltered ? (searchResults?.totalOpps ?? 0) : totalOpps;
   const totalPages = Math.ceil(displayTotal / limit);
 
+  // Generate filter description for better accessibility and SEO
+  const generateFilterDescription = () => {
+    const parts = [];
+    if (search) parts.push(`matching "${search}"`);
+    if (selectedType) {
+      const typeName =
+        types.find((t) => t.alias === selectedType)?.name ?? selectedType;
+      parts.push(`in category "${typeName}"`);
+    }
+    if (selectedZone.length > 0) {
+      const zoneNames = selectedZone.map((z) => z.name).join(", ");
+      parts.push(
+        `in location${selectedZone.length > 1 ? "s" : ""} "${zoneNames}"`,
+      );
+    }
+
+    if (parts.length === 0) return "";
+    return `Filtered opportunities ${parts.join(", ")}`;
+  };
+
+  const filterDescription = generateFilterDescription();
+
   return (
     <>
-      <div className="flex min-h-64 w-full flex-col items-center justify-center">
-        <div className="space-y-2 text-center">
+      <section
+        aria-label="Opportunities Header"
+        className="flex min-h-64 w-full flex-col items-center justify-center"
+      >
+        <header className="space-y-2 text-center">
           <h1 className="font-brand text-4xl text-black uppercase">
             Opportunities
           </h1>
           <p className="text-primary text-lg font-semibold">
             Passion is found from doing, not looking.
           </p>
-        </div>
+        </header>
 
         <SearchBar
           search={search}
@@ -151,31 +193,45 @@ const OpportunitiesClient = ({
           selectedZones={selectedZone}
           onZoneSelect={handleZoneSelect}
           types={types}
+          aria-label="Filter opportunities"
         />
-      </div>
+      </section>
 
-      <div className="container mt-8 min-h-46 w-3/4">
+      <section
+        aria-label={filterDescription || "All Opportunities"}
+        className="container mt-8 min-h-46 w-3/4"
+      >
         {isLoading ? (
           <LoadingComponent />
         ) : (
           <>
-            {search != "" ||
-              selectedType != "" ||
-              (selectedZone.length != 0 && displayTotal != totalOpps && (
-                <p className="mb-4 font-semibold">
-                  {displayTotal} Opportunities Found
+            {(search !== "" ||
+              selectedType !== "" ||
+              selectedZone.length !== 0) && (
+              <div className="mb-4">
+                <h2 className="sr-only">Search Results</h2>
+                <p className="font-semibold" aria-live="polite">
+                  {displayTotal}{" "}
+                  {displayTotal === 1 ? "Opportunity" : "Opportunities"} Found
                 </p>
-              ))}
+                {filterDescription && (
+                  <p className="text-sm text-gray-600">{filterDescription}</p>
+                )}
+              </div>
+            )}
 
-            <div className="grid grid-cols-1 gap-3 gap-y-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+            <ul
+              aria-label="Opportunities List"
+              className="grid grid-cols-1 gap-3 gap-y-5 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+            >
               {displayedOpps.length > 0 ? (
                 displayedOpps.map((opp) => (
-                  <div
+                  <li
                     key={opp.id}
                     className="flex items-center justify-center px-8"
                   >
                     <EventCard opp={opp} static />
-                  </div>
+                  </li>
                 ))
               ) : (
                 <div className="text-md col-span-full flex h-full flex-col items-center justify-center space-y-2 font-bold">
@@ -183,28 +239,38 @@ const OpportunitiesClient = ({
                     src={
                       "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
                     }
-                    height="400"
-                    width="400"
-                    alt="No Opportunities Found"
+                    height={400}
+                    width={400}
+                    alt="No opportunities found illustration"
                     className="h-32 w-32"
                   />
                   <span className="font-medium italic">
                     &quot;Shucks!&quot;
                   </span>
                   <p className="font-semibold">No Opportunities Found.</p>
+                  {filterDescription && (
+                    <p className="mt-2 text-sm font-normal text-gray-600">
+                      Try adjusting your search filters.
+                    </p>
+                  )}
                 </div>
               )}
-            </div>
+            </ul>
           </>
         )}
-      </div>
+      </section>
 
       {!isLoading && displayTotal > limit && (
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPageChange={handlePageChange}
-        />
+        <nav
+          aria-label="Pagination Navigation"
+          className="mx-auto flex w-full justify-center"
+        >
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+          />
+        </nav>
       )}
     </>
   );

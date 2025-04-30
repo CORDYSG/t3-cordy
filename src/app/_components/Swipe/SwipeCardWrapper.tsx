@@ -585,15 +585,15 @@ const OpportunitiesPage = () => {
 
       {/* Guest user information banner */}
       {!isAuthenticated && !limitReached && (
-        <div className="mt-4 rounded-lg bg-gray-100 p-4 text-center text-sm">
+        <div className="mt-8 rounded-lg bg-gray-100 p-4 text-center text-sm">
           <p>
             You're browsing as a guest.
-            <a
+            <Link
               href="/api/auth/signin"
               className="ml-2 font-semibold text-blue-600 hover:underline"
             >
-              Sign in
-            </a>
+              Sign in{" "}
+            </Link>
             to save your preferences and see tailored opportunities.
           </p>
         </div>
