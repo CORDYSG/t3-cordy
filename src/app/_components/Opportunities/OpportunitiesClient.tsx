@@ -72,7 +72,6 @@ const OpportunitiesClient = ({
     if (currentQueryPage !== page) {
       setPage(currentQueryPage);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQueryPage]);
 
   // Determine if we should be using filtered data

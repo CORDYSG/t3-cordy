@@ -23,6 +23,7 @@ export const userOppRouter = createTRPCRouter({
       z.object({
         limit: z.number().min(1).max(100).optional(),
         guestId: z.string().optional(), // For identifying guest users
+        seenOppIds: z.array(z.string()).optional(), // Array of airtable_ids the guest has already seen
       }),
     )
     .query(async ({ ctx, input }) => {
@@ -52,8 +53,28 @@ export const userOppRouter = createTRPCRouter({
 
       // Return cached data if available and not expired
       if (guestSession.cachedOpportunities.length > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-        return guestSession.cachedOpportunities;
+        // Filter out any opps the user has already seen
+        console.log(
+          "guest Session cached >>>",
+          guestSession.cachedOpportunities.length,
+        );
+        if (input.seenOppIds && input.seenOppIds.length > 0) {
+          guestSession.cachedOpportunities =
+            guestSession.cachedOpportunities.filter(
+              (opp: { airtable_id?: string }) =>
+                !input.seenOppIds?.includes(opp.airtable_id ?? ""),
+            );
+
+          console.log(
+            "guest Session cached after filter >>>",
+            guestSession.cachedOpportunities.length,
+          );
+        }
+
+        if (guestSession.cachedOpportunities.length > 0) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return guestSession.cachedOpportunities;
+        }
       }
 
       // Check if guest has exceeded the fetch limit (3)
@@ -65,12 +86,36 @@ export const userOppRouter = createTRPCRouter({
           cachedOpportunities: guestSession.cachedOpportunities,
         };
       }
+      let randomOpps = [];
+      if (input.seenOppIds && input.seenOppIds.length > 0) {
+        console.log("guest Session seen >>>", input.seenOppIds.length);
+        const allOpps = await db.opps.findMany({
+          where: {
+            airtable_id: {
+              notIn: input.seenOppIds ?? [],
+            },
+          },
+          select: { id: true },
+        });
+        const shuffledIds = allOpps
+          .map((o) => o.id)
+          .sort(() => Math.random() - 0.5)
+          .slice(0, LIMIT);
 
-      // Fetch random opportunities for guests
-      const randomOpps = await db.opps.findMany({
-        take: LIMIT,
-        orderBy: { created_at: "desc" },
-      });
+        // Step 3: Fetch actual opps
+        randomOpps = await db.opps.findMany({
+          where: { id: { in: shuffledIds } },
+        });
+      } else {
+        randomOpps = await db.opps.findMany({
+          take: LIMIT * 2, // Fetch more than needed to account for filtering
+          orderBy: { created_at: "desc" },
+        });
+        console.log("guest Session no seen >>> random oops", randomOpps.length);
+      }
+
+      randomOpps = randomOpps.slice(0, LIMIT);
+      console.log("randomOpps >>>", randomOpps.length);
 
       // Enrich with zone information
       const zones = await db.zones.findMany({});
@@ -91,6 +136,8 @@ export const userOppRouter = createTRPCRouter({
           zones: oppZones,
         };
       });
+
+      console.log("enrichedOpps >>>", enrichedOpps.length);
 
       // Update guest session
       guestSession.fetchCount += 1;
@@ -204,7 +251,6 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
     .slice(0, 5)
     .map(([zone]) => zone);
 
-  // Step 3: Recommend similar opps
   let recommendedOpps = await db.opps.findMany({
     where: {
       id: { notIn: seenOppIds },
@@ -216,16 +262,25 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
 
   // Step 4: Random filler if not enough
   if (recommendedOpps.length < LIMIT) {
-    const fillerOpps = await db.opps.findMany({
+    const allfillerOpps = await db.opps.findMany({
       where: {
         id: {
           notIn: [...interactedOppIds, ...recommendedOpps.map((o) => o.id)],
         },
       },
-      take: LIMIT - recommendedOpps.length,
+      // take: LIMIT - recommendedOpps.length,
+      select: { id: true },
       orderBy: { created_at: "desc" },
     });
 
+    const shuffledIds = allfillerOpps
+      .map((o) => o.id)
+      .sort(() => Math.random() - 0.5)
+      .slice(0, LIMIT - recommendedOpps.length);
+
+    const fillerOpps = await db.opps.findMany({
+      where: { id: { in: shuffledIds } },
+    });
     recommendedOpps = [...recommendedOpps, ...fillerOpps];
   }
 

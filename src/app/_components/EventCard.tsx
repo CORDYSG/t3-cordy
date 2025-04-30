@@ -21,7 +21,6 @@ export default function EventCard({
   opp,
   static: isStatic,
   pointerNone,
-  button,
 }: Readonly<EventCardProps>): JSX.Element {
   const calculateDaysLeft = (deadline: Date): number => {
     const now = new Date();
@@ -120,7 +119,9 @@ export default function EventCard({
   }, [sortedZones]); // Only depend on sortedZones, which is memoized
 
   const handleButtonClick = (airtable_id: string) => {
-    router.push(`/opportunities/${airtable_id}`);
+    if (!pointerNone) {
+      router.push(`/opportunities/${airtable_id}`);
+    }
   };
   return (
     <button
