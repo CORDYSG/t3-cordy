@@ -21,20 +21,20 @@ export async function generateMetadata({
   });
 
   // Extract relevant information for SEO tags
-  const title = opp?.name || "Opportunity Details";
-  const description = opp?.description
-    ? opp.description.length > 160
-      ? opp.description.substring(0, 157) + "..."
-      : opp.description
+  const title = opp?.name ?? "Opportunity Details";
+  const description = opp?.caption
+    ? opp.caption.length > 160
+      ? opp.caption.substring(0, 157) + "..."
+      : opp.caption
     : "View detailed information about this opportunity and find similar opportunities.";
 
   // Get the types and zones for keywords
-  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") || "";
+  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
   const zoneKeywords =
-    opp?.zones?.map((z: ZoneType) => z.name).join(", ") || "";
+    opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
 
   // Get the main image URL for OG image if available
-  const imageUrl = opp?.image_url || "";
+  const imageUrl = opp?.thumbnail_url ?? "";
 
   return {
     title: `${title} | Opportunity Details`,
@@ -122,7 +122,7 @@ const OpportunityDetail = async ({
           <OpportunityDetailCard opp={opp} types={types} />
 
           {/* Add any hidden microdata that might be missing from the card component */}
-          <meta itemProp="name" content={opp?.name || ""} />
+          <meta itemProp="name" content={opp?.name ?? ""} />
           {opp?.description && (
             <meta itemProp="description" content={opp.description} />
           )}

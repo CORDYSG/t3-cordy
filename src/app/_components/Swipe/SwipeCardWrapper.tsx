@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
@@ -587,7 +590,7 @@ const OpportunitiesPage = () => {
       {!isAuthenticated && !limitReached && (
         <div className="mt-8 rounded-lg bg-gray-100 p-4 text-center text-sm">
           <p>
-            You're browsing as a guest.
+            You&apos;re browsing as a guest.
             <Link
               href="/api/auth/signin"
               className="ml-2 font-semibold text-blue-600 hover:underline"
