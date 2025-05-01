@@ -464,7 +464,7 @@ const OpportunitiesPage = () => {
       <div
         style={{ minHeight: "450px" }}
         ref={containerRef}
-        className="relative flex min-h-[450px] w-1/4 max-w-sm items-center"
+        className="relative flex min-h-[450px] max-w-sm items-center"
       >
         {(isFetchingRef.current && visibleOpps.length === 0) ||
         isLoadingMore ? (
