@@ -42,6 +42,23 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
               className="absolute inset-0 h-full w-full rounded-md object-cover"
             />
           )}
+          {!opp.thumbnail_url && (
+            <div className="bg-background absolute inset-0 flex items-center justify-center rounded-lg px-24 py-24">
+              <Image
+                src={
+                  "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                }
+                width={1000}
+                height={1000}
+                blurDataURL={
+                  "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                }
+                placeholder="blur"
+                alt="Cordy Face"
+                className="object-cover"
+              />
+            </div>
+          )}
         </div>
         <div className="mb-2 space-y-4 md:mb-0">
           <h2 className="text-2xl font-bold">{opp.name}</h2>

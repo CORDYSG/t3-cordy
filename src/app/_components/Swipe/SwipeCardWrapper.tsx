@@ -108,6 +108,7 @@ const OpportunitiesPage = () => {
   const [limitReached, setLimitReached] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const hasInitialLoadedRef = useRef(false);
   // Track newly added opportunities for animation
   const [newlyAddedOpps, setNewlyAddedOpps] = useState<number[]>([]);
@@ -217,6 +218,11 @@ const OpportunitiesPage = () => {
 
     // Don't fetch more if we've hit the guest limit
     if ((limitReached && !isAuthenticated) || remainingOpps > 4) return;
+    if (remainingOpps === 0) {
+      setIsLoadingMore(true); // Set fetching to true if no opportunities are loaded
+    } else {
+      setIsLoadingMore(false); // Set fetching to false if opportunities are loaded
+    }
 
     if (
       !isFetchingRef.current &&
@@ -266,9 +272,9 @@ const OpportunitiesPage = () => {
 
   // Create transform values for the LIKE/NOPE indicators
   const nopeOpacity = useTransform(x, [0, -50, -100], [0, 0.5, 1]);
-  const nopeScale = useTransform(x, [0, -100], [0.5, 1]);
+  const nopeScale = useTransform(x, [0, -100], [0.8, 1]);
   const likeOpacity = useTransform(x, [0, 50, 100], [0, 0.5, 1]);
-  const likeScale = useTransform(x, [0, 100], [0.5, 1]);
+  const likeScale = useTransform(x, [0, 100], [0.8, 1]);
 
   const handleSwipe = (dir: SwipeDirection, index: number) => {
     const opp = opportunities[index];
@@ -366,7 +372,7 @@ const OpportunitiesPage = () => {
     const velocity = info.velocity.x;
 
     // Threshold for swipe
-    const shouldSwipe = Math.abs(xOffset) > 100 || Math.abs(velocity) > 800;
+    const shouldSwipe = Math.abs(xOffset) > 120 || Math.abs(velocity) > 800;
 
     if (shouldSwipe) {
       const direction = xOffset > 0 ? "right" : "left";
@@ -375,7 +381,7 @@ const OpportunitiesPage = () => {
       // Animate the card flying off the screen with a more visible animation
       animate(x, targetX, {
         type: "tween",
-        duration: 0.3,
+        duration: 0.5,
         ease: "easeOut",
         onComplete: () => {
           handleSwipe(direction, index);
@@ -453,7 +459,7 @@ const OpportunitiesPage = () => {
         className="relative flex min-h-[450px] w-1/4 max-w-sm items-center"
       >
         {isFetchingRef.current && visibleOpps.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center">
             <LoadingComponent />
           </div>
         ) : (
@@ -545,23 +551,23 @@ const OpportunitiesPage = () => {
                 {isTopCard && (
                   <>
                     <motion.div
-                      className="bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-4 text-white"
+                      className="bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-6 text-white"
                       style={{
                         opacity: nopeOpacity,
                         scale: nopeScale,
                       }}
                     >
-                      <X size={28} />
+                      <X size={32} />
                     </motion.div>
 
                     <motion.div
-                      className="bg-accent-green absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-4 text-white"
+                      className="bg-accent-green absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-6 text-white"
                       style={{
                         opacity: likeOpacity,
                         scale: likeScale,
                       }}
                     >
-                      <Check size={28} />
+                      <Check size={32} />
                     </motion.div>
                   </>
                 )}
@@ -569,21 +575,23 @@ const OpportunitiesPage = () => {
             );
           })
         )}
-        {!isFetchingRef.current && visibleOpps.length === 0 && (
-          <div className="flex h-full w-full flex-col items-center justify-center py-4 text-center text-xl">
-            <Image
-              src={
-                "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
-              }
-              alt="Neutral Cordy"
-              width={120}
-              height={500}
-              className="mx-auto mb-4"
-            />
-            <p className="mb-4 italic">&quot;Oh, poop&quot;</p>
-            <p className="font-brand">No new opportunities.</p>
-          </div>
-        )}
+        {!isLoadingMore &&
+          !isFetchingRef.current &&
+          visibleOpps.length === 0 && (
+            <div className="flex h-full w-full flex-col items-center justify-center py-4 text-center text-xl">
+              <Image
+                src={
+                  "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
+                }
+                alt="Neutral Cordy"
+                width={120}
+                height={500}
+                className="mx-auto mb-4"
+              />
+              <p className="mb-4 italic">&quot;Oh, poop&quot;</p>
+              <p className="font-brand">No new opportunities.</p>
+            </div>
+          )}
       </div>
 
       {/* Guest user information banner */}

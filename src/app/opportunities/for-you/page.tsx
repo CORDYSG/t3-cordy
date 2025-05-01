@@ -34,14 +34,31 @@ export type SwipeAction = {
 
 const ForYouPage = () => {
   return (
-    <main className="flex w-[100vw] flex-col items-center overflow-hidden">
-      <h1 className="sr-only">Personalized Opportunities For You</h1>
+    <>
+      <main className="flex w-[100vw] flex-col items-center overflow-hidden">
+        <h1 className="sr-only">Personalized Opportunities For You</h1>
 
-      <section aria-label="Opportunity Cards" className="w-full">
-        <SwipeCardWrapper />
-      </section>
+        <section aria-label="Opportunity Cards" className="w-full">
+          <SwipeCardWrapper />
+        </section>
 
-      <div className="relative mx-auto mt-32 flex h-24 w-2/3 items-center justify-center md:h-40 md:w-full">
+        {/* Structured data for better search engine understanding */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebPage",
+              name: "For You - Personalized Opportunities",
+              description:
+                "Discover personalized opportunities tailored to your interests and preferences.",
+              image:
+                "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg",
+            }),
+          }}
+        />
+      </main>
+      <div className="relative mx-auto mt-12 flex h-24 w-2/3 items-center justify-center md:h-40 md:w-full">
         <Image
           src={
             "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg"
@@ -53,23 +70,7 @@ const ForYouPage = () => {
           priority
         />
       </div>
-
-      {/* Structured data for better search engine understanding */}
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "WebPage",
-            name: "For You - Personalized Opportunities",
-            description:
-              "Discover personalized opportunities tailored to your interests and preferences.",
-            image:
-              "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg",
-          }),
-        }}
-      />
-    </main>
+    </>
   );
 };
 

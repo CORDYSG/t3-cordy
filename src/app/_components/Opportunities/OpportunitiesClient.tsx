@@ -154,13 +154,11 @@ const OpportunitiesClient = ({
     if (selectedType) {
       const typeName =
         types.find((t) => t.alias === selectedType)?.name ?? selectedType;
-      parts.push(`in category "${typeName}"`);
+      parts.push(`in type "${typeName}"`);
     }
     if (selectedZone.length > 0) {
       const zoneNames = selectedZone.map((z) => z.name).join(", ");
-      parts.push(
-        `in location${selectedZone.length > 1 ? "s" : ""} "${zoneNames}"`,
-      );
+      parts.push(`in zone${selectedZone.length > 1 ? "s" : ""} "${zoneNames}"`);
     }
 
     if (parts.length === 0) return "";

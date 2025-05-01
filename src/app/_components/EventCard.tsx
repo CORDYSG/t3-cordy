@@ -136,6 +136,7 @@ export default function EventCard({
             src={opp.thumbnail_url}
             width={1000}
             height={1000}
+            loading="lazy"
             blurDataURL={opp.thumbnail_url}
             placeholder="blur"
             alt={opp.name}
@@ -143,7 +144,21 @@ export default function EventCard({
           />
         )}
         {!opp.thumbnail_url && (
-          <div className="absolute inset-0 flex items-center justify-center rounded-lg bg-gray-200 text-gray-500"></div>
+          <div className="bg-background absolute inset-0 flex items-center justify-center rounded-lg p-12">
+            <Image
+              src={
+                "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+              }
+              width={1000}
+              height={1000}
+              blurDataURL={
+                "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+              }
+              placeholder="blur"
+              alt="Cordy Face"
+              className="object-cover"
+            />
+          </div>
         )}
       </div>
       <div
