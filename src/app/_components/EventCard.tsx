@@ -129,7 +129,7 @@ export default function EventCard({
       onClick={() => handleButtonClick(opp.airtable_id)}
     >
       <div
-        className={`bg-grey-500 relative rounded-lg border-[2px] p-4 ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
+        className={`bg-grey-500 relative rounded-lg border-[2px] p-4 select-none ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
       >
         {opp.thumbnail_url && (
           <Image
@@ -164,25 +164,25 @@ export default function EventCard({
       </div>
 
       <h2
-        className={`text-md mb-2 line-clamp-1 text-left font-bold ${isStatic ? "text-sm" : "text-md"}`}
+        className={`text-md mb-2 line-clamp-1 text-left font-bold select-none ${isStatic ? "text-sm" : "text-md"}`}
       >
         {opp.name}
       </h2>
       <p
-        className={`mb-4 line-clamp-3 text-left text-gray-700 ${isStatic ? "text-sm" : "text-md"}`}
+        className={`mb-4 line-clamp-3 text-left text-gray-700 select-none ${isStatic ? "text-sm" : "text-md"}`}
       >
         {opp.caption}
       </p>
       <div>
-        <p className="text-left text-sm text-gray-500">
+        <p className="text-left text-sm text-gray-500 select-none">
           {opp.deadline ? formatDate(opp.deadline) : "Forever"}
         </p>
         {daysLeft !== null ? (
-          <p className="text-primary text-left text-sm font-bold">
+          <p className="text-primary text-left text-sm font-bold select-none">
             {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
           </p>
         ) : (
-          <p className="not-first: text-left text-sm font-bold text-gray-700">
+          <p className="not-first: text-left text-sm font-bold text-gray-700 select-none">
             No deadline
           </p>
         )}

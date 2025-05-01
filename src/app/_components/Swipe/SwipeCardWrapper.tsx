@@ -375,7 +375,7 @@ const OpportunitiesPage = () => {
       // Animate the card flying off the screen with a more visible animation
       animate(x, targetX, {
         type: "tween",
-        duration: 0.7,
+        duration: 0.3,
         ease: "easeOut",
         onComplete: () => {
           handleSwipe(direction, index);
@@ -386,7 +386,7 @@ const OpportunitiesPage = () => {
       // Return to center if not swiped far enough
       animate(x, 0, {
         type: "spring",
-        stiffness: 400,
+        stiffness: 300,
         damping: 30,
       });
     }
@@ -521,7 +521,7 @@ const OpportunitiesPage = () => {
                     type: "spring",
                     stiffness: 200,
                     damping: 25,
-                    duration: isNewlyAdded ? 0.8 : 0.6,
+                    duration: isNewlyAdded ? 0.5 : 0.3,
                     delay: isNewlyAdded ? 0.2 : 0,
                   },
                 }}

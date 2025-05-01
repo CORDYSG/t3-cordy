@@ -34,7 +34,7 @@ export type SwipeAction = {
 
 const ForYouPage = () => {
   return (
-    <main className="flex w-full flex-col items-center">
+    <main className="flex w-[100vw] flex-col items-center overflow-hidden">
       <h1 className="sr-only">Personalized Opportunities For You</h1>
 
       <section aria-label="Opportunity Cards" className="w-full">

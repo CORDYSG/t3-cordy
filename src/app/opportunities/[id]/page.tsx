@@ -7,54 +7,69 @@ import LoadingComponent from "../../_components/LoadingComponent";
 import { api } from "@/trpc/server";
 import OpportunityDetailCard from "../../_components/Opportunities/OpportunityDetailCard";
 import EventCard from "../../_components/EventCard";
-import { Metadata } from "next";
+import { type Metadata } from "next";
 
-// Define dynamic metadata generation for the page
+// Define dynamic metadata generation for the page with Promise params
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   // Fetch the opportunity data to use in metadata
-  const opp = await api.opp.getOppById({
-    oppId: params.id,
-  });
+  try {
+    const resolvedParams = await params;
+    const opp = await api.opp.getOppById({
+      oppId: resolvedParams.id,
+    });
 
-  // Extract relevant information for SEO tags
-  const title = opp?.name ?? "Opportunity Details";
-  const description = opp?.caption
-    ? opp.caption.length > 160
-      ? opp.caption.substring(0, 157) + "..."
-      : opp.caption
-    : "View detailed information about this opportunity and find similar opportunities.";
+    // Extract relevant information for SEO tags
+    const title = opp?.name ?? "Opportunity Details";
+    const description = opp?.caption
+      ? opp.caption.length > 160
+        ? opp.caption.substring(0, 157) + "..."
+        : opp.caption
+      : "View detailed information about this opportunity and find similar opportunities.";
 
-  // Get the types and zones for keywords
-  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
-  const zoneKeywords =
-    opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
+    // Get the types and zones for keywords
 
-  // Get the main image URL for OG image if available
-  const imageUrl = opp?.thumbnail_url ?? "";
+    const typeKeywords =
+      // @ts-expect-error eslint not receive prisma type correctly
+      opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
 
-  return {
-    title: `${title} | Opportunity Details`,
-    description,
-    keywords: `opportunity, ${typeKeywords}, ${zoneKeywords}`,
-    openGraph: {
-      title: `${title}`,
+    const zoneKeywords =
+      // @ts-expect-error eslint not receive prisma type correctly
+      opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
+
+    // Get the main image URL for OG image if available
+    const imageUrl = opp?.thumbnail_url ?? "";
+
+    return {
+      title: `${title} | Opportunity Details`,
       description,
-      images: imageUrl ? [{ url: imageUrl }] : [],
-      type: "article",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: `${title}`,
-      description,
-      images: imageUrl ? [imageUrl] : [],
-    },
-  };
+      keywords: `opportunity, ${typeKeywords}, ${zoneKeywords}`,
+      openGraph: {
+        title: `${title}`,
+        description,
+        images: imageUrl ? [{ url: imageUrl }] : [],
+        type: "article",
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${title}`,
+        description,
+        images: imageUrl ? [imageUrl] : [],
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching opportunity data for metadata:", error);
+    return {
+      title: "Opportunity Details",
+      description: "View detailed information about this opportunity.",
+    };
+  }
 }
 
+// Component definition updated to match Next.js expected types
 const OpportunityDetail = async ({
   params,
 }: {
