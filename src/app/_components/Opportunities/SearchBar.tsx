@@ -96,7 +96,7 @@ const SearchBar = ({
                   className="flex cursor-pointer items-center space-x-2 rounded-r-md text-left font-semibold text-gray-500 uppercase"
                   onClick={handleClearAllFilters}
                 >
-                  <X size={16} /> <p>Clear all</p>
+                  <X size={16} /> <p>Clear</p>
                 </button>
               )}
               <div>
