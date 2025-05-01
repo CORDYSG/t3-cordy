@@ -108,6 +108,7 @@ const OpportunitiesPage = () => {
   const [limitReached, setLimitReached] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const hasInitialLoadedRef = useRef(false);
   // Track newly added opportunities for animation
   const [newlyAddedOpps, setNewlyAddedOpps] = useState<number[]>([]);
@@ -217,6 +218,11 @@ const OpportunitiesPage = () => {
 
     // Don't fetch more if we've hit the guest limit
     if ((limitReached && !isAuthenticated) || remainingOpps > 4) return;
+    if (remainingOpps === 0) {
+      setIsLoadingMore(true); // Set fetching to true if no opportunities are loaded
+    } else {
+      setIsLoadingMore(false); // Set fetching to false if opportunities are loaded
+    }
 
     if (
       !isFetchingRef.current &&
@@ -453,7 +459,7 @@ const OpportunitiesPage = () => {
         className="relative flex min-h-[450px] w-1/4 max-w-sm items-center"
       >
         {isFetchingRef.current && visibleOpps.length === 0 ? (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full w-full items-center justify-center">
             <LoadingComponent />
           </div>
         ) : (
@@ -569,21 +575,23 @@ const OpportunitiesPage = () => {
             );
           })
         )}
-        {!isFetchingRef.current && visibleOpps.length === 0 && (
-          <div className="flex h-full w-full flex-col items-center justify-center py-4 text-center text-xl">
-            <Image
-              src={
-                "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
-              }
-              alt="Neutral Cordy"
-              width={120}
-              height={500}
-              className="mx-auto mb-4"
-            />
-            <p className="mb-4 italic">&quot;Oh, poop&quot;</p>
-            <p className="font-brand">No new opportunities.</p>
-          </div>
-        )}
+        {!isLoadingMore &&
+          !isFetchingRef.current &&
+          visibleOpps.length === 0 && (
+            <div className="flex h-full w-full flex-col items-center justify-center py-4 text-center text-xl">
+              <Image
+                src={
+                  "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
+                }
+                alt="Neutral Cordy"
+                width={120}
+                height={500}
+                className="mx-auto mb-4"
+              />
+              <p className="mb-4 italic">&quot;Oh, poop&quot;</p>
+              <p className="font-brand">No new opportunities.</p>
+            </div>
+          )}
       </div>
 
       {/* Guest user information banner */}
