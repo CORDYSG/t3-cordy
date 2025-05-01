@@ -1,15 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
-
 @font-face {
   font-family: "FatFrank";
-  src: url("./public/fonts/fonnts.com-FatFrank_Heavy.otf") format("otf");
+  src: url("/public/fonts/fonnts.com-FatFrank_Heavy.otf") format("otf");
   font-weight: normal;
   font-style: normal;
   font-display: swap;
 }
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   --font-sans:
