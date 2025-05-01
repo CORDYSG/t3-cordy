@@ -111,8 +111,8 @@ export const oppRouter = createTRPCRouter({
     .input(
       z.object({
         search: z.string().optional().default(""),
-        type: z.array(z.string()).optional().default([]),
-        zoneIds: z.array(z.string()).optional().default([]), //zone names
+        type: z.array(z.string().max(20)).optional().default([]),
+        zoneIds: z.array(z.string().max(20)).optional().default([]), //zone names
         page: z.number().optional().default(1),
         limit: z.number().optional().default(8),
         excludeOppIds: z.array(z.string()).optional().default([]),
@@ -145,7 +145,6 @@ export const oppRouter = createTRPCRouter({
       }
 
       if (excludeOppIds.length > 0) {
-        whereClause.AND = whereClause.AND ?? [];
         whereClause.AND = whereClause.AND ?? [];
         (whereClause.AND as Prisma.OppsWhereInput[]).push({
           airtable_id: { notIn: excludeOppIds },

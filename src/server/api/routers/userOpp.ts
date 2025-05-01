@@ -54,26 +54,17 @@ export const userOppRouter = createTRPCRouter({
       // Return cached data if available and not expired
       if (guestSession.cachedOpportunities.length > 0) {
         // Filter out any opps the user has already seen
-        console.log(
-          "guest Session cached >>>",
-          guestSession.cachedOpportunities.length,
-        );
+
         if (input.seenOppIds && input.seenOppIds.length > 0) {
-          guestSession.cachedOpportunities =
-            guestSession.cachedOpportunities.filter(
-              (opp: { airtable_id?: string }) =>
-                !input.seenOppIds?.includes(opp.airtable_id ?? ""),
-            );
-
-          console.log(
-            "guest Session cached after filter >>>",
-            guestSession.cachedOpportunities.length,
+          const filtered = guestSession.cachedOpportunities.filter(
+            (opp: { airtable_id?: string }) =>
+              !input.seenOppIds?.includes(opp.airtable_id ?? ""),
           );
-        }
 
-        if (guestSession.cachedOpportunities.length > 0) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          return guestSession.cachedOpportunities;
+          if (filtered.length > 0) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+            return filtered;
+          }
         }
       }
 
@@ -111,11 +102,9 @@ export const userOppRouter = createTRPCRouter({
           take: LIMIT * 2, // Fetch more than needed to account for filtering
           orderBy: { created_at: "desc" },
         });
-        console.log("guest Session no seen >>> random oops", randomOpps.length);
       }
 
       randomOpps = randomOpps.slice(0, LIMIT);
-      console.log("randomOpps >>>", randomOpps.length);
 
       // Enrich with zone information
       const zones = await db.zones.findMany({});
@@ -136,8 +125,6 @@ export const userOppRouter = createTRPCRouter({
           zones: oppZones,
         };
       });
-
-      console.log("enrichedOpps >>>", enrichedOpps.length);
 
       // Update guest session
       guestSession.fetchCount += 1;

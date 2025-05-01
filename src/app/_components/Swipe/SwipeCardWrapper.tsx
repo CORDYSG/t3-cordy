@@ -610,7 +610,7 @@ const OpportunitiesPage = () => {
             You&apos;re browsing as a guest.
             <Link
               href="/api/auth/signin"
-              className="ml-2 font-semibold text-blue-600 hover:underline"
+              className="ml-1 font-semibold text-blue-600 hover:underline"
             >
               Sign in{" "}
             </Link>
