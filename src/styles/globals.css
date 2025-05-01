@@ -231,7 +231,7 @@
 
   /* Card with neobrutalism style */
   .card {
-    @apply rounded-xl border-2 border-black bg-white p-4 shadow-md transition-transform duration-200 hover:scale-105;
+    @apply touch:scale-105 rounded-xl border-2 border-black bg-white p-4 shadow-md transition-transform duration-200 active:scale-105;
     box-shadow: 5px 5px 0px 0px rgba(0, 0, 0, 1);
   }
 
