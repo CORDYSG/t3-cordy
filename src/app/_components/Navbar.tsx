@@ -5,6 +5,7 @@ import { Menu, UserCircle } from "lucide-react";
 
 import { FaTelegramPlane } from "react-icons/fa";
 import type { Session } from "next-auth";
+import { useRouter } from "next/navigation";
 
 import {
   Sheet,
@@ -24,6 +25,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ session }) => {
+  const router = useRouter();
   let userInitials = "U";
 
   if (session?.user) {
