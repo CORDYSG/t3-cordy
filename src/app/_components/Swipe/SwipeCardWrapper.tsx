@@ -42,6 +42,7 @@ const OpportunitiesPage = () => {
     seenOppIds: [],
     likedOppIds: [],
   });
+  const [isLoadingMore, setIsLoadingMore] = useState(true);
 
   // Create or retrieve a guest ID and history for unauthenticated users
   useEffect(() => {
@@ -88,11 +89,14 @@ const OpportunitiesPage = () => {
     ? api.userOpp.getFYOpps.useQuery({
         limit: 8,
       })
-    : api.userOpp.getOpportunities.useQuery({
-        limit: 8,
-        guestId: guestId,
-        seenOppIds: guestHistory.seenOppIds, // Pass seen opp IDs to the backend
-      });
+    : api.userOpp.getOpportunities.useQuery(
+        {
+          limit: 8,
+          guestId: guestId,
+          seenOppIds: guestHistory.seenOppIds, // Pass seen opp IDs to the backend
+        },
+        { enabled: !!guestId },
+      );
 
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [current, setCurrent] = useState(0);
@@ -108,7 +112,7 @@ const OpportunitiesPage = () => {
   const [limitReached, setLimitReached] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const isFetchingRef = useRef(false);
-  const [isLoadingMore, setIsLoadingMore] = useState(false);
+
   const hasInitialLoadedRef = useRef(false);
   // Track newly added opportunities for animation
   const [newlyAddedOpps, setNewlyAddedOpps] = useState<number[]>([]);
@@ -117,6 +121,7 @@ const OpportunitiesPage = () => {
   const mutation = api.userOpp.createOrUpdate.useMutation();
 
   // Update opportunities state when data is fetched
+
   useEffect(() => {
     if (!fetchedOpportunities) return;
 
@@ -159,6 +164,7 @@ const OpportunitiesPage = () => {
           // Only mark fetching as complete after we've processed the results
           isFetchingRef.current = false;
           hasInitialLoadedRef.current = true;
+          setIsLoadingMore(false); // Reset loading state
 
           // Properly combine previous and new opportunities
           return [...prev, ...newOpps];
@@ -194,12 +200,14 @@ const OpportunitiesPage = () => {
         // Properly combine previous and new opportunities
         return [...prev, ...newOpps];
       });
+      setIsLoadingMore(false);
     } else if (
       Array.isArray(fetchedOpportunities) &&
       fetchedOpportunities.length === 0
     ) {
       // Handle case where no new opportunities are returned
       isFetchingRef.current = false;
+      setIsLoadingMore(false);
     }
   }, [fetchedOpportunities]);
 
@@ -458,7 +466,8 @@ const OpportunitiesPage = () => {
         ref={containerRef}
         className="relative flex min-h-[450px] w-1/4 max-w-sm items-center"
       >
-        {isFetchingRef.current && visibleOpps.length === 0 ? (
+        {(isFetchingRef.current && visibleOpps.length === 0) ||
+        isLoadingMore ? (
           <div className="flex h-full w-full items-center justify-center">
             <LoadingComponent />
           </div>
