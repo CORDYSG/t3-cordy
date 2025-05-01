@@ -16,7 +16,7 @@
     "DM Sans", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   --font-primary: var(--font-dm-sans), system-ui, sans-serif;
-  --font-brand: "FatFrank", sans-serif;
+  --font-brand: var(--font-fat-frank), sans-serif;
 }
 
 @theme inline {

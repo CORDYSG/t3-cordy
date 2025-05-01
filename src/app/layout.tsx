@@ -7,6 +7,7 @@ import { auth } from "@/server/auth";
 import Navbar from "./_components/Navbar";
 import Footer from "./_components/Footer";
 import { SessionProvider } from "next-auth/react";
+import localFont from "next/font/local";
 
 export const metadata: Metadata = {
   title: "CORDY",
@@ -14,6 +15,15 @@ export const metadata: Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
+const fatFrank = localFont({
+  src: "../../public/fonts/fonnts.com-FatFrank_Heavy.otf",
+  variable: "--font-fat-frank",
+  display: "swap",
+  style: "normal",
+  weight: "400",
+  preload: true,
+  fallback: ["sans-serif"],
+});
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -25,7 +35,7 @@ const dmSans = DM_Sans({
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();
   return (
-    <html lang="en" className={`${dmSans.variable}`}>
+    <html lang="en" className={`${dmSans.variable} ${fatFrank.variable}`}>
       <body className="w-screen overflow-x-hidden">
         <TRPCReactProvider>
           <SessionProvider session={session}>

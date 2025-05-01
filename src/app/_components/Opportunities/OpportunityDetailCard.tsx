@@ -62,7 +62,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
         </div>
         <div className="mb-2 space-y-4 md:mb-0">
           <h2 className="text-2xl font-bold">{opp.name}</h2>
-          <div className="space-x-2">
+          <div className="space-y-2 space-x-2">
             {" "}
             {opp.zones &&
               opp.zones.length > 0 &&
