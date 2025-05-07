@@ -234,7 +234,7 @@ const OpportunitiesClient = ({
                 displayedOpps.map((opp) => (
                   <li
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                    key={opp.id}
+                    key={"id" in opp ? opp.id.toString() : JSON.stringify(opp)}
                     className="flex items-center justify-center px-8"
                   >
                     <EventCard
