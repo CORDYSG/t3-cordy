@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { api } from "@/trpc/react";
 import SearchBar from "./SearchBar";
 import EventCard from "../../_components/EventCard";
@@ -28,11 +28,13 @@ const OpportunitiesClient = ({
 }: OpportunitiesClientProps) => {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [search, setSearch] = useState("");
   const [selectedType, setSelectedType] = useState("");
   const [selectedZone, setSelectedZone] = useState<ZoneType[]>([]);
   const [page, setPage] = useState(initialPage);
   const [isFiltered, setIsFiltered] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   const currentQueryPage = parseInt(searchParams.get("page") ?? "1") || 1;
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -67,7 +69,15 @@ const OpportunitiesClient = ({
     },
   );
 
-  // Update page when URL changes
+  useEffect(() => {
+    // If we're not on the opportunities page, set isNavigating to true
+    // to prevent unnecessary queries
+    setIsNavigating(
+      !pathname?.startsWith("/opportunities") ||
+        Boolean(/\/opportunities\/[^/]+$/.exec(pathname)),
+    );
+  }, [pathname]);
+
   useEffect(() => {
     if (currentQueryPage !== page) {
       setPage(currentQueryPage);
@@ -85,12 +95,11 @@ const OpportunitiesClient = ({
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
 
-    if (isFiltered) {
+    if (isFiltered && !isNavigating) {
       searchDebounceRef.current = setTimeout(() => {
         void refetch();
       }, 300);
     }
-
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     };
@@ -228,7 +237,11 @@ const OpportunitiesClient = ({
                     key={opp.id}
                     className="flex items-center justify-center px-8"
                   >
-                    <EventCard opp={opp} static />
+                    <EventCard
+                      opp={opp}
+                      static
+                      pauseQueries={setIsNavigating}
+                    />
                   </li>
                 ))
               ) : (

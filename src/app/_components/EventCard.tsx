@@ -15,12 +15,14 @@ type EventCardProps = {
   static?: boolean; // <-- add static prop
   pointerNone?: boolean; // <-- add pointerNone prop
   button?: boolean; // <-- add button prop
+  pauseQueries?: (paused: boolean) => void;
 };
 
 export default function EventCard({
   opp,
   static: isStatic,
   pointerNone,
+  pauseQueries,
 }: Readonly<EventCardProps>): JSX.Element {
   const calculateDaysLeft = (deadline: Date): number => {
     const now = new Date();
@@ -118,15 +120,23 @@ export default function EventCard({
     };
   }, [sortedZones]); // Only depend on sortedZones, which is memoized
 
-  const handleButtonClick = (airtable_id: string) => {
+  const handleButtonClick = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    airtable_id: string,
+  ) => {
     if (!pointerNone) {
+      e.preventDefault();
+      if (pauseQueries) {
+        pauseQueries(true);
+      }
+
       router.push(`/opportunities/${airtable_id}`);
     }
   };
   return (
     <button
       className={`card cursor-pointer outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
-      onClick={() => handleButtonClick(opp.airtable_id)}
+      onClick={(e) => handleButtonClick(e, opp.airtable_id)}
     >
       <div
         className={`bg-grey-500 relative rounded-lg border-[2px] p-4 select-none ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}

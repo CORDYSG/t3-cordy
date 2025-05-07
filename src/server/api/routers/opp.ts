@@ -3,67 +3,96 @@ import { db } from "@/server/db";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import type { Prisma } from "@prisma/client";
 
+const activeOppsFilter = {
+  AND: [{ status: "Active" }, { status: { not: null } }],
+};
+
+let zonesCache: Awaited<ReturnType<typeof fetchAllZones>> = [];
+let zonesCacheExpiry = 0;
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+async function fetchAllZones(): Promise<
+  Awaited<ReturnType<typeof db.zones.findMany>>
+> {
+  const now = Date.now();
+  if (now > zonesCacheExpiry || zonesCache.length === 0) {
+    // Cache is expired or empty, fetch fresh data
+    zonesCache = await db.zones.findMany();
+    zonesCacheExpiry = now + CACHE_TTL;
+  }
+  return zonesCache;
+}
+
+function buildZoneMap(zones: Awaited<ReturnType<typeof fetchAllZones>>) {
+  const zoneMap = new Map<string, (typeof zones)[number]>();
+  for (const zone of zones) {
+    if (zone.name) {
+      zoneMap.set(zone.name, zone);
+    }
+  }
+  return zoneMap;
+}
+
+// Helper function to enrich opportunities with zone objects
+function enrichOppsWithZones(
+  opps: Array<{ zone?: string[] }>,
+  zoneMap: ReturnType<typeof buildZoneMap>,
+) {
+  return opps.map((opp) => {
+    const oppZones = (opp.zone ?? [])
+      .map((zoneName) => zoneMap.get(zoneName))
+      .filter((zone): zone is NonNullable<typeof zone> => Boolean(zone));
+    return {
+      ...opp,
+      zones: oppZones,
+    };
+  });
+}
+
 export const oppRouter = createTRPCRouter({
   getAllOpportunitiesWithZones: publicProcedure.query(async () => {
-    const opps = await db.opps.findMany({});
-    const zones = await db.zones.findMany({});
+    const [opps, zones] = await Promise.all([
+      db.opps.findMany({
+        where: activeOppsFilter,
+        // Add index hint if you have appropriate indices
+        // orderBy: { created_at: "desc" },
+      }),
+      fetchAllZones(),
+    ]);
 
     if (opps.length === 0) return [];
     if (zones.length === 0) return opps;
 
     // Create a quick lookup map for zone names
-    const zoneMap = new Map<string, (typeof zones)[number]>();
-    for (const zone of zones) {
-      if (zone.name) {
-        zoneMap.set(zone.name, zone);
-      }
-    }
-
-    // For each opportunity, map zone names to zone objects
-    const enrichedOpps = opps.map((opp) => {
-      const oppZones = (opp.zone ?? [])
-        .map((zoneName) => zoneMap.get(zoneName))
-        .filter(Boolean);
-      return {
-        ...opp,
-        zones: oppZones, // we add a new field 'zones' which has the full zone objects
-      };
-    });
-
-    return enrichedOpps;
+    const zoneMap = buildZoneMap(zones);
+    return enrichOppsWithZones(opps, zoneMap);
   }),
   getOppById: publicProcedure
     .input(z.object({ oppId: z.string() }))
     .query(async ({ input }) => {
-      const opp = await db.opps.findFirst({
-        where: { airtable_id: input.oppId },
-      });
-      const zones = await db.zones.findMany({});
+      const [opp, zones] = await Promise.all([
+        db.opps.findFirst({
+          where: {
+            airtable_id: input.oppId,
+            ...activeOppsFilter,
+          },
+        }),
+        fetchAllZones(),
+      ]);
 
       if (!opp) return null;
       if (zones.length === 0) return opp;
 
       // Create a quick lookup map for zone names
-      const zoneMap = new Map<string, (typeof zones)[number]>();
-      for (const zone of zones) {
-        if (zone.name) {
-          zoneMap.set(zone.name, zone);
-        }
-      }
+      const zoneMap = buildZoneMap(zones);
+      const oppZones = (opp.zone ?? [])
+        .map((zoneName) => zoneMap.get(zoneName))
+        .filter(Boolean);
 
-      // For each opportunity, map zone names to zone objects
-      const enrichedOppFn = () => {
-        const oppZones = (opp.zone ?? [])
-          .map((zoneName) => zoneMap.get(zoneName))
-          .filter(Boolean);
-        return {
-          ...opp,
-          zones: oppZones, // we add a new field 'zones' which has the full zone objects
-        };
+      return {
+        ...opp,
+        zones: oppZones,
       };
-      const enrichedOpp = enrichedOppFn();
-
-      return enrichedOpp;
     }),
   getAllOpportunitiesWithZonesLimit: publicProcedure
     .input(z.object({ limit: z.number(), page: z.number().min(1).max(100) })) // Added page parameter
@@ -71,38 +100,24 @@ export const oppRouter = createTRPCRouter({
       const { limit, page } = input;
       const skip = (page - 1) * limit; // Calculate the number of records to skip
 
-      const [opps, totalOpps] = await Promise.all([
+      const [opps, totalOpps, zones] = await Promise.all([
         db.opps.findMany({
+          where: activeOppsFilter,
           take: limit,
           skip: skip,
+          orderBy: { created_at: "desc" }, // Add consistent sorting
         }),
-        db.opps.count(), // Get the total number of opportunities
+        db.opps.count({
+          where: activeOppsFilter,
+        }),
+        fetchAllZones(),
       ]);
 
-      const zones = await db.zones.findMany();
-
       if (opps.length === 0) return { opps: [], totalOpps };
-
       if (zones.length === 0) return { opps, totalOpps };
 
-      // Create a quick lookup map for zone names
-      const zoneMap = new Map<string, (typeof zones)[number]>();
-      for (const zone of zones) {
-        if (zone.name) {
-          zoneMap.set(zone.name, zone);
-        }
-      }
-
-      // For each opportunity, map zone names to zone objects
-      const enrichedOpps = opps.map((opp) => {
-        const oppZones = (opp.zone ?? [])
-          .map((zoneName) => zoneMap.get(zoneName))
-          .filter(Boolean);
-        return {
-          ...opp,
-          zones: oppZones, // we add a new field 'zones' which has the full zone objects
-        };
-      });
+      const zoneMap = buildZoneMap(zones);
+      const enrichedOpps = enrichOppsWithZones(opps, zoneMap);
 
       return { opps: enrichedOpps, totalOpps };
     }),
@@ -154,6 +169,8 @@ export const oppRouter = createTRPCRouter({
       if (type && type.length > 0) {
         whereClause.type = { hasSome: type };
       }
+      whereClause.AND = whereClause.AND ?? [];
+      (whereClause.AND as Prisma.OppsWhereInput[]).push(activeOppsFilter);
 
       // First, run the query with OR logic to get all opportunities with ANY of the requested zones
       const initialWhereClause = { ...whereClause };
@@ -163,24 +180,28 @@ export const oppRouter = createTRPCRouter({
         };
       }
 
-      // Execute search query to get all matching opps
-      const allOpps = await ctx.db.opps.findMany({
-        where: initialWhereClause,
-        orderBy: {
-          created_at: "desc",
-        },
-      });
+      // Run queries in parallel
+      const [allOpps, zones] = await Promise.all([
+        db.opps.findMany({
+          where: initialWhereClause,
+          orderBy: {
+            created_at: "desc",
+          },
+        }),
+        fetchAllZones(),
+      ]);
 
-      // Post-process to separate perfect matches from partial matches
-      let perfectMatches: typeof allOpps = [];
-      const partialMatches: typeof allOpps = [];
+      // Process results efficiently
+      let sortedOpps = allOpps;
 
-      // Process the results to identify perfect and partial matches
       if (hasZoneFilter && allOpps.length > 0) {
-        // For each opportunity, check if it contains ALL requested zones
-        allOpps.forEach((opp) => {
+        // Separate perfect and partial matches
+        const perfectMatches: typeof allOpps = [];
+        const partialMatches: typeof allOpps = [];
+
+        for (const opp of allOpps) {
           const oppZones = opp.zone || [];
-          // Check if ALL requested zones are present in this opportunity
+          // Check if ALL requested zones are present
           const hasAllZones = zoneIds.every((zoneId) =>
             oppZones.includes(zoneId),
           );
@@ -190,43 +211,19 @@ export const oppRouter = createTRPCRouter({
           } else {
             partialMatches.push(opp);
           }
-        });
-      } else {
-        // If no zone filtering, all matches are considered "perfect"
-        perfectMatches = allOpps;
-      }
-
-      // Combine perfect matches first, then partial matches
-      const sortedOpps = [...perfectMatches, ...partialMatches];
-
-      // Apply pagination to the sorted results
-      const paginatedOpps = sortedOpps.slice(skip, skip + limit);
-
-      // Fetch zones for enriched opps
-      const zones = await db.zones.findMany({});
-
-      // Create a quick lookup map for zone names
-      const zoneMap = new Map<string, (typeof zones)[number]>();
-      for (const zone of zones) {
-        if (zone.name) {
-          zoneMap.set(zone.name, zone);
         }
+
+        sortedOpps = [...perfectMatches, ...partialMatches];
       }
 
-      // Enrich the paginated opportunities with zone objects
-      const enrichedOpps = paginatedOpps.map((opp) => {
-        const oppZones = (opp.zone ?? [])
-          .map((zoneName) => zoneMap.get(zoneName))
-          .filter(Boolean);
-        return {
-          ...opp,
-          zones: oppZones, // we add a new field 'zones' which has the full zone objects
-        };
-      });
+      // Apply pagination efficiently
+      const paginatedOpps = sortedOpps.slice(skip, skip + limit);
+      const zoneMap = buildZoneMap(zones);
+      const enrichedOpps = enrichOppsWithZones(paginatedOpps, zoneMap);
 
       return {
         opps: enrichedOpps,
-        totalOpps: allOpps.length,
+        totalOpps: sortedOpps.length,
       };
     }),
 });

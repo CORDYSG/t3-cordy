@@ -14,7 +14,7 @@ export const typesRouter = createTRPCRouter({
 
     .input(z.object({ typeId: z.string() }))
     .query(async ({ input }) => {
-      const type = await db.types.findFirst({
+      const type = await db.types.findUnique({
         where: { airtable_id: input.typeId },
       });
       return type;

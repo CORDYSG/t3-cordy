@@ -1,233 +1,289 @@
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider  = "postgresql"
-    url       = env("DATABASE_URL")
-    directUrl = env("DIRECT_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model UserOpportunity {
-    id          String   @id @default(cuid())
-    userId      String
-    oppId       BigInt
-    liked       Boolean  @default(false)
-    saved       Boolean  @default(false)
-    clicked     Boolean  @default(false)
-    applied     Boolean  @default(false)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
-    opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
-    user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  userId      String
+  oppId       BigInt
+  liked       Boolean  @default(false)
+  saved       Boolean  @default(false)
+  clicked     Boolean  @default(false)
+  applied     Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([userId, oppId])
-    @@index([userId])
-    @@index([oppId])
+  @@unique([userId, oppId])
+  @@index([userId])
+  @@index([oppId])
 }
 
 model UserType {
-    id        String   @id @default(cuid())
-    userId    String
-    typeId    BigInt
-    preferred Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    type      Types    @relation(fields: [typeId], references: [id], onDelete: Cascade)
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  typeId    BigInt
+  preferred Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  type      Types    @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([userId, typeId])
-    @@index([userId])
-    @@index([typeId])
+  @@unique([userId, typeId])
+  @@index([userId])
+  @@index([typeId])
 }
 
 model UserZone {
-    id        String   @id @default(cuid())
-    userId    String
-    zoneId    BigInt
-    preferred Boolean  @default(true)
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
-    user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-    zone      Zones    @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  id        String   @id @default(cuid())
+  userId    String
+  zoneId    BigInt
+  preferred Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  zone      Zones    @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
-    @@unique([userId, zoneId])
-    @@index([userId])
-    @@index([zoneId])
+  @@unique([userId, zoneId])
+  @@index([userId])
+  @@index([zoneId])
 }
 
 model OppView {
-    id          String   @id @default(cuid())
-    oppId       BigInt
-    userId      String?
-    viewedAt    DateTime @default(now())
-    duration    Int?
-    source      String?
-    opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
-    user        User?    @relation(fields: [userId], references: [id])
+  id          String   @id @default(cuid())
+  oppId       BigInt
+  userId      String?
+  viewedAt    DateTime @default(now())
+  duration    Int?
+  source      String?
+  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
 
-    @@index([oppId])
-    @@index([userId])
-    @@index([viewedAt])
+  @@index([oppId])
+  @@index([userId])
+  @@index([viewedAt])
 }
 
 model OppMetrics {
-    id          String   @id @default(cuid())
-    oppId       BigInt   @unique
-    viewCount   Int      @default(0)
-    likeCount   Int      @default(0)
-    clickCount  Int      @default(0)
-    saveCount   Int      @default(0)
-    applyCount  Int      @default(0)
-    createdAt   DateTime @default(now())
-    updatedAt   DateTime @updatedAt
-    opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  id          String   @id @default(cuid())
+  oppId       BigInt   @unique
+  viewCount   Int      @default(0)
+  likeCount   Int      @default(0)
+  clickCount  Int      @default(0)
+  saveCount   Int      @default(0)
+  applyCount  Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
 
-    @@index([oppId])
+  @@index([oppId])
 }
 
 model UserRecommendation {
-    id          String    @id @default(cuid())
-    userId      String
-    oppId       BigInt
-    score       Float
-    shown       Boolean   @default(false)
-    createdAt   DateTime  @default(now())
-    shownAt     DateTime?
-    opportunity Opps      @relation(fields: [oppId], references: [id], onDelete: Cascade)
-    user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String    @id @default(cuid())
+  userId      String
+  oppId       BigInt
+  score       Float
+  shown       Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  shownAt     DateTime?
+  opportunity Opps      @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@index([userId])
-    @@index([oppId])
+  @@index([userId])
+  @@index([oppId])
 }
 
 model User {
-    id                  String               @id @default(cuid())
-    name                String?
-    username            String?
-    email               String?              @unique
-    emailVerified       DateTime?
-    image               String?
-    telegramId          String?
-    lastActive          DateTime?
-    onboardingCompleted Boolean              @default(false)
-    accounts            Account[]
-    views               OppView[]
-    sessions            Session[]
-    opportunities       UserOpportunity[]
-    recommendations     UserRecommendation[]
-    typePreferences     UserType[]
-    zonePreferences     UserZone[]
+  id                  String               @id @default(cuid())
+  username            String?
+  email               String?              @unique
+  emailVerified       DateTime?
+  image               String?
+  telegramId          String?
+  lastActive          DateTime?
+  onboardingCompleted Boolean              @default(false)
+  name                String?
+  accounts            Account[]
+  views               OppView[]
+  sessions            Session[]
+  opportunities       UserOpportunity[]
+  recommendations     UserRecommendation[]
+  typePreferences     UserType[]
+  zonePreferences     UserZone[]
 }
 
 model Account {
-    id                       String  @id @default(cuid())
-    userId                   String
-    type                     String
-    provider                 String
-    providerAccountId        String
-    refresh_token            String?
-    access_token             String?
-    expires_at               Int?
-    token_type               String?
-    scope                    String?
-    id_token                 String?
-    session_state            String?
-    refresh_token_expires_in Int?
-    user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                       String  @id @default(cuid())
+  userId                   String
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String?
+  access_token             String?
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String?
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-    @@unique([provider, providerAccountId])
+  @@unique([provider, providerAccountId])
 }
 
 model Session {
-    id           String   @id @default(cuid())
-    sessionToken String   @unique
-    userId       String
-    expires      DateTime
-    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model VerificationToken {
-    identifier String
-    token      String   @unique
-    expires    DateTime
+  identifier String
+  token      String   @unique
+  expires    DateTime
 
-    @@unique([identifier, token])
+  @@unique([identifier, token])
 }
 
 model OppZone {
-    id        String   @id @default(cuid())
-    oppId     BigInt
-    zoneId    BigInt
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  oppId       BigInt
+  zoneId      BigInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  zone        Zones    @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
-    opportunity Opps  @relation(fields: [oppId], references: [id], onDelete: Cascade)
-    zone        Zones @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-
-    @@unique([oppId, zoneId])
-    @@index([oppId])
-    @@index([zoneId])
+  @@unique([oppId, zoneId])
+  @@index([oppId])
+  @@index([zoneId])
 }
 
 model OppType {
-    id        String   @id @default(cuid())
-    oppId     BigInt
-    typeId    BigInt
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  oppId       BigInt
+  typeId      BigInt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  type        Types    @relation(fields: [typeId], references: [id], onDelete: Cascade)
 
-    opportunity Opps  @relation(fields: [oppId], references: [id], onDelete: Cascade)
-    type        Types @relation(fields: [typeId], references: [id], onDelete: Cascade)
-
-    @@unique([oppId, typeId])
-    @@index([oppId])
-    @@index([typeId])
+  @@unique([oppId, typeId])
+  @@index([oppId])
+  @@index([typeId])
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Opps {
-    id               BigInt               @id(map: "opps_pkey") @default(autoincrement())
-    created_at       DateTime             @default(now()) @db.Timestamptz(6)
-    name             String
-    url_og           String
-    organisation     String?
-    deadline         DateTime?            @db.Date
-    caption          String?
-    information      String?
-    eligibility      String?
-    type             String[]
-    zone             String[]
-    thumbnail_url    String?
-    type_id          String[]
-    airtable_id      String?              @unique(map: "opps_airtable_id_key")
-    zone_id          String[]
-    metrics          OppMetrics?
-    views            OppView[]
-    userInteractions UserOpportunity[]
-    recommendations  UserRecommendation[]
-    OppZone          OppZone[]
-    OppType          OppType[]
+  id                  BigInt                   @id(map: "opps_pkey") @default(autoincrement())
+  created_at          DateTime                 @default(now()) @db.Timestamptz(6)
+  name                String
+  url_og              String
+  organisation        String?
+  deadline            DateTime?                @db.Date
+  caption             String?
+  information         String?
+  eligibility         String?
+  type                String[]
+  zone                String[]
+  thumbnail_url       String?
+  type_id             String[]
+  airtable_id         String?                  @unique(map: "opps_airtable_id_key")
+  zone_id             String[]
+  full_text_search    Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, caption)"))
+  embedding           Unsupported("vector")?
+  status              String?                  @default("null")
+  metrics             OppMetrics?
+  OppType             OppType[]
+  views               OppView[]
+  OppZone             OppZone[]
+  TeleUserOpportunity TeleUserOpportunity[]
+  userInteractions    UserOpportunity[]
+  recommendations     UserRecommendation[]
 }
 
 model Types {
-    id              BigInt     @id(map: "types_pkey") @default(autoincrement())
-    airtable_id     String?    @unique(map: "types_airtable_id_key")
-    created_at      DateTime   @default(now()) @db.Timestamptz(6)
-    name            String?
-    alias           String?
-    opp_id          String[]
-    userPreferences UserType[]
-    OppType         OppType[]
+  id              BigInt     @id(map: "types_pkey") @default(autoincrement())
+  airtable_id     String?    @unique(map: "types_airtable_id_key")
+  created_at      DateTime   @default(now()) @db.Timestamptz(6)
+  name            String?
+  alias           String?
+  opp_id          String[]
+  OppType         OppType[]
+  userPreferences UserType[]
 }
 
 model Zones {
-    id              BigInt     @id(map: "zones_pkey") @default(autoincrement())
-    created_at      DateTime   @default(now()) @db.Timestamptz(6)
-    colour          String?
-    airtable_id     String?    @unique(map: "zones_airtable_id_key")
-    name            String?
-    userPreferences UserZone[]
-    OppZone         OppZone[]
+  id              BigInt     @id(map: "zones_pkey") @default(autoincrement())
+  created_at      DateTime   @default(now()) @db.Timestamptz(6)
+  colour          String?
+  airtable_id     String?    @unique(map: "zones_airtable_id_key")
+  name            String?
+  OppZone         OppZone[]
+  userPreferences UserZone[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model TeleUser {
+  id                   String                @id @default(dbgenerated("gen_random_uuid()"))
+  created_at           DateTime              @default(now()) @db.Timestamptz(6)
+  telegramId           String                @unique
+  sendpulse_contact_id String                @unique
+  username             String?
+  is_student           Boolean
+  school_type          school_type?
+  non_student_type     non_school_type?
+  school_name          String?
+  TeleUserOpportunity  TeleUserOpportunity[]
+}
+
+model TeleUserOpportunity {
+  id        String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId    String
+  oppId     BigInt
+  liked     Boolean  @default(false)
+  saved     Boolean  @default(false)
+  clicked   Boolean  @default(false)
+  applied   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  Opps      Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  TeleUser  TeleUser @relation(fields: [userId], references: [id], onDelete: Cascade, map: "TeleUserOpportunity_userId_fkey1")
+
+  @@unique([userId, oppId], map: "TeleUserOpportunity_userId_oppId_idx")
+  @@index([oppId])
+  @@index([userId])
+}
+
+enum non_school_type {
+  Working
+  NS
+  Gap_Year @map("Gap Year")
+  Teacher
+  Parent
+  Other
+
+  @@map("non-school_type")
+}
+
+enum school_type {
+  Secondary_School                 @map("Secondary School")
+  Junior_College_MI                @map("Junior College/MI")
+  Polytechnic
+  University
+  Institute_of_Technical_Education @map("Institute of Technical Education")
+  International_School             @map("International School")
+  Others
 }
