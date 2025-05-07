@@ -15,12 +15,14 @@ type EventCardProps = {
   static?: boolean; // <-- add static prop
   pointerNone?: boolean; // <-- add pointerNone prop
   button?: boolean; // <-- add button prop
+  pauseQueries?: (paused: boolean) => void;
 };
 
 export default function EventCard({
   opp,
   static: isStatic,
   pointerNone,
+  pauseQueries,
 }: Readonly<EventCardProps>): JSX.Element {
   const calculateDaysLeft = (deadline: Date): number => {
     const now = new Date();
@@ -124,6 +126,10 @@ export default function EventCard({
   ) => {
     if (!pointerNone) {
       e.preventDefault();
+      if (pauseQueries) {
+        pauseQueries(true);
+      }
+
       router.push(`/opportunities/${airtable_id}`);
     }
   };
