@@ -3,9 +3,17 @@ import { db } from "@/server/db";
 import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import type { Prisma } from "@prisma/client";
 
+const activeOppsFilter = {
+  AND: [{ status: { not: "Concluded" } }, { status: { not: null } }],
+};
+
 export const oppRouter = createTRPCRouter({
   getAllOpportunitiesWithZones: publicProcedure.query(async () => {
-    const opps = await db.opps.findMany({});
+    const opps = await db.opps.findMany({
+      where: {
+        OR: [{ status: "Active" }, { status: { not: null } }],
+      },
+    });
     const zones = await db.zones.findMany({});
 
     if (opps.length === 0) return [];
@@ -36,7 +44,10 @@ export const oppRouter = createTRPCRouter({
     .input(z.object({ oppId: z.string() }))
     .query(async ({ input }) => {
       const opp = await db.opps.findFirst({
-        where: { airtable_id: input.oppId },
+        where: {
+          airtable_id: input.oppId,
+          ...activeOppsFilter,
+        },
       });
       const zones = await db.zones.findMany({});
 
@@ -73,10 +84,13 @@ export const oppRouter = createTRPCRouter({
 
       const [opps, totalOpps] = await Promise.all([
         db.opps.findMany({
+          where: activeOppsFilter,
           take: limit,
           skip: skip,
         }),
-        db.opps.count(), // Get the total number of opportunities
+        db.opps.count({
+          where: activeOppsFilter, // Also apply the filter when counting!
+        }), // Get the total number of opportunities
       ]);
 
       const zones = await db.zones.findMany();
@@ -154,6 +168,8 @@ export const oppRouter = createTRPCRouter({
       if (type && type.length > 0) {
         whereClause.type = { hasSome: type };
       }
+      whereClause.AND = whereClause.AND ?? [];
+      (whereClause.AND as Prisma.OppsWhereInput[]).push(activeOppsFilter);
 
       // First, run the query with OR logic to get all opportunities with ANY of the requested zones
       const initialWhereClause = { ...whereClause };

@@ -13,6 +13,10 @@ type GuestSessionData = {
   cachedOpportunities: OppWithZoneType[];
 };
 
+const activeOppsFilter = {
+  AND: [{ status: { not: "Concluded" } }, { status: { not: null } }],
+};
+
 // In-memory cache for guest sessions (in production, use Redis or similar)
 const guestSessions = new Map<string, GuestSessionData>();
 
@@ -79,12 +83,12 @@ export const userOppRouter = createTRPCRouter({
       }
       let randomOpps = [];
       if (input.seenOppIds && input.seenOppIds.length > 0) {
-        console.log("guest Session seen >>>", input.seenOppIds.length);
         const allOpps = await db.opps.findMany({
           where: {
             airtable_id: {
               notIn: input.seenOppIds ?? [],
             },
+            ...activeOppsFilter,
           },
           select: { id: true },
         });
@@ -95,12 +99,12 @@ export const userOppRouter = createTRPCRouter({
 
         // Step 3: Fetch actual opps
         randomOpps = await db.opps.findMany({
-          where: { id: { in: shuffledIds } },
+          where: { id: { in: shuffledIds }, ...activeOppsFilter },
         });
       } else {
         randomOpps = await db.opps.findMany({
           take: LIMIT * 2, // Fetch more than needed to account for filtering
-          orderBy: { created_at: "desc" },
+          orderBy: { created_at: "desc", ...activeOppsFilter },
         });
       }
 
@@ -216,7 +220,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
 
   // Step 2: Fetch those opps to derive type/zone prefs
   const likedOpps = await db.opps.findMany({
-    where: { id: { in: interactedOppIds } },
+    where: { id: { in: interactedOppIds }, ...activeOppsFilter },
     select: { type: true, zone: true },
   });
 
@@ -241,6 +245,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
   let recommendedOpps = await db.opps.findMany({
     where: {
       id: { notIn: seenOppIds },
+      ...activeOppsFilter,
       AND: [{ type: { hasSome: topTypes } }, { zone: { hasSome: topZones } }],
     },
     take: LIMIT,
@@ -251,6 +256,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
   if (recommendedOpps.length < LIMIT) {
     const allfillerOpps = await db.opps.findMany({
       where: {
+        ...activeOppsFilter,
         id: {
           notIn: [...interactedOppIds, ...recommendedOpps.map((o) => o.id)],
         },
@@ -266,7 +272,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
       .slice(0, LIMIT - recommendedOpps.length);
 
     const fillerOpps = await db.opps.findMany({
-      where: { id: { in: shuffledIds } },
+      where: { id: { in: shuffledIds }, ...activeOppsFilter },
     });
     recommendedOpps = [...recommendedOpps, ...fillerOpps];
   }

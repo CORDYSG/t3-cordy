@@ -237,8 +237,6 @@ const OpportunitiesPage = () => {
       remainingOpps < 3 &&
       hasInitialLoadedRef.current
     ) {
-      console.log("Fetching more opportunities, remaining:", remainingOpps);
-      console.log("Current opportunities:", opportunities);
       isFetchingRef.current = true;
       void refetch();
     }
