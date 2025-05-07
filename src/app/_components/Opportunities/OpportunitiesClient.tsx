@@ -8,7 +8,6 @@ import EventCard from "../../_components/EventCard";
 import LoadingComponent from "../../_components/LoadingComponent";
 import Pagination from "./Pagination";
 import Image from "next/image";
-import Head from "next/head";
 
 type OpportunitiesClientProps = {
   initialOpps: OpportunityType[];
@@ -225,6 +224,7 @@ const OpportunitiesClient = ({
               {displayedOpps.length > 0 ? (
                 displayedOpps.map((opp) => (
                   <li
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     key={opp.id}
                     className="flex items-center justify-center px-8"
                   >
