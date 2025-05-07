@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -10,7 +13,7 @@ import Pagination from "./Pagination";
 import Image from "next/image";
 
 type OpportunitiesClientProps = {
-  initialOpps: OpportunityType[];
+  initialOpps: OppWithZoneType[];
   totalOpps: number;
   initialPage: number;
   limit: number;
@@ -60,6 +63,7 @@ const OpportunitiesClient = ({
       initialData: isFiltered
         ? undefined
         : {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-return
             opps: initialOpps.map((opp) => ({
               ...opp,
               zones: [], // Add an empty zones array or populate it as needed

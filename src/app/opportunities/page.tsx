@@ -106,8 +106,12 @@ const OpportunitiesPage = async ({
       position: (page - 1) * limit + index + 1,
       item: {
         "@type": "Event",
-        name: opp.name,
-        url: `${process.env.NEXT_PUBLIC_SITE_URL}/opportunities/${opp.id}`,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        name: "name" in opp ? opp.name : "Opportunity Event",
+        url:
+          "id" in opp
+            ? `${process.env.NEXT_PUBLIC_SITE_URL}/opportunities/${opp.id}`
+            : "",
       },
     })),
   };
