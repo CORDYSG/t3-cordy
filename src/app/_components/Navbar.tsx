@@ -79,7 +79,10 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                     <PopoverTrigger asChild>
                       <Avatar>
                         <AvatarImage
-                          src={session.user.image ?? "/default-avatar.png"}
+                          src={
+                            session.user.image ??
+                            "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                          }
                           alt={session.user.name ?? "User"}
                         />
                         <AvatarFallback>{userInitials} </AvatarFallback>
@@ -146,8 +149,12 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 {" "}
                 <Avatar className="aspect-square h-full w-36 border-2">
                   <AvatarImage
-                    src={session?.user.image ?? "/default-avatar.png"}
+                    src={
+                      session?.user.image ??
+                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                    }
                     alt={session?.user.name ?? "User"}
+                    className="p-5"
                   />
 
                   <AvatarFallback>{userInitials} </AvatarFallback>

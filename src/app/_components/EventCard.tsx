@@ -140,6 +140,7 @@ export default function EventCard({
     >
       <div
         className={`bg-grey-500 relative rounded-lg border-[2px] p-4 select-none ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
+        style={{ width: "100%" }}
       >
         {opp.thumbnail_url && (
           <Image
