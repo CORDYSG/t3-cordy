@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "CORDY",
     short_name: "CORDY",
     description: "Cordy",
-    start_url: "/",
+    start_url: "/opportunities",
     display: "standalone",
     background_color: "#FFF7E7",
     theme_color: "#fff7e7",
