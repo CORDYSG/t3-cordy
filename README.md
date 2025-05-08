@@ -1,29 +1,34 @@
-# Create T3 App
+# Cordy 🚀
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Find your next adventure at [app.cordy.sg](https://app.cordy.sg)
 
-## What's next? How do I make an app with this?
+## What's Cordy?
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+Cordy is your new favorite platform for discovering amazing opportunities! Whether you're looking to volunteer, join a community project, or find your next passion, Cordy connects you with possibilities that match your interests.
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+## Why Cordy?
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Drizzle](https://orm.drizzle.team)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+> "Passion is found from doing, not looking."
 
-## Learn More
+But we make the looking part a whole lot easier! With Cordy, you can:
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+- 🔍 Search for opportunities that speak to you
+- 🌍 Filter by location zones that work for your schedule
+- 🏷️ Browse by interest categories to find your perfect match
+- 💌 Save favorites and get notified about new opportunities
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+## Tech Magic ✨
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+Built with Next.js, TypeScript, and tRPC, Cordy delivers a smooth, responsive experience that helps you find what you're looking for—fast!
 
-## How do I deploy this?
+## Quick Start
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+Just visit [app.cordy.sg](https://app.cordy.sg) and start exploring! No complicated setup, no fuss.
+
+## Join the Community
+
+Found a bug? Have a suggestion? Want to contribute? Reach out to our team!
+
+---
+
+_Cordy: Connect with opportunities, connect with community._

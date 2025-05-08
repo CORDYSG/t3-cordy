@@ -14,7 +14,7 @@ type GuestSessionData = {
 };
 
 const activeOppsFilter = {
-  AND: [{ status: { not: "Concluded" } }, { status: { not: null } }],
+  AND: [{ status: "Active" }, { status: { not: null } }],
 };
 
 // In-memory cache for guest sessions (in production, use Redis or similar)

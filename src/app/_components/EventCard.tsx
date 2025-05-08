@@ -135,7 +135,7 @@ export default function EventCard({
   };
   return (
     <button
-      className={`card cursor-pointer outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
+      className={`card flex h-full cursor-pointer flex-col justify-start outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
       onClick={(e) => handleButtonClick(e, opp.airtable_id)}
     >
       <div
