@@ -8,6 +8,8 @@ import Navbar from "./_components/Navbar";
 import Footer from "./_components/Footer";
 import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
+import { Suspense } from "react";
+import Loading from "./loading";
 
 export const metadata: Metadata = {
   title: "CORDY",
@@ -57,7 +59,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <TRPCReactProvider>
           <SessionProvider session={session}>
             <Navbar session={session} />
-            {children}
+            <Suspense fallback={<Loading />}>{children}</Suspense>
             <Footer />
           </SessionProvider>
         </TRPCReactProvider>
