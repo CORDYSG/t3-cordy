@@ -9,7 +9,7 @@ datasource db {
 }
 
 model UserOpportunity {
-  id          String   @id @default(cuid())
+  id          String   @id @default(dbgenerated("gen_random_uuid()"))
   userId      String
   oppId       BigInt
   liked       Boolean  @default(false)
@@ -102,7 +102,7 @@ model UserRecommendation {
 }
 
 model User {
-  id                  String               @id @default(cuid())
+  id                  String               @id @default(dbgenerated("gen_random_uuid()"))
   username            String?
   email               String?              @unique
   emailVerified       DateTime?

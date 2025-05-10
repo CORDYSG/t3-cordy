@@ -16,6 +16,7 @@ type EventCardProps = {
   pointerNone?: boolean; // <-- add pointerNone prop
   button?: boolean; // <-- add button prop
   pauseQueries?: (paused: boolean) => void;
+  
 };
 
 export default function EventCard({

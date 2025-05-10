@@ -600,6 +600,7 @@ const OpportunitiesPage = () => {
             </div>
           )}
       </div>
+      {isAuthenticated && <div className="mt-8 w-full"></div>}
 
       {/* Guest user information banner */}
       {!isAuthenticated && !limitReached && (

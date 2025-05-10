@@ -5,6 +5,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
+import type { Prisma } from "@prisma/client";
 
 // Create a new type for guest session data
 type GuestSessionData = {
@@ -13,10 +14,18 @@ type GuestSessionData = {
   cachedOpportunities: OppWithZoneType[];
 };
 
-const activeOppsFilter = {
-  AND: [{ status: "Active" }, { status: { not: null } }],
-};
-
+function getActiveOppsFilter() {
+  const now = new Date();
+  return {
+    AND: [
+      {
+        OR: [{ status: "Active" }, { status: { startsWith: "Active" } }],
+      },
+      { status: { not: { contains: "Completed" } } },
+      { deadline: { gt: now } },
+    ],
+  };
+}
 // In-memory cache for guest sessions (in production, use Redis or similar)
 const guestSessions = new Map<string, GuestSessionData>();
 
@@ -88,7 +97,7 @@ export const userOppRouter = createTRPCRouter({
             airtable_id: {
               notIn: input.seenOppIds ?? [],
             },
-            ...activeOppsFilter,
+            ...getActiveOppsFilter(),
           },
           select: { id: true },
         });
@@ -99,12 +108,15 @@ export const userOppRouter = createTRPCRouter({
 
         // Step 3: Fetch actual opps
         randomOpps = await db.opps.findMany({
-          where: { id: { in: shuffledIds }, ...activeOppsFilter },
+          where: { id: { in: shuffledIds }, ...getActiveOppsFilter() },
         });
       } else {
         randomOpps = await db.opps.findMany({
           take: LIMIT * 2, // Fetch more than needed to account for filtering
-          orderBy: { created_at: "desc", ...activeOppsFilter },
+          orderBy: { created_at: "desc" },
+          where: {
+            ...getActiveOppsFilter(),
+          },
         });
       }
 
@@ -203,7 +215,6 @@ export const userOppRouter = createTRPCRouter({
 
 // Helper function to get opportunities for authenticated users
 async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
-  // Step 1: Get user interactions
   const interactions = await db.userOpportunity.findMany({
     where: {
       userId,
@@ -212,15 +223,15 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
     select: { oppId: true },
   });
   const interactedOppIds = interactions.map((i) => i.oppId);
+
   const seen = await db.userOpportunity.findMany({
     where: { userId },
     select: { oppId: true },
   });
   const seenOppIds = seen.map((i) => i.oppId);
 
-  // Step 2: Fetch those opps to derive type/zone prefs
   const likedOpps = await db.opps.findMany({
-    where: { id: { in: interactedOppIds }, ...activeOppsFilter },
+    where: { id: { in: interactedOppIds } },
     select: { type: true, zone: true },
   });
 
@@ -242,26 +253,37 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
     .slice(0, 5)
     .map(([zone]) => zone);
 
+  // ✅ Build where clause using array
+  const whereClauses: Prisma.OppsWhereInput[] = [];
+
+  whereClauses.push(getActiveOppsFilter());
+  whereClauses.push({ id: { notIn: seenOppIds } });
+
+  if (topTypes.length > 0) {
+    whereClauses.push({ type: { hasSome: topTypes } });
+  }
+
+  if (topZones.length > 0) {
+    whereClauses.push({ zone: { hasSome: topZones } });
+  }
+
   let recommendedOpps = await db.opps.findMany({
     where: {
-      id: { notIn: seenOppIds },
-      ...activeOppsFilter,
-      AND: [{ type: { hasSome: topTypes } }, { zone: { hasSome: topZones } }],
+      AND: whereClauses,
     },
     take: LIMIT,
     orderBy: { created_at: "desc" },
   });
 
-  // Step 4: Random filler if not enough
+  // Fallback filler
   if (recommendedOpps.length < LIMIT) {
     const allfillerOpps = await db.opps.findMany({
       where: {
-        ...activeOppsFilter,
+        ...getActiveOppsFilter(),
         id: {
           notIn: [...interactedOppIds, ...recommendedOpps.map((o) => o.id)],
         },
       },
-      // take: LIMIT - recommendedOpps.length,
       select: { id: true },
       orderBy: { created_at: "desc" },
     });
@@ -272,14 +294,14 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
       .slice(0, LIMIT - recommendedOpps.length);
 
     const fillerOpps = await db.opps.findMany({
-      where: { id: { in: shuffledIds }, ...activeOppsFilter },
+      where: { id: { in: shuffledIds }, ...getActiveOppsFilter() },
     });
+
     recommendedOpps = [...recommendedOpps, ...fillerOpps];
   }
 
+  // Enrich with zones
   const zones = await db.zones.findMany({});
-
-  // Create a quick lookup map for zone names
   const zoneMap = new Map();
   for (const zone of zones) {
     if (zone.name) {

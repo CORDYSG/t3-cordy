@@ -4,7 +4,11 @@ import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
 import type { Prisma } from "@prisma/client";
 
 const activeOppsFilter = {
-  AND: [{ status: "Active" }, { status: { not: null } }],
+  AND: [
+    { status: "Active" },
+    { status: { not: null } },
+    { deadline: { gt: new Date() } },
+  ],
 };
 
 let zonesCache: Awaited<ReturnType<typeof fetchAllZones>> = [];
