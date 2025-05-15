@@ -1226,6 +1226,11 @@
   resolved "https://registry.yarnpkg.com/@uiball/loaders/-/loaders-1.3.1.tgz#f339803aa3abaca2d3f3ee9d872d2a137a240aae"
   integrity sha512-1vLUoW1aux5CDJedCkW+TYxsnX0WKmmUJMi+wRR4DPEKdTZ2/KP8gQSv/LJu6oc2I0sJceKHFWLeAWO3/og98A==
 
+"@uidotdev/usehooks@^2.4.1":
+  version "2.4.1"
+  resolved "https://registry.yarnpkg.com/@uidotdev/usehooks/-/usehooks-2.4.1.tgz#4b733eaeae09a7be143c6c9ca158b56cc1ea75bf"
+  integrity sha512-1I+RwWyS+kdv3Mv0Vmc+p0dPYH0DTRAo04HLyXReYBL9AeseDWUJyi4THuksBJcu9F0Pih69Ak150VDnqbVnXg==
+
 "@unrs/resolver-binding-darwin-arm64@1.7.2":
   version "1.7.2"
   resolved "https://registry.yarnpkg.com/@unrs/resolver-binding-darwin-arm64/-/resolver-binding-darwin-arm64-1.7.2.tgz#12eed2bd9865d1f55bb79d76072330b6032441d7"
