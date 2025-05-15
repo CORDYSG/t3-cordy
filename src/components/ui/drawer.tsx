@@ -11,12 +11,6 @@ function Drawer({
   return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
 
-function DrawerHandle({
-  ...props
-}: React.ComponentProps<typeof DrawerPrimitive.Handle>) {
-  return <DrawerPrimitive.Handle data-slot="drawer-handle" {...props} />;
-}
-
 function DrawerTrigger({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Trigger>) {
@@ -135,5 +129,4 @@ export {
   DrawerFooter,
   DrawerTitle,
   DrawerDescription,
-  DrawerHandle,
 };

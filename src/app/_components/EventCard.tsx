@@ -36,12 +36,14 @@ type EventCardProps = {
   pointerNone?: boolean; // <-- add pointerNone prop
   button?: boolean; // <-- add button prop
   pauseQueries?: (paused: boolean) => void;
+  disableInteractions?: boolean;
 };
 
 export default function EventCard({
   opp,
   static: isStatic,
   pointerNone,
+  disableInteractions,
   pauseQueries,
 }: Readonly<EventCardProps>): JSX.Element {
   const [open, setOpen] = useState(false);
@@ -166,7 +168,10 @@ export default function EventCard({
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
+        <DialogTrigger
+          asChild
+          className={`${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
+        >
           <div
             className={`card flex h-full cursor-pointer flex-col justify-start outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
             // onClick={(e) => handleButtonClick(e, opp.airtable_id)}
@@ -343,7 +348,10 @@ export default function EventCard({
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerTrigger asChild>
+      <DrawerTrigger
+        asChild
+        className={`${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
+      >
         <div
           className={`card flex h-full cursor-pointer flex-col justify-start outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
         >
