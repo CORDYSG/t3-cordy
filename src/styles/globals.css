@@ -259,4 +259,8 @@
   .underline-indicator-active::after {
     transform: translateX(-50%) scaleX(1);
   }
+  .motion-card {
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
 }

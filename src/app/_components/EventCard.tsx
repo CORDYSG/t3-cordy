@@ -66,7 +66,6 @@ export default function EventCard({
   const zonesRef = useRef<HTMLDivElement>(null);
   const [visibleZones, setVisibleZones] = useState<ZoneType[]>([]);
   const [hiddenCount, setHiddenCount] = useState(0);
-  const [isMounted, setIsMounted] = useState(false);
 
   const isDesktop = useMediaQuery("(min-width: 1024px)");
 
