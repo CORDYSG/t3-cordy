@@ -1,13 +1,19 @@
-/* eslint-disable @typescript-eslint/no-unsafe-argument */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import Link from "next/link";
 
 type EventCardProps = {
@@ -16,7 +22,6 @@ type EventCardProps = {
   pointerNone?: boolean; // <-- add pointerNone prop
   button?: boolean; // <-- add button prop
   pauseQueries?: (paused: boolean) => void;
-  
 };
 
 export default function EventCard({

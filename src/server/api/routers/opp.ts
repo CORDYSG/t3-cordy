@@ -11,22 +11,24 @@ const activeOppsFilter = {
   ],
 };
 
-let zonesCache: Awaited<ReturnType<typeof fetchAllZones>> = [];
+type FetchAllZonesReturnType = Awaited<ReturnType<typeof fetchAllZones>>;
+let zonesCache: FetchAllZonesReturnType | null = null;
 let zonesCacheExpiry = 0;
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
-
-async function fetchAllZones(): Promise<
-  Awaited<ReturnType<typeof db.zones.findMany>>
-> {
+const CACHE_TTL = 20 * 60 * 1000;
+async function fetchAllZones(): Promise<ZoneType[]> {
   const now = Date.now();
-  if (now > zonesCacheExpiry || zonesCache.length === 0) {
-    // Cache is expired or empty, fetch fresh data
-    zonesCache = await db.zones.findMany();
-    zonesCacheExpiry = now + CACHE_TTL;
+  if (now > zonesCacheExpiry || !zonesCache) {
+    try {
+      zonesCache = await db.zones.findMany({});
+      zonesCacheExpiry = now + CACHE_TTL;
+    } catch (error) {
+      // Fallback to empty array if there's an error
+      console.error("Failed to fetch zones:", error);
+      return [];
+    }
   }
   return zonesCache;
 }
-
 function buildZoneMap(zones: Awaited<ReturnType<typeof fetchAllZones>>) {
   const zoneMap = new Map<string, (typeof zones)[number]>();
   for (const zone of zones) {
@@ -141,93 +143,46 @@ export const oppRouter = createTRPCRouter({
       const { search, type, zoneIds, page, limit, excludeOppIds } = input;
       const skip = (page - 1) * limit;
 
-      // Define the where clause with proper typing
-      const whereClause: Prisma.OppsWhereInput = {};
-
-      // Track if we're doing zone filtering to handle the special case
-      const hasZoneFilter = zoneIds && zoneIds.length > 0;
-
-      // Add search condition
-      if (search && search.trim() !== "") {
-        whereClause.OR = [
-          {
-            name: { contains: search, mode: "insensitive" as Prisma.QueryMode },
-          },
-          {
-            caption: {
-              contains: search,
-              mode: "insensitive" as Prisma.QueryMode,
-            },
-          },
-          // Add more fields as needed
-        ];
-      }
-
-      if (excludeOppIds.length > 0) {
-        whereClause.AND = whereClause.AND ?? [];
-        (whereClause.AND as Prisma.OppsWhereInput[]).push({
+      // Build the where clause more efficiently
+      const whereClause: Prisma.OppsWhereInput = {
+        status: "Active",
+        deadline: { gt: new Date() },
+        ...(excludeOppIds.length > 0 && {
           airtable_id: { notIn: excludeOppIds },
-        });
-      }
-
-      if (type && type.length > 0) {
-        whereClause.type = { hasSome: type };
-      }
-      whereClause.AND = whereClause.AND ?? [];
-      (whereClause.AND as Prisma.OppsWhereInput[]).push(activeOppsFilter);
-
-      // First, run the query with OR logic to get all opportunities with ANY of the requested zones
-      const initialWhereClause = { ...whereClause };
-      if (hasZoneFilter) {
-        initialWhereClause.zone = {
-          hasSome: zoneIds,
-        };
-      }
-
-      // Run queries in parallel
-      const [allOpps, zones] = await Promise.all([
-        db.opps.findMany({
-          where: initialWhereClause,
-          orderBy: {
-            created_at: "desc",
-          },
         }),
-        fetchAllZones(),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { caption: { contains: search, mode: "insensitive" } },
+          ],
+        }),
+        ...(type.length > 0 && { type: { hasSome: type } }),
+        ...(zoneIds.length > 0 && { zone: { hasSome: zoneIds } }),
+      };
+
+      // Get zones first since we need them for filtering
+      const zones = await fetchAllZones();
+      const zoneMap = buildZoneMap(zones);
+
+      // Use a single count + findMany query with proper pagination
+      const [totalOpps, opps] = await Promise.all([
+        db.opps.count({ where: whereClause }),
+        db.opps.findMany({
+          where: whereClause,
+          take: limit,
+          skip,
+          orderBy: { created_at: "desc" },
+        }),
       ]);
 
-      // Process results efficiently
-      let sortedOpps = allOpps;
-
-      if (hasZoneFilter && allOpps.length > 0) {
-        // Separate perfect and partial matches
-        const perfectMatches: typeof allOpps = [];
-        const partialMatches: typeof allOpps = [];
-
-        for (const opp of allOpps) {
-          const oppZones = opp.zone || [];
-          // Check if ALL requested zones are present
-          const hasAllZones = zoneIds.every((zoneId) =>
-            oppZones.includes(zoneId),
-          );
-
-          if (hasAllZones) {
-            perfectMatches.push(opp);
-          } else {
-            partialMatches.push(opp);
-          }
-        }
-
-        sortedOpps = [...perfectMatches, ...partialMatches];
+      // Early return if no results
+      if (opps.length === 0) {
+        return { opps: [], totalOpps };
       }
 
-      // Apply pagination efficiently
-      const paginatedOpps = sortedOpps.slice(skip, skip + limit);
-      const zoneMap = buildZoneMap(zones);
-      const enrichedOpps = enrichOppsWithZones(paginatedOpps, zoneMap);
-
       return {
-        opps: enrichedOpps,
-        totalOpps: sortedOpps.length,
+        opps: enrichOppsWithZones(opps, zoneMap),
+        totalOpps,
       };
     }),
 });

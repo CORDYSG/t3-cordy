@@ -78,20 +78,22 @@ const OpportunitiesPage = async ({
   const limit = 12;
 
   // Server-side data fetching
-  const { opps = [], totalOpps = 0 } =
-    await api.opp.getAllOpportunitiesWithZonesLimit({
-      limit,
-      page,
-    });
+  const [oppsData, types, zones] = await Promise.all([
+    api.opp.getAllOpportunitiesWithZonesLimit({ limit, page }),
+    api.type.getAllTypes(),
+    api.zone.getAllZones(),
+  ]);
 
-  const types = await api.type.getAllTypes();
-
-  // Fetch available zones for filters
-  const zones = await api.zone.getAllZones();
+  const { opps = [], totalOpps = 0 } = oppsData;
 
   // Calculate total pages for structured data
   const totalPages = Math.ceil(totalOpps / limit);
-
+  if (page < totalPages) {
+    api.opp
+      .getAllOpportunitiesWithZonesLimit({ limit, page: page + 1 })
+      .then(() => console.debug(`Prefetched page ${page + 1}`))
+      .catch(console.error);
+  }
   // JSON-LD for collection page
   const jsonLd = {
     "@context": "https://schema.org",
