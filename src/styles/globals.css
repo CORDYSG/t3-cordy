@@ -242,4 +242,25 @@
   .animate-scale-up-center {
     animation: scale-up-center 0.3s ease-in-out;
   }
+
+  .underline-indicator::after {
+    content: "";
+    position: absolute;
+    bottom: 0.1rem; /* adjust spacing */
+    left: 50%;
+    transform: translateX(-50%) scaleX(0);
+    transform-origin: center;
+    width: 60%; /* shorter than full width */
+    height: 2px;
+    background-color: currentColor;
+    border-radius: 999px;
+    transition: transform 0.3s ease-out;
+  }
+  .underline-indicator-active::after {
+    transform: translateX(-50%) scaleX(1);
+  }
+  .motion-card {
+    backface-visibility: hidden;
+    transform-style: preserve-3d;
+  }
 }

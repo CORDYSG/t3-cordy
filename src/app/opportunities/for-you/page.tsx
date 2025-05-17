@@ -1,7 +1,7 @@
-import SwipeCardWrapper from "@/app/_components/Swipe/SwipeCardWrapper";
-import { api } from "@/trpc/server";
 import Image from "next/image";
 import { type Metadata } from "next";
+
+import Wrapper from "@/app/_components/Swipe/Wrapper";
 
 // Define metadata for the page (Next.js 13+ approach)
 export const metadata: Metadata = {
@@ -39,7 +39,7 @@ const ForYouPage = () => {
         <h1 className="sr-only">Personalized Opportunities For You</h1>
 
         <section aria-label="Opportunity Cards" className="w-full">
-          <SwipeCardWrapper />
+          <Wrapper />
         </section>
 
         {/* Structured data for better search engine understanding */}

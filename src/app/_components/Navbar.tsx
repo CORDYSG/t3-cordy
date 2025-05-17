@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Menu, UserCircle } from "lucide-react";
+import { Menu } from "lucide-react";
 
 import { FaTelegramPlane } from "react-icons/fa";
 import type { Session } from "next-auth";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { useState } from "react";
 
 import {
   Sheet,
@@ -26,6 +27,11 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ session }) => {
   const router = useRouter();
+  const pathName = usePathname();
+  const segments = pathName.split("/").filter(Boolean);
+  const lastSegment = segments[segments.length - 1] ?? "";
+  const [open, setOpen] = useState(false); // 👈 track open state
+
   let userInitials = "U";
 
   if (session?.user) {
@@ -39,12 +45,11 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
   }
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <div className="drawer-content flex flex-col">
         <nav className="sticky top-0 w-full">
           <div className="relative container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-20 items-center justify-between">
-              {/* Logo */}
               <div className="flex-shrink-0">
                 <Link
                   href="/"
@@ -59,13 +64,13 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 <div className="flex items-baseline space-x-4 uppercase">
                   <Link
                     href="/opportunities/for-you"
-                    className="text-text active:text-primary hover:text-primary rounded-md px-3 py-2 text-sm font-semibold"
+                    className={`group active:text-primary-active hover:text-primary underline-indicator relative rounded-md px-3 py-2 text-sm font-semibold ${lastSegment.startsWith("for-you") ? "text-primary underline-indicator-active" : "text-text"}`}
                   >
                     For You
                   </Link>
                   <Link
                     href="/opportunities"
-                    className="text-text active:text-primary hover:text-primary rounded-md px-3 py-2 text-sm font-semibold"
+                    className={`group active:text-primary-active hover:text-primary underline-indicator relative rounded-md px-3 py-2 text-sm font-semibold ${lastSegment.startsWith("opportunities") ? "text-primary underline-indicator-active" : "text-text"}`}
                   >
                     Opportunities
                   </Link>
@@ -165,7 +170,11 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                   {session?.user.name}
                 </div>
               ) : (
-                <Link href="/api/auth/signin" className="w-full outline-none">
+                <Link
+                  href="/api/auth/signin"
+                  className="w-full outline-none"
+                  onClick={() => setOpen(false)}
+                >
                   <button className="btn-brand-primary my-4 w-full text-sm uppercase">
                     Sign in
                   </button>
@@ -177,7 +186,8 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
               <li className="mb-4">
                 <Link
                   href="/opportunities/for-you"
-                  className="hover:text-primary text-black"
+                  className={`active:text-primary-active hover:text-primary rounded-md px-3 py-2 text-sm font-semibold ${lastSegment.startsWith("for-you") ? "text-primary" : "text-text"}`}
+                  onClick={() => setOpen(false)}
                 >
                   For You
                 </Link>
@@ -185,7 +195,8 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
               <li className="mb-4">
                 <Link
                   href="/opportunities"
-                  className="hover:text-primary text-black"
+                  className={`active:text-primary-active hover:text-primary rounded-md px-3 py-2 text-sm font-semibold ${lastSegment.startsWith("opportunities") ? "text-primary" : "text-text"}`}
+                  onClick={() => setOpen(false)}
                 >
                   Opportunities
                 </Link>
