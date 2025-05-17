@@ -49,9 +49,9 @@ const ForYouPage = () => {
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "WebPage",
-              name: "For You - Personalized Opportunities",
+              name: "For You - Personalised Opportunities",
               description:
-                "Discover personalized opportunities tailored to your interests and preferences.",
+                "Discover personalised opportunities tailored to your interests and preferences.",
               image:
                 "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg",
             }),

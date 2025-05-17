@@ -481,7 +481,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     // Guest limit reached view
     if (!isAuthenticated && limitReached && opportunities.length <= current) {
       return (
-        <div className="flex min-h-[520px] w-full flex-col items-center justify-center gap-2 p-6 text-center">
+        <div className="flex min-h-[540px] w-full flex-col items-center justify-center gap-2 p-6 text-center">
           <Image
             src="https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg"
             alt="Neutral Cordy"
@@ -520,7 +520,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     }
 
     return (
-      <div className="flex w-full flex-col items-center gap-6 p-6">
+      <div className="flex min-h-[620px] w-full flex-col items-center gap-6 p-6">
         {visibleOpps.length > 0 && (
           <div className="container flex w-full max-w-sm justify-start gap-4 md:w-1/2">
             <button
