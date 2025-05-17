@@ -1,9 +1,8 @@
+"use client";
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-"use client";
-
 import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
@@ -32,9 +31,9 @@ import { useMediaQuery } from "@uidotdev/usehooks";
 
 type EventCardProps = {
   opp: OppWithZoneType;
-  static?: boolean; // <-- add static prop
-  pointerNone?: boolean; // <-- add pointerNone prop
-  button?: boolean; // <-- add button prop
+  static?: boolean;
+  pointerNone?: boolean;
+  button?: boolean;
   pauseQueries?: (paused: boolean) => void;
   disableInteractions?: boolean;
 };
@@ -54,6 +53,7 @@ export default function EventCard({
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
   const router = useRouter();
+
   // Function to format the date
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
@@ -160,148 +160,115 @@ export default function EventCard({
     }
   };
 
-  const snapPoints = ["355px", 1];
-  const [snap, setSnap] = useState<number | string | null>(
-    snapPoints[0] ?? null,
-  );
-
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger
           asChild
-          className={`${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
+          className={` ${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
         >
           <div
-            className={`card flex h-full cursor-pointer flex-col justify-start outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
-            // onClick={(e) => handleButtonClick(e, opp.airtable_id)}
+            className={`card flex h-full w-full flex-col justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
           >
-            <div
-              className={`bg-grey-500 relative rounded-lg border-[2px] p-4 select-none ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
-              style={{ width: "100%" }}
-            >
-              {opp.thumbnail_url && (
+            <div className="relative mb-3 h-0 w-full overflow-hidden rounded-lg border-2 pb-[56.25%]">
+              {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
-                  width={1000}
-                  height={1000}
+                  fill
                   loading="lazy"
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                   blurDataURL={opp.thumbnail_url}
                   placeholder="blur"
                   alt={opp.name}
-                  className="absolute inset-0 h-full w-full rounded-md object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
-              )}
-              {!opp.thumbnail_url && (
-                <div
-                  className="bg-background absolute inset-0 flex items-center justify-center rounded-lg p-12"
-                  style={{ padding: "3rem" }}
-                >
+              ) : (
+                <div className="bg-background absolute inset-0 flex items-center justify-center">
                   <Image
-                    src={
-                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                    }
-                    width={1000}
-                    height={1000}
-                    blurDataURL={
-                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                    }
-                    placeholder="blur"
+                    src="https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                    width={64}
+                    height={64}
                     alt="Cordy Face"
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               )}
             </div>
+
             <div
               ref={zonesContainerRef}
-              className="relative my-2 mt-2 flex h-8 items-center overflow-hidden"
+              className="mb-4 flex w-full flex-col items-center gap-2"
             >
-              <div
-                ref={zonesRef}
-                className="absolute flex flex-nowrap items-center gap-2"
-              >
-                {visibleZones.map((zone: ZoneType) => (
+              <div ref={zonesRef} className="flex w-full flex-col gap-2">
+                {opp.zones.map((zone: ZoneType) => (
                   <EventZone key={zone.id} zone={zone} />
                 ))}
-
-                {hiddenCount > 0 && (
-                  <div className="flex h-8 items-center justify-center text-sm font-semibold text-gray-600">
-                    +{hiddenCount} more
-                  </div>
-                )}
               </div>
             </div>
 
-            <h2
-              className={`text-md mb-2 line-clamp-1 text-left font-bold select-none ${isStatic ? "text-sm" : "text-md"}`}
-            >
+            <h2 className="mb-2 line-clamp-3 text-left text-base leading-tight font-black">
               {opp.name}
             </h2>
-            <p
-              className={`mb-4 line-clamp-3 text-left text-gray-700 select-none ${isStatic ? "text-sm" : "text-md"}`}
-            >
+            <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+              {opp.organisation}
+            </p>
+            <p className="mb-auto line-clamp-3 text-left text-sm">
               {opp.caption}
             </p>
-            <div>
-              <p className="text-left text-sm text-gray-500 select-none">
+
+            <div className="mt-3 border-t border-gray-100 pt-2">
+              <p className="text-left text-xs text-gray-500">
                 {opp.deadline ? formatDate(opp.deadline) : "Forever"}
               </p>
               {daysLeft !== null ? (
-                <p className="text-primary text-left text-sm font-bold select-none">
+                <p className="text-primary text-left text-xs font-bold">
                   {daysLeft > 0
                     ? `${daysLeft} days left`
                     : "Deadline has passed"}
                 </p>
               ) : (
-                <p className="not-first: text-left text-sm font-bold text-gray-700 select-none">
+                <p className="text-left text-xs font-bold text-gray-700">
                   No deadline
                 </p>
               )}
             </div>
           </div>
         </DialogTrigger>
-        <DialogContent className="shadow-brand max-w-[425px] rounded-md border-2 bg-white p-5 md:max-w-[800px]">
+
+        <DialogContent className="!shadow-brand max-w-[425px] rounded-md border-2 bg-white p-8 md:max-w-[800px]">
           <DialogHeader className="flex w-full flex-row gap-5">
             <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48 md:max-w-1/3">
-              {opp.thumbnail_url && (
+              {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
-                  width={400}
-                  height={400}
+                  fill
+                  sizes="(max-width: 768px) 100vw, 33vw"
                   blurDataURL={opp.thumbnail_url}
                   placeholder="blur"
                   alt={opp.name}
                   className="absolute inset-0 h-full w-full rounded-md object-cover"
                 />
-              )}
-              {!opp.thumbnail_url && (
-                <div className="bg-background absolute inset-0 flex items-center justify-center rounded-lg px-24 py-24">
+              ) : (
+                <div className="bg-background absolute inset-0 flex items-center justify-center rounded-lg">
                   <Image
-                    src={
-                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                    }
-                    width={1000}
-                    height={1000}
-                    blurDataURL={
-                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                    }
-                    placeholder="blur"
+                    src="https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                    width={80}
+                    height={80}
                     alt="Cordy Face"
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               )}
             </div>
             <div className="flex w-full flex-col justify-between pb-4">
-              {" "}
               <div>
-                <DialogTitle className="text-3xl font-bold">
-                  {" "}
+                <DialogTitle className="text-3xl font-black">
                   {opp.name}
                 </DialogTitle>
-                <div className="my-4 flex space-y-2 space-x-2">
-                  {" "}
+                <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+                  {opp.organisation}
+                </p>
+                <div className="my-4 flex flex-wrap gap-2">
                   {opp.zones &&
                     opp.zones.length > 0 &&
                     opp.zones.map((zone: ZoneType) => (
@@ -309,7 +276,7 @@ export default function EventCard({
                     ))}
                 </div>
               </div>
-              <div className="h-2 w-full border-b-1 border-gray-800"></div>
+              <div className="my-2 w-full border-b border-dashed"></div>
               <div>
                 <div className="space-y-1">
                   <p className="text-sm text-gray-500">
@@ -353,49 +320,36 @@ export default function EventCard({
         className={`${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
       >
         <div
-          className={`card flex h-full cursor-pointer flex-col justify-start outline-none ${isStatic ? "max-h-[420px] max-w-[270px]" : "mx-auto min-h-48 max-w-[280px] min-w-[280px] space-y-2 md:min-h-56 md:max-w-sm lg:min-h-90"}`}
+          className={`card flex h-full w-full flex-col justify-start p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
         >
-          <div
-            className={`bg-grey-500 relative rounded-lg border-[2px] p-4 select-none ${isStatic ? "min-h-36 min-w-44" : "min-h-48 min-w-44"}`}
-            style={{ width: "100%" }}
-          >
-            {opp.thumbnail_url && (
+          <div className="relative mb-3 h-0 w-full overflow-hidden rounded-lg border-2 pb-[56.25%]">
+            {opp.thumbnail_url ? (
               <Image
                 src={opp.thumbnail_url}
-                width={1000}
-                height={1000}
+                fill
                 loading="lazy"
+                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                 blurDataURL={opp.thumbnail_url}
                 placeholder="blur"
                 alt={opp.name}
-                className="absolute inset-0 h-full w-full rounded-md object-cover"
+                className="absolute inset-0 h-full w-full object-cover"
               />
-            )}
-            {!opp.thumbnail_url && (
-              <div
-                className="bg-background absolute inset-0 flex items-center justify-center rounded-lg p-12"
-                style={{ padding: "3rem" }}
-              >
+            ) : (
+              <div className="bg-background absolute inset-0 flex items-center justify-center">
                 <Image
-                  src={
-                    "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                  }
-                  width={1000}
-                  height={1000}
-                  blurDataURL={
-                    "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                  }
-                  placeholder="blur"
+                  src="https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                  width={64}
+                  height={64}
                   alt="Cordy Face"
-                  className="object-cover"
+                  className="object-contain"
                 />
               </div>
             )}
           </div>
 
-          <div
+          {/* <div
             ref={zonesContainerRef}
-            className="relative my-2 mt-2 flex h-8 items-center overflow-hidden"
+            className="relative mb-2 flex h-8 items-center overflow-hidden"
           >
             <div
               ref={zonesRef}
@@ -406,33 +360,44 @@ export default function EventCard({
               ))}
 
               {hiddenCount > 0 && (
-                <div className="flex h-8 items-center justify-center text-sm font-semibold text-gray-600">
+                <div className="flex h-6 items-center justify-center rounded-full bg-gray-100 px-2 text-xs font-semibold text-gray-600">
                   +{hiddenCount} more
                 </div>
               )}
             </div>
+          </div> */}
+
+          <div
+            ref={zonesContainerRef}
+            className="mb-4 flex w-full flex-col items-center gap-2"
+          >
+            <div ref={zonesRef} className="flex w-full flex-col gap-2">
+              {opp.zones.map((zone: ZoneType) => (
+                <EventZone key={zone.id} zone={zone} />
+              ))}
+            </div>
           </div>
 
-          <h2
-            className={`text-md mb-2 line-clamp-1 text-left font-bold select-none ${isStatic ? "text-sm" : "text-md"}`}
-          >
+          <h2 className="mb-2 line-clamp-1 text-left text-base font-bold">
             {opp.name}
           </h2>
-          <p
-            className={`mb-4 line-clamp-3 text-left text-gray-700 select-none ${isStatic ? "text-sm" : "text-md"}`}
-          >
+
+          <p className="mb-auto line-clamp-3 text-left text-sm text-gray-700">
             {opp.caption}
           </p>
-          <div>
-            <p className="text-left text-sm text-gray-500 select-none">
+          <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+            {opp.organisation}
+          </p>
+          <div className="mt-3 border-t border-gray-100 pt-2">
+            <p className="text-left text-xs text-gray-500">
               {opp.deadline ? formatDate(opp.deadline) : "Forever"}
             </p>
             {daysLeft !== null ? (
-              <p className="text-primary text-left text-sm font-bold select-none">
+              <p className="text-primary text-left text-xs font-bold">
                 {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
               </p>
             ) : (
-              <p className="not-first: text-left text-sm font-bold text-gray-700 select-none">
+              <p className="text-left text-xs font-bold text-gray-700">
                 No deadline
               </p>
             )}
@@ -443,66 +408,57 @@ export default function EventCard({
       <DrawerContent className="w-screen bg-white outline-none">
         <div className="flex-1 overflow-y-auto px-4">
           <DrawerHeader>
-            <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48">
-              {opp.thumbnail_url && (
+            <div className="relative h-48 w-full overflow-hidden rounded-md border-2">
+              {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
-                  width={200}
-                  height={200}
+                  fill
+                  sizes="100vw"
                   blurDataURL={opp.thumbnail_url}
                   placeholder="blur"
                   alt={opp.name}
-                  className="absolute inset-0 h-full w-full rounded-md object-cover"
+                  className="absolute inset-0 h-full w-full object-cover"
                 />
-              )}
-              {!opp.thumbnail_url && (
-                <div className="bg-background absolute inset-0 flex items-center justify-center rounded-lg px-24 py-24">
+              ) : (
+                <div className="bg-background absolute inset-0 flex items-center justify-center">
                   <Image
-                    src={
-                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                    }
-                    width={1000}
-                    height={1000}
-                    blurDataURL={
-                      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
-                    }
-                    placeholder="blur"
+                    src="https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
+                    width={80}
+                    height={80}
                     alt="Cordy Face"
-                    className="object-cover"
+                    className="object-contain"
                   />
                 </div>
               )}
             </div>
-            <DrawerTitle className="text-3xl font-bold">{opp.name}</DrawerTitle>
-
-            <div
-              ref={zonesContainerRef}
-              className="relative my-2 mt-4 h-10 overflow-hidden"
-            >
-              <div ref={zonesRef} className="absolute flex flex-nowrap gap-2">
-                {opp.zones.map((zone: ZoneType) => (
-                  <EventZone key={zone.id} zone={zone} />
-                ))}
-              </div>
+            <DrawerTitle className="mt-4 text-2xl font-black">
+              {opp.name}
+            </DrawerTitle>
+            <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+              {opp.organisation}
+            </p>
+            <div className="my-4 flex flex-wrap gap-2">
+              {opp.zones.map((zone: ZoneType) => (
+                <EventZone key={zone.id} zone={zone} />
+              ))}
             </div>
-            <div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">
-                  {opp.deadline ? formatDate(opp.deadline) : "Forever"}
+
+            <div className="mt-4 space-y-1">
+              <p className="text-sm text-gray-500">
+                {opp.deadline ? formatDate(opp.deadline) : "Forever"}
+              </p>
+              {daysLeft !== null ? (
+                <p className="text-primary text-sm font-bold">
+                  {daysLeft > 0
+                    ? `${daysLeft} days left`
+                    : "Deadline has passed"}
                 </p>
-                {daysLeft !== null ? (
-                  <p className="text-primary text-sm font-bold">
-                    {daysLeft > 0
-                      ? `${daysLeft} days left`
-                      : "Deadline has passed"}
-                  </p>
-                ) : (
-                  <p className="text-sm font-bold text-gray-700">No deadline</p>
-                )}
-              </div>
+              ) : (
+                <p className="text-sm font-bold text-gray-700">No deadline</p>
+              )}
             </div>
 
-            <DrawerDescription className="text-text mt-2 border-t-2 border-gray-400 pt-5">
+            <DrawerDescription className="text-text mt-4 border-t border-gray-200 pt-4">
               {opp.information}
             </DrawerDescription>
           </DrawerHeader>
@@ -515,7 +471,7 @@ export default function EventCard({
             >
               <button className="btn-brand-primary w-full">View more!</button>
             </Link>
-            <DrawerClose className="my-2 py-5 text-sm font-semibold text-gray-500">
+            <DrawerClose className="mt-2 text-sm font-semibold text-gray-500">
               Close
             </DrawerClose>
           </DrawerFooter>
