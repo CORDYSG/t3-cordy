@@ -159,14 +159,14 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                       "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg"
                     }
                     alt={session?.user.name ?? "User"}
-                    className="p-5"
+                    className=""
                   />
 
                   <AvatarFallback>{userInitials} </AvatarFallback>
                 </Avatar>
               </div>
               {session ? (
-                <div className="text-center font-semibold">
+                <div className="text-center font-bold">
                   {session?.user.name}
                 </div>
               ) : (

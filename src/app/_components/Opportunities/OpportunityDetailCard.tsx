@@ -84,7 +84,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
           </div>
         </div>
       </div>
-      <div className="mt-4 mb-8 w-full border-1"></div>
+      <div className="mt-4 mb-8 w-full border-2 border-dashed"></div>
       <div className="space-y-4">
         <h2 className="hidden text-2xl font-bold md:block">{opp.name}</h2>
         <div className="flex gap-2">

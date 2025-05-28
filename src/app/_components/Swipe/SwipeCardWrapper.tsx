@@ -520,9 +520,9 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     }
 
     return (
-      <div className="flex min-h-[620px] w-full flex-col items-center gap-6 p-6">
+      <div className="flex min-h-[620px] w-full flex-col items-center gap-2 p-6 sm:p-4 md:min-h-[660px]">
         {visibleOpps.length > 0 && (
-          <div className="container flex w-full max-w-sm justify-start gap-4 md:w-1/2">
+          <div className="container flex w-full max-w-sm justify-start gap-4 md:my-4 md:w-1/2">
             <button
               className={`btn-secondary flex items-center gap-2 font-semibold uppercase transition-all duration-200 ${
                 undoing
@@ -537,133 +537,133 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
             </button>
           </div>
         )}
+        <div className="flex w-full items-center justify-center px-6">
+          <div
+            ref={containerRef}
+            className="relative flex min-h-[490px] w-full max-w-sm items-center"
+          >
+            {(isFetchingRef.current && visibleOpps.length === 0) ||
+            isLoadingMore ? (
+              <div className="flex h-full w-full items-center justify-center">
+                <LoadingComponent />
+              </div>
+            ) : (
+              visibleOpps.map((opp, i) => {
+                const index = current + i;
+                const isTopCard = i === 0;
+                const zIndex = visibleOpps.length - i;
+                const offsetY = i * CARD_OFFSET_Y;
+                const offsetRotation =
+                  i % 2 === 0 ? -CARD_ROTATION : CARD_ROTATION;
+                const undoInitialX =
+                  lastSwipeDirection === "right" ? 1500 : -1500;
+                const isNewlyAdded = newlyAddedOpps.includes(opp.id);
+                const stackPosition = stackSize - i - 1;
 
-        <div
-          ref={containerRef}
-          className="relative flex min-h-[490px] w-full max-w-sm items-center"
-        >
-          {(isFetchingRef.current && visibleOpps.length === 0) ||
-          isLoadingMore ? (
-            <div className="flex h-full w-full items-center justify-center">
-              <LoadingComponent />
-            </div>
-          ) : (
-            visibleOpps.map((opp, i) => {
-              const index = current + i;
-              const isTopCard = i === 0;
-              const zIndex = visibleOpps.length - i;
-              const offsetY = i * CARD_OFFSET_Y;
-              const offsetRotation =
-                i % 2 === 0 ? -CARD_ROTATION : CARD_ROTATION;
-              const undoInitialX =
-                lastSwipeDirection === "right" ? 1500 : -1500;
-              const isNewlyAdded = newlyAddedOpps.includes(opp.id);
-              const stackPosition = stackSize - i - 1;
-
-              return (
-                <motion.div
-                  key={`card-${opp.id}-${index}`}
-                  drag={isTopCard && !undoing ? "x" : false}
-                  dragConstraints={{ left: 0, right: 0 }}
-                  style={{
-                    x: isTopCard ? x : 0,
-                    y: offsetY,
-                    zIndex,
-                    opacity: isTopCard ? opacity : 1,
-                  }}
-                  initial={{
-                    ...(undoing && isTopCard
-                      ? {
-                          x: undoInitialX,
-                          y: offsetY,
-                          rotate: lastSwipeDirection === "right" ? 15 : -15,
-                          opacity: 0,
-                        }
-                      : isNewlyAdded
+                return (
+                  <motion.div
+                    key={`card-${opp.id}-${index}`}
+                    drag={isTopCard && !undoing ? "x" : false}
+                    dragConstraints={{ left: 0, right: 0 }}
+                    style={{
+                      x: isTopCard ? x : 0,
+                      y: offsetY,
+                      zIndex,
+                      opacity: isTopCard ? opacity : 1,
+                    }}
+                    initial={{
+                      ...(undoing && isTopCard
                         ? {
-                            scale: 0.5,
-                            y: offsetY + 100,
-                            opacity: 0,
-                            rotate: offsetRotation * 2,
-                          }
-                        : {
-                            x: 0,
+                            x: undoInitialX,
                             y: offsetY,
-                            rotate: isTopCard ? 0 : offsetRotation,
+                            rotate: lastSwipeDirection === "right" ? 15 : -15,
                             opacity: 0,
-                          }),
-                  }}
-                  animate={{
-                    x: 0,
-                    y: offsetY,
-                    scale: 1,
-                    rotate: isTopCard
-                      ? isSwiping
-                        ? rotate.get()
-                        : 0
-                      : offsetRotation,
-                    opacity: 1,
-                    transition: {
-                      type: "spring",
-                      stiffness: 200,
-                      damping: 25,
-                      duration: isNewlyAdded ? 0.5 : 0.3,
-                      delay: isNewlyAdded ? 0.2 : 0,
-                    },
-                  }}
-                  exit={{
-                    x: isTopCard
-                      ? lastSwipeDirection === "right"
-                        ? 1500
-                        : -1500
-                      : 0,
-                    opacity: 0,
-                    transition: { duration: 0.2 },
-                  }}
-                  onDrag={() => setIsSwiping(true)}
-                  whileTap={isTopCard ? { scale: 1.02 } : undefined}
-                  onDragEnd={
-                    isTopCard && !undoing
-                      ? (_, info) => handleDragEnd(info, index)
-                      : undefined
-                  }
-                  className={`motion-card absolute w-full ${
-                    isTopCard && !undoing
-                      ? "cursor-grab active:cursor-grabbing"
-                      : "pointer-events-none"
-                  }`}
-                >
-                  <div className="flex h-full w-full touch-none items-center justify-center">
-                    <EventCard
-                      opp={opp}
-                      pointerNone={isSwiping}
-                      disableInteractions={isTopCard && isSwiping}
-                    />
-                  </div>
+                          }
+                        : isNewlyAdded
+                          ? {
+                              scale: 0.5,
+                              y: offsetY + 100,
+                              opacity: 0,
+                              rotate: offsetRotation * 2,
+                            }
+                          : {
+                              x: 0,
+                              y: offsetY,
+                              rotate: isTopCard ? 0 : offsetRotation,
+                              opacity: 0,
+                            }),
+                    }}
+                    animate={{
+                      x: 0,
+                      y: offsetY,
+                      scale: 1,
+                      rotate: isTopCard
+                        ? isSwiping
+                          ? rotate.get()
+                          : 0
+                        : offsetRotation,
+                      opacity: 1,
+                      transition: {
+                        type: "spring",
+                        stiffness: 200,
+                        damping: 25,
+                        duration: isNewlyAdded ? 0.5 : 0.3,
+                        delay: isNewlyAdded ? 0.2 : 0,
+                      },
+                    }}
+                    exit={{
+                      x: isTopCard
+                        ? lastSwipeDirection === "right"
+                          ? 1500
+                          : -1500
+                        : 0,
+                      opacity: 0,
+                      transition: { duration: 0.2 },
+                    }}
+                    onDrag={() => setIsSwiping(true)}
+                    whileTap={isTopCard ? { scale: 1.02 } : undefined}
+                    onDragEnd={
+                      isTopCard && !undoing
+                        ? (_, info) => handleDragEnd(info, index)
+                        : undefined
+                    }
+                    className={`motion-card absolute w-full ${
+                      isTopCard && !undoing
+                        ? "cursor-grab active:cursor-grabbing"
+                        : "pointer-events-none"
+                    }`}
+                  >
+                    <div className="flex h-full w-full touch-none items-center justify-center">
+                      <EventCard
+                        opp={opp}
+                        pointerNone={isSwiping}
+                        disableInteractions={isTopCard && isSwiping}
+                      />
+                    </div>
 
-                  {isTopCard && (
-                    <>
-                      <motion.div
-                        className="bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-6 text-white"
-                        style={{ opacity: nopeOpacity, scale: nopeScale }}
-                      >
-                        <X size={32} />
-                      </motion.div>
+                    {isTopCard && (
+                      <>
+                        <motion.div
+                          className="bg-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-6 text-white"
+                          style={{ opacity: nopeOpacity, scale: nopeScale }}
+                        >
+                          <X size={32} />
+                        </motion.div>
 
-                      <motion.div
-                        className="bg-accent-green absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-6 text-white"
-                        style={{ opacity: likeOpacity, scale: likeScale }}
-                      >
-                        <Check size={32} />
-                      </motion.div>
-                    </>
-                  )}
-                </motion.div>
-              );
-            })
-          )}
+                        <motion.div
+                          className="bg-accent-green absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 p-6 text-white"
+                          style={{ opacity: likeOpacity, scale: likeScale }}
+                        >
+                          <Check size={32} />
+                        </motion.div>
+                      </>
+                    )}
+                  </motion.div>
+                );
+              })
+            )}
+          </div>
         </div>
-
         {!isAuthenticated && !limitReached && (
           <div className="mt-8 rounded-lg bg-gray-100 p-4 text-center text-sm">
             <p>
