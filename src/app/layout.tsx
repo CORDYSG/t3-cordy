@@ -59,7 +59,11 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <TRPCReactProvider>
           <SessionProvider session={session}>
             <Navbar session={session} />
-            <Suspense fallback={<Loading />}>{children}</Suspense>
+            <div className="min-h-48">
+              {" "}
+              <Suspense fallback={<Loading />}>{children}</Suspense>
+            </div>
+
             <Footer />
           </SessionProvider>
         </TRPCReactProvider>

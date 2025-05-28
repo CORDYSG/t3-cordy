@@ -276,7 +276,7 @@ export default function EventCard({
                     ))}
                 </div>
               </div>
-              <div className="my-2 w-full border-b border-dashed"></div>
+              <div className="my-2 w-full border-2 border-b border-dashed"></div>
               <div>
                 <div className="space-y-1">
                   <p className="text-sm text-gray-500">
@@ -437,7 +437,7 @@ export default function EventCard({
             <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
               {opp.organisation}
             </p>
-            <div className="my-4 flex flex-wrap gap-2">
+            <div className="my-2 flex flex-wrap gap-2">
               {opp.zones.map((zone: ZoneType) => (
                 <EventZone key={zone.id} zone={zone} />
               ))}
@@ -457,8 +457,8 @@ export default function EventCard({
                 <p className="text-sm font-bold text-gray-700">No deadline</p>
               )}
             </div>
-
-            <DrawerDescription className="text-text mt-4 border-t border-gray-200 pt-4">
+            <div className="my-4 w-full border-2 border-dashed"></div>
+            <DrawerDescription className="text-text">
               {opp.information}
             </DrawerDescription>
           </DrawerHeader>

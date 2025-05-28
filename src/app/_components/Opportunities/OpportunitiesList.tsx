@@ -21,7 +21,7 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
   return (
     <div className="w-full px-2 sm:px-4">
       {opps.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
+        <div className="flex flex-col items-center justify-center text-center">
           <p className="text-lg font-medium text-gray-600">
             No opportunities found matching your criteria
           </p>
