@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { FaInstagram } from "react-icons/fa";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 import Image from "next/image";
 
 const Footer: React.FC = () => {
@@ -21,13 +21,36 @@ const Footer: React.FC = () => {
               YOUTH-LED NON-PROFIT
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <FaInstagram size={24} color="white" />
-          </div>
-          <Link href="/about" className="text-white hover:text-gray-300">
-            About
+          {/* <div className="flex items-center gap-2 text-sm font-semibold text-white">
+            <Link
+              href="https://www.instagram.com/cordy.sg/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-white hover:text-gray-300"
+            >
+              Instagram
+            </Link>
+          </div> */}
+          <Link
+            href="https://www.tiktok.com/@cordy.sg?lang=en"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-gray-300"
+          >
+            Tiktok
           </Link>
-          <Link href="/contact" className="text-white hover:text-gray-300">
+          <Link
+            href="https://www.instagram.com/cordy.sg/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-white hover:text-gray-300"
+          >
+            Instagram
+          </Link>
+          {/* <Link href="/about" className="text-white hover:text-gray-300">
+            About
+          </Link> */}
+          {/* <Link href="/contact" className="text-white hover:text-gray-300">
             Contact
           </Link>
           <Link href="/privacy" className="text-white hover:text-gray-300">
@@ -35,7 +58,7 @@ const Footer: React.FC = () => {
           </Link>
           <Link href="/terms" className="text-white hover:text-gray-300">
             Terms of Service
-          </Link>
+          </Link> */}
         </div>
 
         {/* Right side - Image placeholder */}

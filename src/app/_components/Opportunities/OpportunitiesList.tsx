@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+"use client";
 import { useMemo } from "react";
 import LoadingComponent from "../LoadingComponent";
 import EventCard from "../EventCard";
+import { motion } from "framer-motion";
 
 type OpportunitiesListProps = {
   opps: OppWithZoneType[];
@@ -37,9 +39,15 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
           {opps.map((opp) => (
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
             <li key={opp.id} className="flex h-full w-full">
-              <div className="h-full w-full">
+              <motion.div
+                className="h-full w-full"
+                initial={{ opacity: 0.5, scale: 0.65, y: 20 }}
+                whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ duration: 0.4, ease: "easeOut" }}
+                viewport={{ once: true, amount: 0.2 }}
+              >
                 <EventCard opp={opp} static pauseQueries={setIsNavigating} />
-              </div>
+              </motion.div>
             </li>
           ))}
         </ul>
