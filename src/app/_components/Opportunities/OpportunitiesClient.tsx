@@ -143,7 +143,7 @@ const OpportunitiesClient = ({
         router.refresh();
       }
 
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 50, behavior: "smooth" });
     },
     [search, selectedType, selectedZone, isFiltered, router, searchParams],
   );
