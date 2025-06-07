@@ -257,14 +257,13 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
       const submitSwipes = async () => {
         try {
-          await Promise.all(
-            pendingSwipes.map((swipe) =>
-              mutation.mutateAsync({
-                oppId: BigInt(swipe.oppId),
-                liked: swipe.direction === "right",
-              }),
-            ),
-          );
+          // Use mutate instead of mutateAsync to avoid promise issues
+          pendingSwipes.forEach((swipe) => {
+            mutation.mutate({
+              oppId: BigInt(swipe.oppId),
+              liked: swipe.direction === "right",
+            });
+          });
           setPendingSwipes([]);
         } catch (error) {
           console.error("Error submitting swipes:", error);
@@ -272,7 +271,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       };
 
       void submitSwipes();
-    }, [pendingSwipes, isAuthenticated, mutation]);
+    }, [pendingSwipes, isAuthenticated]); // Remo
 
     const handleSwipe = useCallback(
       (dir: SwipeDirection, index: number) => {

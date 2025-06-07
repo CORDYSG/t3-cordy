@@ -204,6 +204,7 @@ model Opps {
   full_text_search    Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, caption)"))
   embedding           Unsupported("vector")?
   status              String?                  @default("null")
+  url_source          String?
   metrics             OppMetrics?
   OppType             OppType[]
   views               OppView[]
