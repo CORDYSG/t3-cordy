@@ -18,7 +18,7 @@ const LoadingComponent = () => {
     "Getting things ready... CORDY is petting the server.",
     "Data is coming... CORDY is performing a magic trick.",
   ];
-  const [loadingMessage, setLoadingMessage] = useState("");
+  const [loadingMessage, setLoadingMessage] = useState("Loading...");
   useEffect(() => {
     // Set initial random loading message
     setLoadingMessage(

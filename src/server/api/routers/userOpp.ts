@@ -5,7 +5,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "@/server/api/trpc";
-import type { Prisma } from "@prisma/client";
+import { UserActionType, type Prisma } from "@prisma/client";
 
 // Create a new type for guest session data
 type GuestSessionData = {
@@ -13,6 +13,11 @@ type GuestSessionData = {
   lastFetchTime: number;
   cachedOpportunities: OppWithZoneType[];
 };
+
+const generateGuestId = () => {
+  return `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+};
+
 
 function getActiveOppsFilter() {
   const now = new Date();
@@ -211,6 +216,109 @@ export const userOppRouter = createTRPCRouter({
         },
       });
     }),
+    
+updateUserOppMetrics: publicProcedure
+  .input(
+    z.object({
+      oppId: z.bigint(),
+      action: z.nativeEnum(UserActionType),
+      guestId: z.string().optional(), 
+    }),
+  )
+  .mutation(async ({ ctx, input }) => {
+    const userId = ctx.session?.user.id;
+
+       const guestId = userId ? null : input.guestId || generateGuestId();
+
+    return await db.$transaction(async (tx) => {
+      // Log the action
+      const action = await tx.userAction.create({
+        data: {
+          userId,
+          guestId,
+          oppId: input.oppId,
+          actionType: input.action,
+        },
+      });
+
+      // Update aggregated metrics
+     const updateData: any = {};
+      const createData: any = { oppId: input.oppId };
+      const isGuest = !userId;
+      
+      switch (input.action) {
+        case UserActionType.LIKE:
+          const likeField = isGuest ? 'guestLikeCount' : 'likeCount';
+          updateData[likeField] = { increment: 1 };
+          createData[likeField] = 1;
+          break;
+        case UserActionType.UNLIKE:
+          const unlikeField = isGuest ? 'guestLikeCount' : 'likeCount';
+          updateData[unlikeField] = { decrement: 1 };
+          createData[unlikeField] = 0; // Start at 0 since we're decrementing
+          break;
+        case UserActionType.SAVE:
+          const saveField = isGuest ? 'guestSaveCount' : 'saveCount';
+          updateData[saveField] = { increment: 1 };
+          createData[saveField] = 1;
+          break;
+        case UserActionType.UNSAVE:
+          const unsaveField = isGuest ? 'guestSaveCount' : 'saveCount';
+          updateData[unsaveField] = { decrement: 1 };
+          createData[unsaveField] = 0;
+          break;
+        case UserActionType.CLICK:
+          const clickField = isGuest ? 'guestClickCount' : 'clickCount';
+          updateData[clickField] = { increment: 1 };
+          createData[clickField] = 1;
+          break;
+        case UserActionType.CLICK_EXPAND:
+          const clickExpandField = isGuest ? 'guestClickExpandCount' : 'clickExpandCount';
+          updateData[clickExpandField] = { increment: 1 };
+          createData[clickExpandField] = 1;
+          break;
+        case UserActionType.APPLY:
+          const applyField = isGuest ? 'guestApplyCount' : 'clickApplyCount';
+          updateData[applyField] = { increment: 1 };
+          createData[applyField] = 1;
+          break;
+        case UserActionType.SHARE_TELEGRAM:
+          const telegramField = isGuest ? 'guestShareTelegramCount' : 'shareTelegramCount';
+          updateData[telegramField] = { increment: 1 };
+          createData[telegramField] = 1;
+          break;
+        case UserActionType.SHARE_WHATSAPP:
+          const whatsappField = isGuest ? 'guestShareWhatsappCount' : 'shareWhatsappCount';
+          updateData[whatsappField] = { increment: 1 };
+          createData[whatsappField] = 1;
+          break;
+        case UserActionType.SHARE_EMAIL:
+          const emailField = isGuest ? 'guestShareEmailCount' : 'shareEmailCount';
+          updateData[emailField] = { increment: 1 };
+          createData[emailField] = 1;
+          break;
+        case UserActionType.SHARE_LINK:
+          const linkField = isGuest ? 'guestShareLinkCount' : 'shareLinkCount';
+          updateData[linkField] = { increment: 1 };
+          createData[linkField] = 1;
+          break;
+        default:
+          throw new Error(`Unknown action type: ${input.action}`);  
+      }
+
+
+       await tx.oppMetrics.upsert({
+    where: { oppId: input.oppId },
+        create: createData,
+        update: updateData,
+      });
+
+      return { action, guestId };
+    });
+
+  }),
+
+    
 });
 
 // Helper function to get opportunities for authenticated users
