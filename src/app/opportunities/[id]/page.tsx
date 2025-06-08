@@ -98,7 +98,7 @@ const OpportunityDetail = async ({
       <Suspense fallback={<LoadingComponent />}>
         <h1 className="sr-only">{opp?.name} - Opportunity Details</h1>
 
-        <article itemScope itemType="https://schema.org/Event">
+        <article itemScope itemType="https://schema.org/Event" className="w-full">
           <OpportunityDetailCard opp={opp} types={types} />
           <meta itemProp="name" content={opp?.name ?? ""} />
           {opp?.description && (
