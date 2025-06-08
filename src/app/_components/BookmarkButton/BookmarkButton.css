@@ -1,0 +1,74 @@
+ .bookmark-btn-container {
+          box-shadow: none;
+          transition: all 0.1s ease-out;
+          align-items: center;
+          justify-content: center;
+          border-radius: 10px;
+          font-weight: 600;
+          display: flex;
+          flex-wrap: wrap;
+          scale: 2;
+          margin: 20px 0;
+        }
+
+        .svg-icon-bookmark-circle {
+          position: absolute;
+          left: calc(50% - 13px);
+          top: calc(50% - 13px);
+          z-index: -1;
+        }
+
+        .bookmark-btn {
+          background-color: rgba(255, 255, 255, 0.05);
+          height: 28px;
+          width: 28px;
+          flex: 0 0 28px;
+          margin: auto auto 0;
+          padding: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 20px;
+          cursor: pointer;
+          font-size: var(--extra-small-regular);
+          font-weight: 600;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          transition: all 0.1s ease-out;
+          outline: 0;
+          position: relative;
+        }
+
+        .bookmark-btn svg:not(.svg-icon-bookmark-circle) {
+          transition: all 0.1s ease-out;
+          scale: 1;
+        }
+
+        .bookmark-btn:active svg:not(.svg-icon-bookmark-circle) {
+          scale: 0.8;
+        }
+
+        .bookmark-btn svg {
+          height: auto;
+          width: 16px;
+          flex: 0 0 16px;
+          width: auto;
+          transition: all 0.1s ease-out;
+          scale: 1;
+          transition: all 0.2s ease-out;
+          overflow: visible;
+        }
+
+        .bookmark-btn span + svg {
+          margin-left: 4px;
+        }
+
+        .bookmark-btn-container.bookmarked .bookmark-btn {
+          background-color: rgba(59, 130, 246, 0.1);
+          color: #3b82f6;
+          border-color: #3b82f6;
+          fill: #3b82f6;
+        }
+
+        .bookmark-btn-container .bookmark-btn {
+          fill: rgba(206, 206, 206, 0.8);
+        }

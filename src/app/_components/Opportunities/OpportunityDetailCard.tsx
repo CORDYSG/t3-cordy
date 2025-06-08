@@ -1,11 +1,17 @@
+"use client";
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-"use client";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import EventZone from "../EventZone";
 import Link from "next/link";
+import { api } from "@/trpc/react";
+
+import { LikeButton } from "../LikeButton";
+import { BookmarkButton } from "../BookmarkButton";
+import { useSession } from "next-auth/react";
 
 type Props = {
   opp: OppWithZoneType;
@@ -19,6 +25,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
       day: "numeric",
     }).format(date);
   };
+
   const calculateDaysLeft = (deadline: Date): number => {
     const now = new Date();
     const timeDiff = deadline.getTime() - now.getTime();
@@ -26,6 +33,64 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   };
 
   const daysLeft = opp.deadline ? calculateDaysLeft(opp.deadline) : null;
+  const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
+  const initialData = api.userOpp.getUserOppMetrics.useQuery({
+    oppId: parseFloat(opp.id),
+  });
+  const [mockLike, setMockLke] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  useEffect(() => {
+    const storedGuestId = localStorage.getItem("guestId");
+
+    updateAction.mutate({
+      oppId: opp.id,
+      guestId: storedGuestId ?? "",
+      action: "VIEW",
+    });
+  }, [opp.id]);
+
+  useEffect(() => {
+    if (initialData.data) {
+      console.log("Initial data:", initialData.data);
+      setMockLke(initialData.data.liked);
+      setIsBookmarked(initialData.data.saved);
+    }
+  }, [initialData.data]);
+
+  const mutation = api.userOpp.createOrUpdate.useMutation();
+
+  const handleLike = () => {
+    const currentLikeStatus = !mockLike;
+    setMockLke(currentLikeStatus);
+    const storedGuestId = localStorage.getItem("guestId");
+    mutation.mutate({
+      oppId: opp.id,
+      liked: currentLikeStatus,
+    });
+
+    updateAction.mutate({
+      oppId: opp.id,
+      guestId: storedGuestId ?? "",
+      action: currentLikeStatus ? "LIKE" : "UNLIKE",
+    });
+  };
+
+  const handleSave = () => {
+    const currentBookmarkStatus = !isBookmarked;
+    setIsBookmarked(currentBookmarkStatus);
+    const storedGuestId = localStorage.getItem("guestId");
+
+    mutation.mutate({
+      oppId: opp.id,
+      saved: currentBookmarkStatus,
+    });
+
+    updateAction.mutate({
+      oppId: opp.id,
+      guestId: storedGuestId ?? "",
+      action: currentBookmarkStatus ? "SAVE" : "UNSAVE",
+    });
+  };
 
   return (
     <div className="shadow-brand w-full rounded-md border-2 bg-white p-5">
@@ -97,15 +162,22 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
             </span>
           ))}
         </div>
-        <p className="text-lg"> {opp.information}</p>
-        <Link
-          className="flex w-full justify-end"
-          href={opp.url_og}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <button className="btn-brand-primary">Find out more!</button>
-        </Link>
+        <p className="text-lg whitespace-pre-line"> {opp.information}</p>
+        <div className="flex w-full items-center justify-end gap-x-8">
+          <BookmarkButton
+            isBookmarked={isBookmarked}
+            handleBookmark={handleSave}
+          />
+          <LikeButton isLiked={mockLike} handleLike={handleLike} />
+          <Link
+            className=""
+            href={opp.url_og}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <button className="btn-brand-primary">Find out more!</button>
+          </Link>
+        </div>
       </div>
     </div>
   );

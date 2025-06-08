@@ -181,7 +181,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 </Link>
               )}
             </div>
-            <div className="h-[0.5px] w-full bg-black"></div>
+            <div className="border-b-2 border-dashed border-black w-full "></div>
             <ul className="font-medium">
               <li className="mb-4">
                 <Link
@@ -201,6 +201,17 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                   Opportunities
                 </Link>
               </li>
+              {/* {session && ( 
+                <li className="mb-4">
+                  <Link
+                    href="/profile"
+                    className={`active:text-primary-active hover:text-primary rounded-md px-3 py-2 text-sm font-semibold ${lastSegment.startsWith("profile") ? "text-primary" : "text-text"}`}
+                    onClick={() => setOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                </li>
+              )} */}
             </ul>
 
             {/* 👇 This pushes it to the bottom */}

@@ -9,17 +9,18 @@ datasource db {
 }
 
 model UserOpportunity {
-  id          String   @id @default(dbgenerated("gen_random_uuid()"))
-  userId      String
-  oppId       BigInt
-  liked       Boolean  @default(false)
-  saved       Boolean  @default(false)
-  clicked     Boolean  @default(false)
-  applied     Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            String   @id @default(dbgenerated("gen_random_uuid()"))
+  userId        String
+  oppId         BigInt
+  liked         Boolean  @default(false)
+  saved         Boolean  @default(false)
+  clicked       Boolean  @default(false)
+  applied       Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  clickedExpand Boolean  @default(false)
+  opportunity   Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, oppId])
   @@index([userId])
@@ -72,16 +73,33 @@ model OppView {
 }
 
 model OppMetrics {
-  id          String   @id @default(cuid())
-  oppId       BigInt   @unique
-  viewCount   Int      @default(0)
-  likeCount   Int      @default(0)
-  clickCount  Int      @default(0)
-  saveCount   Int      @default(0)
-  applyCount  Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  id               String   @id @default(cuid())
+  oppId            BigInt   @unique
+  viewCount        Int      @default(0)
+  likeCount        Int      @default(0)
+  clickCount       Int      @default(0)
+  clickExpandCount Int      @default(0)
+  saveCount        Int      @default(0)
+  applyCount       Int      @default(0)
+  shareTelegramCount Int   @default(0)
+  shareWhatsAppCount Int   @default(0)
+  shareEmailCount  Int      @default(0)
+  shareLinkCount   Int      @default(0)
+  // Separate guest vs user metrics if needed
+  guestViewCount   Int      @default(0)
+  guestLikeCount   Int      @default(0)
+  guestClickCount  Int      @default(0)
+  guestClickExpandCount Int @default(0)
+  guestSaveCount   Int      @default(0)
+  guestApplyCount  Int      @default(0)
+  guestShareTelegramCount Int @default(0)
+  guestShareWhatsAppCount Int @default(0)
+  guestShareEmailCount Int @default(0)
+  guestShareLinkCount  Int @default(0)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  opportunity      Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
 
   @@index([oppId])
 }
@@ -118,6 +136,7 @@ model User {
   recommendations     UserRecommendation[]
   typePreferences     UserType[]
   zonePreferences     UserZone[]
+   userActions        UserAction[]
 }
 
 model Account {
@@ -204,6 +223,7 @@ model Opps {
   full_text_search    Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, caption)"))
   embedding           Unsupported("vector")?
   status              String?                  @default("null")
+  url_source          String?
   metrics             OppMetrics?
   OppType             OppType[]
   views               OppView[]
@@ -211,6 +231,7 @@ model Opps {
   TeleUserOpportunity TeleUserOpportunity[]
   userInteractions    UserOpportunity[]
   recommendations     UserRecommendation[]
+  userActions         UserAction[]
 }
 
 model Types {
@@ -286,4 +307,38 @@ enum school_type {
   Institute_of_Technical_Education @map("Institute of Technical Education")
   International_School             @map("International School")
   Others
+}
+
+enum UserActionType {
+  VIEW
+  LIKE
+  UNLIKE
+  SAVE
+  UNSAVE
+  CLICK
+  CLICK_EXPAND
+  APPLY
+  SHARE_TELEGRAM
+  SHARE_WHATSAPP
+  SHARE_EMAIL
+  SHARE_LINK
+}
+
+model UserAction {
+  id         BigInt         @id @default(autoincrement())
+  userId     String?        // Make nullable for guests
+  guestId    String?        // For anonymous users
+  oppId      BigInt
+  actionType UserActionType
+  createdAt  DateTime       @default(now())
+
+
+  user User? @relation(fields: [userId], references: [id])
+  opp  Opps  @relation(fields: [oppId], references: [id])
+
+  @@index([userId, oppId])
+  @@index([guestId, oppId])
+  @@index([oppId, actionType])
+  @@index([createdAt])
+  @@map("user_actions")
 }
