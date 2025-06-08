@@ -11,7 +11,6 @@ import { api } from "@/trpc/react";
 
 import { LikeButton } from "../LikeButton";
 import { BookmarkButton } from "../BookmarkButton";
-import { useSession } from "next-auth/react";
 
 type Props = {
   opp: OppWithZoneType;

@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
 import Link from "next/link";
-import { FaInstagram, FaTiktok } from "react-icons/fa";
 import Image from "next/image";
 
 const Footer: React.FC = () => {

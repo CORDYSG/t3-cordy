@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 "use client";
-import { useMemo } from "react";
+
 import LoadingComponent from "../LoadingComponent";
 import EventCard from "../EventCard";
 import { motion } from "framer-motion";
@@ -16,12 +16,10 @@ type OpportunitiesListProps = {
 const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
   opps,
   isLoading,
-  filterDescription,
+
   setIsNavigating,
 }) => {
   if (isLoading) return <LoadingComponent />;
-  const session = useSession();
-  const isAuthenticated = !!session.data?.user;
 
   return (
     <div className="w-full px-2 sm:px-4">
@@ -49,12 +47,7 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 viewport={{ once: true, amount: 0.2 }}
               >
-                <EventCard
-                  opp={opp}
-                  static
-                  pauseQueries={setIsNavigating}
-                  isAuthenticated={isAuthenticated}
-                />
+                <EventCard opp={opp} static pauseQueries={setIsNavigating} />
               </motion.div>
             </li>
           ))}

@@ -7,7 +7,6 @@ import { useEffect, useMemo, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useMediaQuery } from "@uidotdev/usehooks";
 
 import {
   Drawer,
@@ -30,7 +29,6 @@ import {
 } from "@/components/ui/dialog";
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { useSession } from "next-auth/react";
 import { BookmarkButton } from "./BookmarkButton";
 import { LikeButton } from "./LikeButton";
 
@@ -46,10 +44,7 @@ type EventCardProps = {
 
 export default function EventCard({
   opp,
-  static: isStatic,
-  disableInteractions,
-  pauseQueries,
-  isAuthenticated,
+  static: disableInteractions,
 }: Readonly<EventCardProps>): JSX.Element {
   const [open, setOpen] = useState(false);
 
@@ -58,7 +53,6 @@ export default function EventCard({
     const timeDiff = deadline.getTime() - now.getTime();
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
-  const router = useRouter();
 
   // Function to format the date
   const formatDate = (date: Date): string => {
@@ -80,16 +74,7 @@ export default function EventCard({
   const initialData = api.userOpp.getUserOppMetrics.useQuery({
     oppId: parseFloat(opp.id),
   });
-  // Sort zones by name length - shortest first to maximize visibility
-  const sortedZones = useMemo(
-    () =>
-      ([...opp.zones] as ZoneType[]).sort((a: ZoneType, b: ZoneType) => {
-        const nameA = a.name ?? "";
-        const nameB = b.name ?? "";
-        return nameA.length - nameB.length;
-      }),
-    [opp.zones],
-  );
+
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
   useEffect(() => {
