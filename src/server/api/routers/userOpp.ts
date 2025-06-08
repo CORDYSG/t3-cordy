@@ -166,10 +166,40 @@ export const userOppRouter = createTRPCRouter({
       return await getFYOppsForAuthenticatedUser(userId, LIMIT);
     }),
 
+  getUserOppMetrics: protectedProcedure
+    .input(z.object({ oppId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id;
+
+      const userOpp = await db.userOpportunity.findUnique({
+        where: {
+          userId_oppId: {
+            userId,
+            oppId: BigInt(input.oppId),
+          },
+        },
+      });
+      if (!userOpp) {
+        return {
+          liked: false,
+          saved: false,
+          clicked: false,
+          applied: false,
+        };
+      }
+
+      return {
+        liked: userOpp.liked,
+        saved: userOpp.saved,
+        clicked: userOpp.clicked,
+        applied: userOpp.applied,
+      };
+    }),
+
   createOrUpdate: protectedProcedure
     .input(
       z.object({
-        oppId: z.bigint(),
+        oppId: z.union([z.bigint(), z.number()]),
         liked: z.boolean().optional(),
         saved: z.boolean().optional(),
         clicked: z.boolean().optional(),
@@ -178,7 +208,7 @@ export const userOppRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-
+      if (!userId) { return null; }
       const existing = await db.userOpportunity.findUnique({
         where: {
           userId_oppId: {
@@ -220,7 +250,7 @@ export const userOppRouter = createTRPCRouter({
 updateUserOppMetrics: publicProcedure
   .input(
     z.object({
-      oppId: z.bigint(),
+      oppId: z.union([z.number(), z.bigint()]),
       action: z.nativeEnum(UserActionType),
       guestId: z.string().optional(), 
     }),
@@ -236,7 +266,7 @@ updateUserOppMetrics: publicProcedure
         data: {
           userId,
           guestId,
-          oppId: input.oppId,
+          oppId: BigInt(input.oppId),
           actionType: input.action,
         },
       });
@@ -247,6 +277,11 @@ updateUserOppMetrics: publicProcedure
       const isGuest = !userId;
       
       switch (input.action) {
+        case UserActionType.VIEW:
+          const viewField = isGuest ? 'guestViewCount' : 'viewCount';
+          updateData[viewField] = { increment: 1 };
+          createData[viewField] = 1;
+          break;
         case UserActionType.LIKE:
           const likeField = isGuest ? 'guestLikeCount' : 'likeCount';
           updateData[likeField] = { increment: 1 };

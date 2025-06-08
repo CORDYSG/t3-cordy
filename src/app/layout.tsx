@@ -55,7 +55,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();
   return (
     <html lang="en" className={`${dmSans.variable} ${fatFrank.variable}`}>
-      <body className="w-screen overflow-x-hidden flex flex-col min-h-screen jusify-between">
+      <body className="jusify-between flex min-h-screen w-screen flex-col overflow-x-hidden">
         <TRPCReactProvider>
           <SessionProvider session={session}>
             <Navbar session={session} />

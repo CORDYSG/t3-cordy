@@ -9,7 +9,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useMediaQuery } from "@uidotdev/usehooks";
 
-
 import {
   Drawer,
   DrawerClose,
@@ -32,12 +31,15 @@ import {
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { useSession } from "next-auth/react";
+import { BookmarkButton } from "./BookmarkButton";
+import { LikeButton } from "./LikeButton";
 
 type EventCardProps = {
   opp: OppWithZoneType;
   static?: boolean;
   pointerNone?: boolean;
   button?: boolean;
+  isAuthenticated?: boolean;
   pauseQueries?: (paused: boolean) => void;
   disableInteractions?: boolean;
 };
@@ -45,9 +47,9 @@ type EventCardProps = {
 export default function EventCard({
   opp,
   static: isStatic,
-  pointerNone,
   disableInteractions,
   pauseQueries,
+  isAuthenticated,
 }: Readonly<EventCardProps>): JSX.Element {
   const [open, setOpen] = useState(false);
 
@@ -70,10 +72,14 @@ export default function EventCard({
   const daysLeft = opp.deadline ? calculateDaysLeft(opp.deadline) : null;
   const zonesContainerRef = useRef<HTMLDivElement>(null);
   const zonesRef = useRef<HTMLDivElement>(null);
-  const [visibleZones, setVisibleZones] = useState<ZoneType[]>([]);
-  const [hiddenCount, setHiddenCount] = useState(0);
+
   const [isDesktop, setIsDesktop] = useState(false);
   const [storedGuestId, setStoredGuestId] = useState<string | null>(null);
+  const [mockLike, setMockLke] = useState(false);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const initialData = api.userOpp.getUserOppMetrics.useQuery({
+    oppId: parseFloat(opp.id),
+  });
   // Sort zones by name length - shortest first to maximize visibility
   const sortedZones = useMemo(
     () =>
@@ -84,26 +90,33 @@ export default function EventCard({
       }),
     [opp.zones],
   );
- const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
-   
-   useEffect(() => {
-      setStoredGuestId(localStorage.getItem("guestId"))
- 
+  const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
+
+  useEffect(() => {
+    setStoredGuestId(localStorage.getItem("guestId"));
+
     // Create a media query and set initial state
     const mediaQuery = window.matchMedia("(min-width: 1024px)");
     setIsDesktop(mediaQuery.matches);
 
     // Listen for changes (optional - only if you want runtime responsiveness)
     const handler = (e: MediaQueryListEvent) => setIsDesktop(e.matches);
-    mediaQuery.addEventListener('change', handler);
+    mediaQuery.addEventListener("change", handler);
 
-    return () => mediaQuery.removeEventListener('change', handler);
+    return () => mediaQuery.removeEventListener("change", handler);
   }, []);
 
+  useEffect(() => {
+    if (initialData.data) {
+      console.log("Initial data:>>>>>>>", initialData.data);
+      setMockLke(initialData.data.liked);
+      setIsBookmarked(initialData.data.saved);
+    }
+  }, [initialData.data]);
 
-   const handleOpenChange = (newOpen: boolean) => {
+  const handleOpenChange = (newOpen: boolean) => {
     setOpen(newOpen);
-    
+
     // Run the update mutation when the drawer opens
     if (newOpen && !disableInteractions) {
       updateAction.mutate({
@@ -115,80 +128,49 @@ export default function EventCard({
   };
 
   const handleButtonClick = () => {
-      updateAction.mutate({
-        oppId: opp.id,
-        guestId: storedGuestId ?? "",
-        action: "CLICK",
-      });
-  }
+    updateAction.mutate({
+      oppId: opp.id,
+      guestId: storedGuestId ?? "",
+      action: "CLICK",
+    });
+  };
 
-  useEffect(() => {
-    // Define the function to check which zones fit
-    const checkVisibleZones = () => {
-      if (!zonesContainerRef.current) return;
+  const handleLike = () => {
+    const currentLikeStatus = !mockLike;
+    setMockLke(currentLikeStatus);
+    const storedGuestId = localStorage.getItem("guestId");
 
-      const containerWidth = zonesContainerRef.current.offsetWidth;
-      const moreIndicatorWidth = 70; // Width for "+X more" text
-      let totalWidth = 0;
-      let visibleCount = 0;
+    mutation.mutate({
+      oppId: opp.id,
+      liked: currentLikeStatus,
+    });
 
-      // Simple width estimation - this is a rough approximation
-      // We use 8px per character plus 24px padding/margins
+    updateAction.mutate({
+      oppId: opp.id,
+      guestId: storedGuestId ?? "",
+      action: currentLikeStatus ? "LIKE" : "UNLIKE",
+    });
+  };
 
-      for (let i = 0; i < sortedZones.length; i++) {
-        // Estimate zone width: text width + padding + gap
-        const estimatedWidth = (sortedZones[i]?.name ?? "").length * 8 + 24;
+  const mutation = api.userOpp.createOrUpdate.useMutation();
 
-        if (i < sortedZones.length - 1) {
-          // Not the last zone - check if we need space for "more"
-          if (
-            totalWidth + estimatedWidth + moreIndicatorWidth <=
-            containerWidth
-          ) {
-            totalWidth += estimatedWidth;
-            visibleCount++;
-          } else {
-            break;
-          }
-        } else if (totalWidth + estimatedWidth <= containerWidth) {
-          visibleCount++;
-        }
-      }
+  const handleSave = () => {
+    const currentBookmarkStatus = !isBookmarked;
+    setIsBookmarked(currentBookmarkStatus);
 
-      // Ensure we show at least one zone if possible
-      visibleCount = Math.max(1, Math.min(visibleCount, sortedZones.length));
+    mutation.mutate({
+      oppId: opp.id,
+      saved: currentBookmarkStatus,
+    });
 
-      return {
-        visible: sortedZones.slice(0, visibleCount),
-        hidden: sortedZones.length - visibleCount,
-      };
-    };
+    updateAction.mutate({
+      oppId: opp.id,
+      guestId: storedGuestId ?? "",
+      action: currentBookmarkStatus ? "SAVE" : "UNSAVE",
+    });
+  };
 
-    // Use a resize observer to detect container width changes
-    const handleResize = () => {
-      const result = checkVisibleZones();
-      if (result) {
-        setVisibleZones(result.visible);
-        setHiddenCount(result.hidden);
-      }
-    };
-
-    const resizeObserver = new ResizeObserver(handleResize);
-    if (zonesContainerRef.current) {
-      resizeObserver.observe(zonesContainerRef.current);
-    }
-
-    // Initial calculation
-    handleResize();
-
-    return () => {
-      resizeObserver.disconnect();
-    };
-  }, [sortedZones]); // Only depend on sortedZones, which is memoized
-
-
-
-    if (isDesktop) {
+  if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogTrigger
@@ -325,22 +307,30 @@ export default function EventCard({
               </div>
             </div>
           </DialogHeader>
-          <DialogDescription className="text-text text-lg">
+          <DialogDescription className="text-text line-clamp-6 text-lg whitespace-pre-line">
             {opp.information}
           </DialogDescription>
-          <Link
-            className="flex w-full justify-end"
-            href={`/opportunities/${opp.airtable_id}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <button onClick={handleButtonClick} className="btn-brand-primary">View more!</button>
-          </Link>
+          <div className="flex w-full items-center justify-end gap-8">
+            <BookmarkButton
+              isBookmarked={isBookmarked}
+              handleBookmark={handleSave}
+            />
+            <LikeButton isLiked={mockLike} handleLike={handleLike} />
+            <Link
+              className=""
+              href={`/opportunities/${opp.airtable_id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <button onClick={handleButtonClick} className="btn-brand-primary">
+                View more!
+              </button>
+            </Link>
+          </div>
         </DialogContent>
       </Dialog>
     );
   }
-
 
   return (
     <Drawer open={open} onOpenChange={handleOpenChange}>
@@ -375,7 +365,6 @@ export default function EventCard({
               </div>
             )}
           </div>
-
 
           <div
             ref={zonesContainerRef}
@@ -468,18 +457,30 @@ export default function EventCard({
               )}
             </div>
             <div className="my-4 w-full border-2 border-dashed"></div>
-            <DrawerDescription className="text-text">
+            <DrawerDescription className="text-text line-clamp-6 whitespace-pre-line">
               {opp.information}
             </DrawerDescription>
           </DrawerHeader>
           <DrawerFooter>
+            <div className="flex w-full items-center justify-end gap-8">
+              <BookmarkButton
+                isBookmarked={isBookmarked}
+                handleBookmark={handleSave}
+              />
+              <LikeButton isLiked={mockLike} handleLike={handleLike} />
+            </div>
             <Link
               className="flex w-full"
               href={`/opportunities/${opp.airtable_id}`}
               target="_blank"
               rel="noopener noreferrer"
             >
-              <button onClick={handleButtonClick} className="btn-brand-primary w-full">View more!</button>
+              <button
+                onClick={handleButtonClick}
+                className="btn-brand-primary w-full"
+              >
+                View more!
+              </button>
             </Link>
             <DrawerClose className="mt-2 text-sm font-semibold text-gray-500">
               Close

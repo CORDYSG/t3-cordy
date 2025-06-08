@@ -98,7 +98,11 @@ const OpportunityDetail = async ({
       <Suspense fallback={<LoadingComponent />}>
         <h1 className="sr-only">{opp?.name} - Opportunity Details</h1>
 
-        <article itemScope itemType="https://schema.org/Event" className="w-full">
+        <article
+          itemScope
+          itemType="https://schema.org/Event"
+          className="w-full"
+        >
           <OpportunityDetailCard opp={opp} types={types} />
           <meta itemProp="name" content={opp?.name ?? ""} />
           {opp?.description && (
@@ -111,10 +115,13 @@ const OpportunityDetail = async ({
           className="my-4 flex h-full w-full grid-rows-2 flex-col justify-center text-left font-bold"
         >
           <h2 className="mb-8 text-2xl">Similar Opportunities</h2>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-8 gap-y-4 px-8 md:grid-cols-2 md:px-0 lg:grid-cols-3">
             {opps.length > 0 &&
               opps.map((opp: OppWithZoneType) => (
-                <div className="flex items-center justify-center" key={opp.id}>
+                <div
+                  className="my-2 flex items-center justify-center px-8 md:my-0 md:px-0"
+                  key={opp.id}
+                >
                   <EventCard opp={opp} static />
                 </div>
               ))}

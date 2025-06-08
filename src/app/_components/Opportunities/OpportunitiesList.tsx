@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import LoadingComponent from "../LoadingComponent";
 import EventCard from "../EventCard";
 import { motion } from "framer-motion";
+import { useSession } from "next-auth/react";
 
 type OpportunitiesListProps = {
   opps: OppWithZoneType[];
@@ -19,6 +20,8 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
   setIsNavigating,
 }) => {
   if (isLoading) return <LoadingComponent />;
+  const session = useSession();
+  const isAuthenticated = !!session.data?.user;
 
   return (
     <div className="w-full px-2 sm:px-4">
@@ -46,7 +49,12 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 viewport={{ once: true, amount: 0.2 }}
               >
-                <EventCard opp={opp} static pauseQueries={setIsNavigating} />
+                <EventCard
+                  opp={opp}
+                  static
+                  pauseQueries={setIsNavigating}
+                  isAuthenticated={isAuthenticated}
+                />
               </motion.div>
             </li>
           ))}

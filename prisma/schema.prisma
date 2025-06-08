@@ -310,6 +310,7 @@ enum school_type {
 }
 
 enum UserActionType {
+  VIEW
   LIKE
   UNLIKE
   SAVE
