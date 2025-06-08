@@ -1,3 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { z } from "zod";
 import { db } from "@/server/db";
 import {
@@ -258,7 +264,7 @@ updateUserOppMetrics: publicProcedure
   .mutation(async ({ ctx, input }) => {
     const userId = ctx.session?.user.id;
 
-       const guestId = userId ? null : input.guestId || generateGuestId();
+       const guestId = userId ? null : input.guestId ?? generateGuestId();
 
     return await db.$transaction(async (tx) => {
       // Log the action
@@ -338,7 +344,8 @@ updateUserOppMetrics: publicProcedure
           createData[linkField] = 1;
           break;
         default:
-          throw new Error(`Unknown action type: ${input.action}`);  
+          // If the action type is unknown, throw an error
+          throw new Error(`Unknown action type: ${String(input.action)}`);
       }
 
 

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import "./BookmarkButton.css";
-import { useState } from "react";
+
 import {
   Tooltip,
   TooltipContent,

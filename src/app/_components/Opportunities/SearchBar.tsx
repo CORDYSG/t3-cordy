@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import {
-  ChevronUp,
-  ChevronDown,
-  X,
-  Clock,
-  CalendarPlus,
-  FunnelX,
-  Funnel,
-} from "lucide-react";
+import { ChevronUp, ChevronDown, X } from "lucide-react";
 import {
   Popover,
   PopoverContent,

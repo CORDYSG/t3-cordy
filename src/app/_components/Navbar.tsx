@@ -26,7 +26,6 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ session }) => {
-  const router = useRouter();
   const pathName = usePathname();
   const segments = pathName.split("/").filter(Boolean);
   const lastSegment = segments[segments.length - 1] ?? "";
@@ -181,7 +180,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                 </Link>
               )}
             </div>
-            <div className="border-b-2 border-dashed border-black w-full "></div>
+            <div className="w-full border-b-2 border-dashed border-black"></div>
             <ul className="font-medium">
               <li className="mb-4">
                 <Link
