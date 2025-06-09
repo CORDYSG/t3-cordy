@@ -32,6 +32,7 @@ import { api } from "@/trpc/react";
 import { BookmarkButton } from "./BookmarkButton";
 import { LikeButton } from "./LikeButton";
 import ShareButton from "./ShareButton";
+import { set } from "zod";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -48,6 +49,7 @@ export default function EventCard({
   opp,
   disableInteractions,
   listView = false,
+  isAuthenticated,
 }: Readonly<EventCardProps>): JSX.Element {
   const [open, setOpen] = useState(false);
 
@@ -74,9 +76,15 @@ export default function EventCard({
   const [storedGuestId, setStoredGuestId] = useState<string | null>(null);
   const [mockLike, setMockLke] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const initialData = api.userOpp.getUserOppMetrics.useQuery({
-    oppId: parseFloat(opp.id),
-  });
+
+  const initialData = api.userOpp.getUserOppMetrics.useQuery(
+    {
+      oppId: parseFloat(opp.id),
+    },
+    {
+      enabled: !!isAuthenticated,
+    },
+  );
 
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
@@ -96,7 +104,6 @@ export default function EventCard({
 
   useEffect(() => {
     if (initialData.data) {
-      console.log("Initial data:>>>>>>>", initialData.data);
       setMockLke(initialData.data.liked);
       setIsBookmarked(initialData.data.saved);
     }

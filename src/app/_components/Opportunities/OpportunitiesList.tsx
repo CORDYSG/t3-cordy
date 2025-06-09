@@ -16,10 +16,10 @@ type OpportunitiesListProps = {
 const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
   opps,
   isLoading,
-
   setIsNavigating,
 }) => {
   if (isLoading) return <LoadingComponent />;
+  const { data: session } = useSession();
 
   return (
     <div className="w-full px-2 sm:px-4">
@@ -47,7 +47,14 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
                 transition={{ duration: 0.4, ease: "easeOut" }}
                 viewport={{ once: true, amount: 0.2 }}
               >
-                <EventCard opp={opp} static pauseQueries={setIsNavigating} />
+                <EventCard
+                  opp={opp}
+                  static
+                  pauseQueries={setIsNavigating}
+                  isAuthenticated={
+                    session?.user?.id !== undefined && session?.user.id !== null
+                  }
+                />
               </motion.div>
             </li>
           ))}
