@@ -129,6 +129,7 @@ model User {
   lastActive          DateTime?
   onboardingCompleted Boolean              @default(false)
   name                String?
+  createdAt           DateTime             @default(now()) @db.Timestamptz(6)
   accounts            Account[]
   views               OppView[]
   sessions            Session[]
@@ -315,6 +316,7 @@ enum UserActionType {
   UNLIKE
   SAVE
   UNSAVE
+  TELE_CLICK
   CLICK
   CLICK_EXPAND
   APPLY

@@ -27,6 +27,7 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 type SwipeDirection = "left" | "right";
 
@@ -58,6 +59,7 @@ const CARD_ROTATION = 6;
 const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
   ({ onEmptyChange }, ref) => {
     const { data: session } = useSession();
+    const searchParams = useSearchParams();
     const isAuthenticated = !!session?.user;
     const [guestId, setGuestId] = useState("");
     const [guestHistory, setGuestHistory] = useState<GuestHistory>({
@@ -87,6 +89,10 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     const [undoing, setUndoing] = useState(false);
     const [limitReached, setLimitReached] = useState(false);
     const [newlyAddedOpps, setNewlyAddedOpps] = useState<number[]>([]);
+    const [specificOppLoaded, setSpecificOppLoaded] = useState(false);
+
+    const specificOppId =
+      searchParams.get("opp") ?? searchParams.get("opportunity");
 
     // Motion values
     const KEYBOARD_SWIPE_DISTANCE = 1000; // Increased from 300 for faster exit
@@ -135,6 +141,15 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           },
           { enabled: !!guestId },
         );
+
+    const { data: specificOpportunity, isLoading: isLoadingSpecific } =
+      api.opp.getOppById.useQuery(
+        { oppId: specificOppId! },
+        {
+          enabled: !!specificOppId && !specificOppLoaded,
+          retry: false,
+        },
+      );
 
     // Mutations
     const mutation = api.userOpp.createOrUpdate.useMutation();
@@ -225,6 +240,39 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
       processFetchedOpportunities();
     }, [fetchedOpportunities]);
+
+    useEffect(() => {
+      if (!specificOpportunity || specificOppLoaded) return;
+
+      setOpportunities((prev) => {
+        // Check if the specific opportunity is already in the list
+        const existingIndex = prev.findIndex(
+          (opp) => opp.airtable_id === specificOpportunity.airtable_id,
+        );
+
+        if (existingIndex !== -1) {
+          // Move existing opportunity to the front
+          const newOpps = [...prev];
+          const [specificOpp] = newOpps.splice(existingIndex, 1);
+          // Filter out undefined just in case
+          return [specificOpp, ...newOpps].filter(
+            (opp): opp is Opportunity => opp !== undefined,
+          );
+        } else {
+          // Add new opportunity to the front
+          return [
+            {
+              ...specificOpportunity,
+              id: Number(specificOpportunity.id),
+            } as Opportunity,
+            ...prev,
+          ];
+        }
+      });
+
+      setSpecificOppLoaded(true);
+      setNewlyAddedOpps([Number(specificOpportunity.id)]);
+    }, [specificOpportunity, specificOppLoaded]);
 
     // Clear newly added opps after animation
     useEffect(() => {

@@ -11,6 +11,7 @@ import { api } from "@/trpc/react";
 
 import { LikeButton } from "../LikeButton";
 import { BookmarkButton } from "../BookmarkButton";
+import ShareButton from "../ShareButton";
 
 type Props = {
   opp: OppWithZoneType;
@@ -163,6 +164,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
         </div>
         <p className="text-lg whitespace-pre-line"> {opp.information}</p>
         <div className="flex w-full items-center justify-end gap-x-8">
+          <ShareButton url={opp.url} oppId={opp.id} />
           <BookmarkButton
             isBookmarked={isBookmarked}
             handleBookmark={handleSave}
