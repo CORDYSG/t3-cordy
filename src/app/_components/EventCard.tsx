@@ -44,7 +44,7 @@ type EventCardProps = {
 
 export default function EventCard({
   opp,
-  static: disableInteractions,
+  disableInteractions,
 }: Readonly<EventCardProps>): JSX.Element {
   const [open, setOpen] = useState(false);
 

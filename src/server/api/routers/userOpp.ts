@@ -176,6 +176,9 @@ export const userOppRouter = createTRPCRouter({
     .input(z.object({ oppId: z.number() }))
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
+      if (!userId) {
+        return null;
+      }
 
       const userOpp = await db.userOpportunity.findUnique({
         where: {

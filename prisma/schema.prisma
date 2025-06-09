@@ -315,6 +315,7 @@ enum UserActionType {
   UNLIKE
   SAVE
   UNSAVE
+  TELE_CLICK
   CLICK
   CLICK_EXPAND
   APPLY
