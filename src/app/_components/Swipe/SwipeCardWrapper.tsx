@@ -92,7 +92,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     const [specificOppLoaded, setSpecificOppLoaded] = useState(false);
 
     const specificOppId =
-      searchParams.get("opp") || searchParams.get("opportunity");
+      searchParams.get("opp") ?? searchParams.get("opportunity");
 
     // Motion values
     const KEYBOARD_SWIPE_DISTANCE = 1000; // Increased from 300 for faster exit
