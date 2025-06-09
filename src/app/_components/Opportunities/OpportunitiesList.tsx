@@ -18,8 +18,8 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
   isLoading,
   setIsNavigating,
 }) => {
-  if (isLoading) return <LoadingComponent />;
   const { data: session } = useSession();
+  if (isLoading) return <LoadingComponent />;
 
   return (
     <div className="w-full px-2 sm:px-4">
