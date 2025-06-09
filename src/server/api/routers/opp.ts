@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "@/server/db";
-import { createTRPCRouter, publicProcedure } from "@/server/api/trpc";
+import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
 import type { Prisma } from "@prisma/client";
 
 const activeOppsFilter = {
@@ -73,6 +73,88 @@ export const oppRouter = createTRPCRouter({
     const zoneMap = buildZoneMap(zones);
     return enrichOppsWithZones(opps, zoneMap);
   }),
+  getUserLikedOpps: protectedProcedure
+     .query(async ({ ctx }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        return [];
+      }
+      
+      
+      const likedOpps = await db.userOpportunity.findMany({
+        where: {
+          userId,
+          liked: true,
+        },
+        select: {
+          updatedAt: true,
+          opportunity: { 
+            select: {
+              id: true,
+              name: true,
+              organisation: true,
+              information: true,
+              deadline: true,
+              caption: true,
+              thumbnail_url: true,
+              airtable_id: true,
+              zone: true, // Include zone information
+              // Add any other fields you need from the Opps model
+            },
+          }
+        },
+        orderBy: {
+          updatedAt: "desc", // Sort by the most recently liked opportunities
+        }
+      });
+
+      const zones = await fetchAllZones();
+      const zoneMap = buildZoneMap(zones);
+
+  
+      // Return just the opportunities, not the wrapper objects
+      return enrichOppsWithZones(likedOpps.map(item => item.opportunity), zoneMap);
+    }),
+  
+    getUserSavedOpps: protectedProcedure
+      .query(async ({ ctx }) => {
+        const userId = ctx.session.user.id;
+        if (!userId) {
+          return [];
+        }
+        const savedOpps = await db.userOpportunity.findMany({
+          where: {
+            userId,
+            saved: true,
+          },
+          select: {
+            updatedAt: true,
+            opportunity: { 
+              select: {
+                id: true,
+                name: true,
+                organisation: true,
+                deadline: true,
+                information: true,
+                caption: true,
+                thumbnail_url: true,
+                airtable_id: true,
+                zone: true, // Include zone information
+                // Add any other fields you need from the Opps model
+              },
+            }
+          },
+            orderBy: {
+          updatedAt: "desc", // Sort by the most recently liked opportunities
+        }
+        });
+
+           const zones = await fetchAllZones();
+           const zoneMap = buildZoneMap(zones);
+        // Return just the opportunities, not the wrapper objects
+          return enrichOppsWithZones(savedOpps.map(item => item.opportunity), zoneMap);
+      }),
+  
   getOppById: publicProcedure
     .input(z.object({ oppId: z.string() }))
     .query(async ({ input }) => {

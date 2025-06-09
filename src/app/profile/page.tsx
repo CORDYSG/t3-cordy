@@ -1,8 +1,9 @@
 import { Suspense } from "react";
-import LoadingComponent from "../../_components/LoadingComponent";
+import LoadingComponent from "../_components/LoadingComponent";
 import { auth } from "@/server/auth";
 import { redirect } from "next/navigation";
-import ProfileCard from "../../_components/ProfilePage/ProfileCard";
+import ProfileCard from "../_components/ProfilePage/ProfileCard";
+import ProfileTabs from "../_components/ProfilePage/ProfileTabs";
 import Head from "next/head";
 
 const ProfilePage = async () => {
@@ -51,17 +52,28 @@ const ProfilePage = async () => {
         <meta name="twitter:image" content={imageUrl} />
       </Head>
 
-      <Suspense fallback={<LoadingComponent />}>
-        <h1 className="sr-only">User Profile</h1>
+      <div className="w-full space-y-8">
+        <Suspense fallback={<LoadingComponent />}>
+          <h1 className="sr-only">User Profile Card</h1>
 
-        <section
-          aria-label="User Profile"
-          className="my-4 flex h-full w-full grid-rows-2 flex-col justify-center text-left font-bold"
-        >
-          <ProfileCard />
-        </section>
-      </Suspense>
+          <section
+            aria-label="User Profile"
+            className="my-4 flex h-full grid-rows-2 flex-col justify-center text-left font-bold"
+          >
+            <ProfileCard />
+          </section>
+        </Suspense>
+        <Suspense fallback={<LoadingComponent />}>
+          <h1 className="sr-only">User Opportunity List</h1>
 
+          <section
+            aria-label="User Opportunity Tabs"
+            className="my-4 flex h-full w-full grid-rows-2 flex-col justify-center text-left font-bold"
+          >
+            <ProfileTabs />
+          </section>
+        </Suspense>
+      </div>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}

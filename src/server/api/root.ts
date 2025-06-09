@@ -3,6 +3,7 @@ import { oppRouter } from "./routers/opp";
 import { zoneRouter } from "./routers/zone";
 import { typesRouter } from "./routers/types";
 import { userOppRouter } from "./routers/userOpp";
+import { userRouter } from "./routers/user";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +15,7 @@ export const appRouter = createTRPCRouter({
   zone: zoneRouter,
   type: typesRouter,
   userOpp: userOppRouter,
+  user: userRouter,
 });
 
 // export type definition of API

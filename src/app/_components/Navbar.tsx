@@ -92,11 +92,21 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                         <AvatarFallback>{userInitials} </AvatarFallback>
                       </Avatar>
                     </PopoverTrigger>
-                    <PopoverContent className="mt-3 flex w-fit items-center justify-center p-3">
-                      <Link href="/api/auth/signout">
-                        <button className="btn-brand-primary text-sm uppercase">
-                          Log Out
-                        </button>
+                    <PopoverContent
+                      className="mt-3 flex w-fit flex-col items-center justify-center p-0"
+                      style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
+                    >
+                      <Link
+                        href="/profile"
+                        className="w-full cursor-pointer rounded-t-md border-b-1 p-3 text-left hover:bg-slate-100"
+                      >
+                        Profile
+                      </Link>
+                      <Link
+                        href="/api/auth/signout"
+                        className="w-full cursor-pointer rounded-b-md p-3 text-left text-red-700 hover:bg-slate-100"
+                      >
+                        Log Out
                       </Link>
                     </PopoverContent>
                   </Popover>
@@ -200,6 +210,17 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
                   Opportunities
                 </Link>
               </li>
+              {session && (
+                <li className="mb-4">
+                  <Link
+                    href="/profile"
+                    className={`active:text-primary-active hover:text-primary rounded-md px-3 py-2 text-sm font-semibold ${lastSegment.startsWith("opportunities") ? "text-primary" : "text-text"}`}
+                    onClick={() => setOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                </li>
+              )}
               {/* {session && ( 
                 <li className="mb-4">
                   <Link

@@ -162,6 +162,8 @@ export const userOppRouter = createTRPCRouter({
       return enrichedOpps;
     }),
 
+    
+    
   // Keep the original protected procedures
   getFYOpps: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(100).optional() }))
@@ -203,6 +205,32 @@ export const userOppRouter = createTRPCRouter({
         clicked: userOpp.clicked,
         applied: userOpp.applied,
       };
+    }),
+    getUserOppMetricCounts: protectedProcedure
+    .query(async ({ ctx }) => {
+      const userId = ctx.session.user.id;
+      if (!userId) {
+        return null;
+      }
+      const metrics = await db.userOpportunity.findMany({
+        where: { userId },
+       
+      });
+      const counts = {
+        liked: 0,
+        saved: 0,
+        clicked: 0,
+        applied: 0,
+        viewed: 0,
+      };
+      metrics.forEach((metric) => {
+        if (metric.liked) counts.liked += 1;
+        if (metric.saved) counts.saved += 1;
+        if (metric.clicked) counts.clicked += 1;
+        if (metric.applied) counts.applied += 1;
+        counts.viewed += 1; 
+      });
+      return counts;
     }),
 
   createOrUpdate: protectedProcedure
