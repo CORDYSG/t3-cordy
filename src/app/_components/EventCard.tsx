@@ -31,6 +31,7 @@ import Link from "next/link";
 import { api } from "@/trpc/react";
 import { BookmarkButton } from "./BookmarkButton";
 import { LikeButton } from "./LikeButton";
+import ShareButton from "./ShareButton";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -373,6 +374,8 @@ export default function EventCard({
             {opp.information}
           </DialogDescription>
           <div className="flex w-full items-center justify-end gap-8">
+            {opp.url}
+            <ShareButton url={opp.url_og} oppId={opp.id} />
             <BookmarkButton
               isBookmarked={isBookmarked}
               handleBookmark={handleSave}
@@ -599,6 +602,7 @@ export default function EventCard({
           </DrawerHeader>
           <DrawerFooter>
             <div className="flex w-full items-center justify-end gap-8">
+              <ShareButton url={opp.url_og} oppId={opp.id} />
               <BookmarkButton
                 isBookmarked={isBookmarked}
                 handleBookmark={handleSave}

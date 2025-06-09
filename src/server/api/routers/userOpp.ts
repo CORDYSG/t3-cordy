@@ -360,7 +360,7 @@ updateUserOppMetrics: publicProcedure
           createData[telegramField] = 1;
           break;
         case UserActionType.SHARE_WHATSAPP:
-          const whatsappField = isGuest ? 'guestShareWhatsappCount' : 'shareWhatsappCount';
+          const whatsappField = isGuest ? 'guestShareWhatsAppCount' : 'shareWhatsAppCount';
           updateData[whatsappField] = { increment: 1 };
           createData[whatsappField] = 1;
           break;
