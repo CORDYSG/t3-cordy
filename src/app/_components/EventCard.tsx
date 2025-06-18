@@ -174,7 +174,7 @@ export default function EventCard({
             className={` ${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
           >
             <div
-              className={`card flex h-full w-full justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
+              className={`card flex h-full w-full justify-start rounded-xl p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
             >
               {/* Image column */}
               <div className="relative mr-4 h-24 w-48 flex-shrink-0 overflow-hidden rounded-lg border-2">
@@ -244,7 +244,7 @@ export default function EventCard({
             className={` ${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
           >
             <div
-              className={`card flex h-full w-full flex-col justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
+              className={`card flex h-full w-full flex-col justify-start rounded-xl p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
             >
               <div className="relative mb-3 h-0 w-full overflow-hidden rounded-lg border-2 pb-[56.25%]">
                 {opp.thumbnail_url ? (
@@ -313,7 +313,7 @@ export default function EventCard({
         )}
 
         <DialogContent
-          className="max-w-[425px] rounded-md border-2 bg-white p-8 md:max-w-[800px]"
+          className="max-w-[425px] rounded-xl border-2 bg-white p-8 md:max-w-[800px]"
           style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
         >
           <DialogHeader className="flex w-full flex-row gap-5">
@@ -412,7 +412,7 @@ export default function EventCard({
           className={`${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
         >
           <div
-            className={`card flex h-full w-full justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
+            className={`card flex h-full w-full justify-start rounded-xl p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
           >
             {/* Image column */}
             <div className="relative mr-4 h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 md:w-48">
@@ -484,7 +484,7 @@ export default function EventCard({
           <div
             className={`card flex h-full w-full flex-col justify-start p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
           >
-            <div className="relative mb-3 h-0 w-full overflow-hidden rounded-lg border-2 pb-[56.25%]">
+            <div className="relative mb-3 h-0 w-full overflow-hidden rounded-xl border-2 pb-[56.25%]">
               {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}

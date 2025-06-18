@@ -138,6 +138,7 @@ model User {
   typePreferences     UserType[]
   zonePreferences     UserZone[]
    userActions        UserAction[]
+   profile UserProfile?
 }
 
 model Account {
@@ -343,4 +344,82 @@ model UserAction {
   @@index([oppId, actionType])
   @@index([createdAt])
   @@map("user_actions")
+}
+
+enum HearAboutSource {
+  SOCIAL_MEDIA
+  FRIEND_REFERRAL
+  SEARCH_ENGINE
+  ADVERTISEMENT
+  SCHOOL
+  TEACHER
+  PARENT
+  NEWS_ARTICLE
+  OTHER
+}
+
+enum AgeRange {
+  BELOW_12     @map("Below 12")
+  THIRTEEN     @map("13")
+  FOURTEEN     @map("14")
+  FIFTEEN      @map("15")
+  SIXTEEN      @map("16")
+  SEVENTEEN    @map("17")
+  EIGHTEEN     @map("18")
+  NINETEEN     @map("19")
+  TWENTY       @map("20")
+  TWENTY_ONE   @map("21")
+  TWENTY_TWO   @map("22")
+  TWENTY_THREE @map("23")
+  TWENTY_FOUR  @map("24")
+  TWENTY_FIVE  @map("25")
+  ABOVE_25     @map("Above 25")
+}
+
+enum InterestCategory {
+  SOCIAL_IMPACT
+  ENTREPRENEURSHIP
+  MUSIC
+  CODING
+  SPORTS
+  EXERCISE
+  OTHER
+}
+
+enum GoalType {
+  ACADEMIC_EXCELLENCE
+  CAREER_PREPARATION
+  SKILL_DEVELOPMENT
+  NETWORKING
+  SCHOLARSHIPS
+  UNIVERSITY_ADMISSION
+  INTERNSHIPS
+  COMPETITIONS
+  LEADERSHIP_EXPERIENCE
+  COMMUNITY_SERVICE
+  PERSONAL_GROWTH
+  OTHER
+}
+
+
+// Add this model to your existing schema
+model UserProfile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  hearAboutSource HearAboutSource?
+  hearAboutOther  String?  // Free text when "OTHER" is selected
+  interests       InterestCategory[]
+  interestsOther  String?  // Free text for additional interests
+  ageRange        AgeRange?
+  isStudent       Boolean?
+  schoolType      school_type? // Reusing your existing enum
+  schoolName      String?
+  goals           GoalType[]
+  goalsOther      String?  // Free text for additional goals
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

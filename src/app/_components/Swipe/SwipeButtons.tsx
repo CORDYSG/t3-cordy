@@ -57,7 +57,7 @@ const SwipeButtons: React.FC<SwipeBarProps> = ({ cardRef }) => {
       <div className="absolute bottom-20 mb-4 hidden w-full min-w-[200px] items-center justify-between lg:flex">
         {/* Thumbs Down Button */}
         <motion.button
-          className={`cursor-pointer rounded-full border-2 border-black bg-white p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-300 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
+          className={`cursor-pointer rounded-xl border-2 border-black bg-white p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-300 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
           onClick={handleThumbsDown}
           onTouchStart={handleThumbsDown}
           variants={buttonVariants}
@@ -70,7 +70,7 @@ const SwipeButtons: React.FC<SwipeBarProps> = ({ cardRef }) => {
 
         {/* Thumbs Up Button */}
         <motion.button
-          className={`bg-accent-green hover:bg-accent-blue-hover cursor-pointer rounded-full border-2 border-black p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
+          className={`bg-accent-green hover:bg-accent-blue-hover cursor-pointer rounded-xl border-2 border-black p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
           onClick={handleThumbsUp}
           onTouchStart={handleThumbsUp}
           variants={buttonVariants}
