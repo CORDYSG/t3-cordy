@@ -35,7 +35,7 @@ export type SwipeAction = {
 const ForYouPage = () => {
   return (
     <>
-      <main className="flex w-[100vw] flex-col items-center overflow-hidden">
+      <main className="flex w-[100vw] flex-col overflow-hidden">
         <h1 className="sr-only">Personalized Opportunities For You</h1>
 
         <section aria-label="Opportunity Cards" className="w-full">
@@ -58,7 +58,7 @@ const ForYouPage = () => {
           }}
         />
       </main>
-      <div className="relative mx-auto mt-12 flex h-24 w-2/3 items-center justify-center md:h-46 md:w-full">
+      <div className="relative mx-auto mt-24 flex h-24 w-2/3 items-center justify-center md:mt-16 md:h-46 md:w-full">
         <Image
           src={
             "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg"

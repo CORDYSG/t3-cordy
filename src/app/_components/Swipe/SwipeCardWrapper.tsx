@@ -153,6 +153,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
     // Mutations
     const mutation = api.userOpp.createOrUpdate.useMutation();
+    const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
     // Initialize guest session
     useEffect(() => {
@@ -310,6 +311,11 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
             mutation.mutate({
               oppId: BigInt(swipe.oppId),
               liked: swipe.direction === "right",
+            });
+            updateAction.mutate({
+              oppId: BigInt(swipe.oppId),
+              guestId: guestId ?? "",
+              action: swipe.direction === "right" ? "LIKE" : "UNLIKE",
             });
           });
           setPendingSwipes([]);
@@ -712,14 +718,14 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           </div>
         </div>
         {!isAuthenticated && !limitReached && (
-          <div className="mt-8 rounded-lg bg-gray-100 p-4 text-center text-sm">
+          <div className="mt-[10vw] rounded-lg bg-gray-100 p-4 text-center text-sm lg:mt-16">
             <p>
               You&apos;re browsing as a guest.
               <Link
                 href="/api/auth/signin"
                 className="ml-1 font-semibold text-blue-600 hover:underline"
               >
-                Sign in
+                Sign in{" "}
               </Link>
               to save your preferences and see tailored opportunities.
             </p>
