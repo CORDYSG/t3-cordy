@@ -200,7 +200,7 @@ const OpportunitiesClient = ({
         className="flex min-h-64 w-full flex-col items-center justify-center px-5"
       >
         <header className="space-y-2 text-center">
-          <h1 className="font-brand text-4xl text-black uppercase">
+          <h1 className="font-brand text-4xl font-bold text-black uppercase">
             Opportunities
           </h1>
           <p className="text-primary text-lg font-semibold">

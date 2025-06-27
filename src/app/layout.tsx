@@ -43,6 +43,45 @@ const fatFrank = localFont({
   preload: true,
   fallback: ["sans-serif"],
 });
+const gilroy = localFont({
+  src: [
+    {
+      path: "../../public/fonts/Gilroy-Light.ttf",
+      weight: "100",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Gilroy-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Gilroy-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Gilroy-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Gilroy-ExtraBold.otf",
+      weight: "800",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/Gilroy-Heavy.ttf",
+      weight: "900",
+      style: "normal",
+    },
+  ],
+  variable: "--font-gilroy",
+  display: "swap",
+  preload: true,
+  fallback: ["sans-serif"],
+});
+
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -54,7 +93,10 @@ const dmSans = DM_Sans({
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();
   return (
-    <html lang="en" className={`${dmSans.variable} ${fatFrank.variable}`}>
+    <html
+      lang="en"
+      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable}`}
+    >
       <body className="flex min-h-screen w-screen flex-col justify-between overflow-x-hidden">
         <TRPCReactProvider>
           <SessionProvider session={session}>

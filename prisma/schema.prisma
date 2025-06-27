@@ -355,11 +355,12 @@ enum HearAboutSource {
   TEACHER
   PARENT
   NEWS_ARTICLE
-  OTHER
+  OTHER_HEARABOUT
 }
 
 enum AgeRange {
-  BELOW_12     @map("Below 12")
+  BELOW_TWELVE     @map("Below 12")
+  TWELVE       @map("12")
   THIRTEEN     @map("13")
   FOURTEEN     @map("14")
   FIFTEEN      @map("15")
@@ -383,7 +384,7 @@ enum InterestCategory {
   CODING
   SPORTS
   EXERCISE
-  OTHER
+  OTHER_INTERESTS
 }
 
 enum GoalType {
@@ -398,7 +399,7 @@ enum GoalType {
   LEADERSHIP_EXPERIENCE
   COMMUNITY_SERVICE
   PERSONAL_GROWTH
-  OTHER
+  OTHER_GOALS
 }
 
 

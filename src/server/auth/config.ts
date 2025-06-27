@@ -57,5 +57,16 @@ export const authConfig = {
         id: user.id,
       },
     }),
+   async redirect({ url, baseUrl }) {
+  
+       if (url === '/api/auth/signout' || url.includes('signout')) {
+      return baseUrl + '/auth/signin';
+    }
+
+    return baseUrl + '/user-check';
+  },
+  },
+   pages: {
+    signIn: '/auth/signin',
   },
 } satisfies NextAuthConfig;
