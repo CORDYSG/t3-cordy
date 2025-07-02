@@ -8,7 +8,8 @@ import {
   school_type 
 } from '@prisma/client';
 import { db } from '@/server/db';
-import { createTRPCRouter, protectedProcedure } from '../trpc';
+import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc';
+import { verifyTelegramLogin } from '@/lib/utils';
 
 // Create validation schemas that match your enums exactly
 const AgeRangeSchema = z.nativeEnum(AgeRange);
@@ -21,6 +22,47 @@ const SchoolTypeSchema = z.nativeEnum(school_type);
 
 export const userRouter = createTRPCRouter({
 
+ linkToTelegram: protectedProcedure
+    .input(
+      z.object({
+        id: z.number(),
+        first_name: z.string(),
+        last_name: z.string().optional(),
+        username: z.string().optional(),
+        photo_url: z.string().optional(),
+        auth_date: z.string(),
+        hash: z.string(),
+      })
+    )
+    .mutation(async ({ input, ctx }) => {
+      const isValid = verifyTelegramLogin(input, process.env.TELEGRAM_BOT_TOKEN!);
+      if (!isValid) {
+        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid Telegram login" });
+      }
+    if (!ctx.session.user) {
+            throw new Error("User not authenticated");
+    }
+
+      // Check if user exists
+      const existing = await ctx.db.user.findFirst({
+        where: { telegramId: input.id.toString() },
+      });
+
+      if (existing) {
+        return { status: "ok", userId: existing.id };
+      }
+
+      // If not, create user
+      const newUser = await ctx.db.user.create({
+        data: {
+          telegramId: input.id.toString(),
+          name: input.first_name,
+          username: input.username ?? undefined,
+        },
+      });
+
+      return { status: "ok", userId: newUser.id };
+    }),
     getUserData: protectedProcedure
     .query(async ({ ctx }) => {
 
@@ -54,7 +96,7 @@ export const userRouter = createTRPCRouter({
                 id: true,
             },
         });
-        
+
         return user;
         }),
 

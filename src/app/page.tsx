@@ -10,7 +10,7 @@ export default async function Home() {
   if (session?.user) {
     // void api.post.getLatest.prefetch();
   }
-  redirect("/opportunities");
+  redirect("/opportunities/for-you");
   return (
     <HydrateClient>
       {/* <Navbar session={session} /> */}

@@ -73,33 +73,31 @@ model OppView {
 }
 
 model OppMetrics {
-  id               String   @id @default(cuid())
-  oppId            BigInt   @unique
-  viewCount        Int      @default(0)
-  likeCount        Int      @default(0)
-  clickCount       Int      @default(0)
-  clickExpandCount Int      @default(0)
-  saveCount        Int      @default(0)
-  applyCount       Int      @default(0)
-  shareTelegramCount Int   @default(0)
-  shareWhatsAppCount Int   @default(0)
-  shareEmailCount  Int      @default(0)
-  shareLinkCount   Int      @default(0)
-  // Separate guest vs user metrics if needed
-  guestViewCount   Int      @default(0)
-  guestLikeCount   Int      @default(0)
-  guestClickCount  Int      @default(0)
-  guestClickExpandCount Int @default(0)
-  guestSaveCount   Int      @default(0)
-  guestApplyCount  Int      @default(0)
-  guestShareTelegramCount Int @default(0)
-  guestShareWhatsAppCount Int @default(0)
-  guestShareEmailCount Int @default(0)
-  guestShareLinkCount  Int @default(0)
-
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  opportunity      Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  id                      String   @id @default(cuid())
+  oppId                   BigInt   @unique
+  viewCount               Int      @default(0)
+  likeCount               Int      @default(0)
+  clickCount              Int      @default(0)
+  saveCount               Int      @default(0)
+  applyCount              Int      @default(0)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+  clickExpandCount        Int      @default(0)
+  guestApplyCount         Int      @default(0)
+  guestClickCount         Int      @default(0)
+  guestLikeCount          Int      @default(0)
+  guestSaveCount          Int      @default(0)
+  guestShareEmailCount    Int      @default(0)
+  guestShareLinkCount     Int      @default(0)
+  guestShareTelegramCount Int      @default(0)
+  guestShareWhatsAppCount Int      @default(0)
+  guestViewCount          Int      @default(0)
+  shareEmailCount         Int      @default(0)
+  shareLinkCount          Int      @default(0)
+  shareTelegramCount      Int      @default(0)
+  shareWhatsAppCount      Int      @default(0)
+  guestClickExpandCount   Int      @default(0)
+  opportunity             Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
 
   @@index([oppId])
 }
@@ -134,11 +132,13 @@ model User {
   views               OppView[]
   sessions            Session[]
   opportunities       UserOpportunity[]
+  profile             UserProfile?
   recommendations     UserRecommendation[]
   typePreferences     UserType[]
   zonePreferences     UserZone[]
-   userActions        UserAction[]
-   profile UserProfile?
+  userActions         UserAction[]
+  teleUser            TeleUser?  @relation(fields: [teleUserid], references: [id])
+  teleUserid String?
 }
 
 model Account {
@@ -269,7 +269,10 @@ model TeleUser {
   school_type          school_type?
   non_student_type     non_school_type?
   school_name          String?
+  web_user_id          String?               @unique
   TeleUserOpportunity  TeleUserOpportunity[]
+
+  User User[]
 }
 
 model TeleUserOpportunity {
@@ -287,6 +290,43 @@ model TeleUserOpportunity {
 
   @@unique([userId, oppId], map: "TeleUserOpportunity_userId_oppId_idx")
   @@index([oppId])
+  @@index([userId])
+}
+
+model UserAction {
+  id         BigInt         @id @default(autoincrement())
+  userId     String?
+  guestId    String?
+  oppId      BigInt
+  actionType UserActionType
+  createdAt  DateTime       @default(now())
+  opp        Opps           @relation(fields: [oppId], references: [id])
+  user       User?          @relation(fields: [userId], references: [id])
+
+  @@index([userId, oppId])
+  @@index([guestId, oppId])
+  @@index([oppId, actionType])
+  @@index([createdAt])
+  @@map("user_actions")
+}
+
+model UserProfile {
+  id              String             @id @default(cuid())
+  userId          String             @unique
+  hearAboutSource HearAboutSource?
+  hearAboutOther  String?
+  interests       InterestCategory[]
+  interestsOther  String?
+  ageRange        AgeRange?
+  isStudent       Boolean?
+  schoolType      school_type?
+  schoolName      String?
+  goals           GoalType[]
+  goalsOther      String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
@@ -312,38 +352,19 @@ enum school_type {
 }
 
 enum UserActionType {
-  VIEW
   LIKE
   UNLIKE
   SAVE
   UNSAVE
-  TELE_CLICK
   CLICK
-  CLICK_EXPAND
   APPLY
   SHARE_TELEGRAM
   SHARE_WHATSAPP
   SHARE_EMAIL
   SHARE_LINK
-}
-
-model UserAction {
-  id         BigInt         @id @default(autoincrement())
-  userId     String?        // Make nullable for guests
-  guestId    String?        // For anonymous users
-  oppId      BigInt
-  actionType UserActionType
-  createdAt  DateTime       @default(now())
-
-
-  user User? @relation(fields: [userId], references: [id])
-  opp  Opps  @relation(fields: [oppId], references: [id])
-
-  @@index([userId, oppId])
-  @@index([guestId, oppId])
-  @@index([oppId, actionType])
-  @@index([createdAt])
-  @@map("user_actions")
+  CLICK_EXPAND
+  VIEW
+  TELE_CLICK
 }
 
 enum HearAboutSource {
@@ -359,8 +380,7 @@ enum HearAboutSource {
 }
 
 enum AgeRange {
-  BELOW_TWELVE     @map("Below 12")
-  TWELVE       @map("12")
+  BELOW_TWELVE @map("Below 12")
   THIRTEEN     @map("13")
   FOURTEEN     @map("14")
   FIFTEEN      @map("15")
@@ -375,6 +395,7 @@ enum AgeRange {
   TWENTY_FOUR  @map("24")
   TWENTY_FIVE  @map("25")
   ABOVE_25     @map("Above 25")
+  TWELVE       @map("12")
 }
 
 enum InterestCategory {
@@ -400,27 +421,4 @@ enum GoalType {
   COMMUNITY_SERVICE
   PERSONAL_GROWTH
   OTHER_GOALS
-}
-
-
-// Add this model to your existing schema
-model UserProfile {
-  id              String   @id @default(cuid())
-  userId          String   @unique
-  hearAboutSource HearAboutSource?
-  hearAboutOther  String?  // Free text when "OTHER" is selected
-  interests       InterestCategory[]
-  interestsOther  String?  // Free text for additional interests
-  ageRange        AgeRange?
-  isStudent       Boolean?
-  schoolType      school_type? // Reusing your existing enum
-  schoolName      String?
-  goals           GoalType[]
-  goalsOther      String?  // Free text for additional goals
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
 }

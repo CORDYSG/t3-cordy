@@ -2,6 +2,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 import DiscordProvider from "next-auth/providers/discord";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "@/server/db";
 
@@ -37,6 +38,27 @@ export const authConfig = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+       CredentialsProvider({
+      id: "telegram",
+      name: "Telegram",
+      credentials: {
+        telegramId: { label: "Telegram ID", type: "text" },
+        username: { label: "Username", type: "text" },
+      },
+      async authorize(credentials, req) {
+        // Validate user via DB or just pass for now
+        const user = {
+          id: credentials?.telegramId?.toString(),
+          name: credentials?.username?.toString(),
+        };
+
+        // You could optionally check DB and create user if needed
+        if (user.id && user.name) {
+          return user;
+        }
+        return null;
+      },
     }),
     /**
      * ...add more providers here.
