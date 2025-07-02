@@ -52,16 +52,19 @@ export const userRouter = createTRPCRouter({
         return { status: "ok", userId: existing.id };
       }
 
-      // If not, create user
-      const newUser = await ctx.db.user.create({
-        data: {
-          telegramId: input.id.toString(),
-          name: input.first_name,
-          username: input.username ?? undefined,
-        },
+
+      const result = await ctx.db.user.update({
+          data: {
+              telegramId: input.id.toString(),
+              name: input.first_name,
+              username: input.username ?? undefined,
+          },
+          where: { 
+            id: ctx.session.user.id
+          }
       });
 
-      return { status: "ok", userId: newUser.id };
+      return { status: "ok", userId: result.id };
     }),
     getUserData: protectedProcedure
     .query(async ({ ctx }) => {

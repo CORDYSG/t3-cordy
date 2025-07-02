@@ -2,6 +2,15 @@ import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import crypto from "crypto";
 
+export interface TelegramAuthData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: string;
+  hash: string;
+}
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -21,14 +30,14 @@ export function getRandomAccentBg(): string {
 }
 
 export function verifyTelegramLogin(
-  data: Record<string, any>,
+  data: TelegramAuthData,
   botToken: string
 ): boolean {
   const { hash, ...rest } = data;
 
   const sorted = Object.keys(rest)
     .sort()
-    .map((key) => `${key}=${rest[key]}`)
+    .map((key) => `${key}=${rest[key as keyof typeof rest]}`)
     .join("\n");
 
   const secret = crypto.createHash("sha256").update(botToken).digest();

@@ -3,10 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { useEffect, useMemo, useRef, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 import {
   Drawer,
@@ -32,7 +31,6 @@ import { api } from "@/trpc/react";
 import { BookmarkButton } from "./BookmarkButton";
 import { LikeButton } from "./LikeButton";
 import ShareButton from "./ShareButton";
-import { set } from "zod";
 
 type EventCardProps = {
   opp: OppWithZoneType;

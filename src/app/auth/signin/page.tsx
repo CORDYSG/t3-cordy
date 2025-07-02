@@ -8,9 +8,20 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 // Extend the Window interface to include onTelegramAuth
+
+interface TelegramAuthData {
+  id: number;
+  first_name: string;
+  last_name?: string;
+  username?: string;
+  photo_url?: string;
+  auth_date: string;
+  hash: string;
+  [key: string]: unknown;
+}
 declare global {
   interface Window {
-    onTelegramAuth?: (user: any) => void;
+    onTelegramAuth?: (user: TelegramAuthData) => void;
   }
 }
 
@@ -69,7 +80,7 @@ export default function SignInPage() {
           </h1>
           {error && (
             <div className="mb-4 rounded border-2 border-black bg-red-200 p-4 text-red-800 shadow-[2px_2px_0px_0px_black]">
-              {errorMessages[error] ||
+              {errorMessages[error] ??
                 "An unexpected error occurred. Please try again."}
             </div>
           )}

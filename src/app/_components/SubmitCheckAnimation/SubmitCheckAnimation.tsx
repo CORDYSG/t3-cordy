@@ -5,7 +5,9 @@ const SubmitAnimation = ({
   size = 60,
   isSubmitting = false,
   isComplete = false,
-  onComplete = () => {},
+  onComplete = () => {
+    /* intentionally empty */
+  },
 }) => {
   const [showTick, setShowTick] = useState(false);
 
