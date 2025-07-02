@@ -1,4 +1,3 @@
-
 import { auth } from "@/server/auth";
 import { api, HydrateClient } from "@/trpc/server";
 import Image from "next/image";
@@ -11,7 +10,7 @@ export default async function Home() {
   if (session?.user) {
     // void api.post.getLatest.prefetch();
   }
-  redirect("/opportunities");
+  redirect("/opportunities/for-you");
   return (
     <HydrateClient>
       {/* <Navbar session={session} /> */}

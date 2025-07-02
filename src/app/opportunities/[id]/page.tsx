@@ -8,6 +8,7 @@ import { api } from "@/trpc/server";
 import OpportunityDetailCard from "../../_components/Opportunities/OpportunityDetailCard";
 import EventCard from "../../_components/EventCard";
 import Head from "next/head";
+import { auth } from "@/server/auth";
 
 const OpportunityDetail = async ({
   params,
@@ -15,6 +16,8 @@ const OpportunityDetail = async ({
   params: Promise<{ id: string }>;
 }) => {
   const { id } = await params;
+  const session = await auth();
+  const user = session?.user;
 
   const opp: OppWithZoneType = await api.opp.getOppById({ oppId: id });
 
@@ -122,7 +125,11 @@ const OpportunityDetail = async ({
                   className="my-2 flex items-center justify-center px-8 md:my-0 md:px-0"
                   key={opp.id}
                 >
-                  <EventCard opp={opp} static />
+                  <EventCard
+                    opp={opp}
+                    static
+                    isAuthenticated={user !== null && user !== undefined}
+                  />
                 </div>
               ))}
             {opps.length === 0 && (

@@ -3,10 +3,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
-import { useEffect, useMemo, useRef, useState, type JSX } from "react";
+import { useEffect, useRef, useState, type JSX } from "react";
 import EventZone from "./EventZone";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 
 import {
   Drawer,
@@ -48,6 +47,7 @@ export default function EventCard({
   opp,
   disableInteractions,
   listView = false,
+  isAuthenticated,
 }: Readonly<EventCardProps>): JSX.Element {
   const [open, setOpen] = useState(false);
 
@@ -74,9 +74,15 @@ export default function EventCard({
   const [storedGuestId, setStoredGuestId] = useState<string | null>(null);
   const [mockLike, setMockLke] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
-  const initialData = api.userOpp.getUserOppMetrics.useQuery({
-    oppId: parseFloat(opp.id),
-  });
+
+  const initialData = api.userOpp.getUserOppMetrics.useQuery(
+    {
+      oppId: parseFloat(opp.id),
+    },
+    {
+      enabled: !!isAuthenticated,
+    },
+  );
 
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
@@ -96,7 +102,6 @@ export default function EventCard({
 
   useEffect(() => {
     if (initialData.data) {
-      console.log("Initial data:>>>>>>>", initialData.data);
       setMockLke(initialData.data.liked);
       setIsBookmarked(initialData.data.saved);
     }
@@ -167,7 +172,7 @@ export default function EventCard({
             className={` ${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
           >
             <div
-              className={`card flex h-full w-full justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
+              className={`card flex h-full w-full justify-start rounded-xl p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
             >
               {/* Image column */}
               <div className="relative mr-4 h-24 w-48 flex-shrink-0 overflow-hidden rounded-lg border-2">
@@ -202,7 +207,7 @@ export default function EventCard({
                   <h2 className="mb-1 line-clamp-2 text-left text-base leading-tight font-black">
                     {opp.name}
                   </h2>
-                  <p className="text-xs leading-tight font-bold text-gray-700">
+                  <p className="text-xs leading-tight font-bold text-gray-500">
                     {opp.organisation}
                   </p>
                 </div>
@@ -237,7 +242,7 @@ export default function EventCard({
             className={` ${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
           >
             <div
-              className={`card flex h-full w-full flex-col justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
+              className={`card flex h-full w-full flex-col justify-start rounded-xl p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
             >
               <div className="relative mb-3 h-0 w-full overflow-hidden rounded-lg border-2 pb-[56.25%]">
                 {opp.thumbnail_url ? (
@@ -278,7 +283,7 @@ export default function EventCard({
               <h2 className="mb-2 line-clamp-3 text-left text-base leading-tight font-black">
                 {opp.name}
               </h2>
-              <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+              <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
                 {opp.organisation}
               </p>
               <p className="mb-auto line-clamp-3 text-left text-sm">
@@ -306,11 +311,11 @@ export default function EventCard({
         )}
 
         <DialogContent
-          className="max-w-[425px] rounded-md border-2 bg-white p-8 md:max-w-[800px]"
+          className="max-w-[425px] rounded-xl border-2 bg-white p-8 md:max-w-[800px]"
           style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
         >
           <DialogHeader className="flex w-full flex-row gap-5">
-            <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48 md:max-w-1/3">
+            <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48 md:max-w-2/5">
               {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
@@ -338,7 +343,7 @@ export default function EventCard({
                 <DialogTitle className="text-3xl font-black">
                   {opp.name}
                 </DialogTitle>
-                <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+                <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
                   {opp.organisation}
                 </p>
                 <div className="my-4 flex flex-wrap gap-2">
@@ -405,10 +410,10 @@ export default function EventCard({
           className={`${disableInteractions ? "pointer-events-none touch-none select-none" : ""}`}
         >
           <div
-            className={`card flex h-full w-full justify-start rounded-lg p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
+            className={`card flex h-full w-full justify-start rounded-xl p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
           >
             {/* Image column */}
-            <div className="relative mr-4 h-24 w-24 flex-shrink-0 overflow-hidden rounded-lg border-2 md:w-48">
+            <div className="relative mr-4 h-24 w-24 rounded-lg border-2 md:h-48">
               {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
@@ -477,7 +482,7 @@ export default function EventCard({
           <div
             className={`card flex h-full w-full flex-col justify-start p-4 transition-all ${disableInteractions ? "" : "cursor-pointer"}`}
           >
-            <div className="relative mb-3 h-0 w-full overflow-hidden rounded-lg border-2 pb-[56.25%]">
+            <div className="relative mb-3 h-0 w-full overflow-hidden rounded-xl border-2 pb-[56.25%]">
               {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
@@ -513,16 +518,16 @@ export default function EventCard({
               </div>
             </div>
 
-            <h2 className="mb-2 line-clamp-1 text-left text-base font-bold">
+            <h2 className="mb-1 line-clamp-1 text-left text-base font-bold">
               {opp.name}
             </h2>
-
+            <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
+              {opp.organisation}
+            </p>
             <p className="mb-auto line-clamp-3 text-left text-sm text-gray-700">
               {opp.caption}
             </p>
-            <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
-              {opp.organisation}
-            </p>
+
             <div className="mt-3 border-t border-gray-100 pt-2">
               <p className="text-left text-xs text-gray-500">
                 {opp.deadline ? formatDate(opp.deadline) : "Forever"}
@@ -546,7 +551,7 @@ export default function EventCard({
       <DrawerContent className="w-screen bg-white outline-none">
         <div className="flex-1 overflow-y-auto px-4">
           <DrawerHeader>
-            <div className="relative h-48 w-full overflow-hidden rounded-md border-2">
+            <div className="relative h-36 w-full overflow-hidden rounded-md border-2 md:h-72">
               {opp.thumbnail_url ? (
                 <Image
                   src={opp.thumbnail_url}
@@ -572,7 +577,7 @@ export default function EventCard({
             <DrawerTitle className="mt-4 text-2xl font-black">
               {opp.name}
             </DrawerTitle>
-            <p className="mb-2 text-xs leading-tight font-bold text-gray-700">
+            <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
               {opp.organisation}
             </p>
             <div className="my-2 flex flex-wrap gap-2">

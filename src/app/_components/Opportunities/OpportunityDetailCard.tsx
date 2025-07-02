@@ -12,12 +12,15 @@ import { api } from "@/trpc/react";
 import { LikeButton } from "../LikeButton";
 import { BookmarkButton } from "../BookmarkButton";
 import ShareButton from "../ShareButton";
+import { useSession } from "next-auth/react";
 
 type Props = {
   opp: OppWithZoneType;
   types: TagType[];
 };
 const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
+  const { data: session } = useSession();
+
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
@@ -34,9 +37,15 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
 
   const daysLeft = opp.deadline ? calculateDaysLeft(opp.deadline) : null;
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
-  const initialData = api.userOpp.getUserOppMetrics.useQuery({
-    oppId: parseFloat(opp.id),
-  });
+
+  const initialData = api.userOpp.getUserOppMetrics.useQuery(
+    {
+      oppId: parseFloat(opp.id),
+    },
+    {
+      enabled: !!session?.user?.id,
+    },
+  );
   const [mockLike, setMockLke] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   useEffect(() => {

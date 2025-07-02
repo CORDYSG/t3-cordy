@@ -42,7 +42,14 @@ const ShareButton = ({
 }: ShareContent) => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
-  const sharedUrl = url ?? window.location.href;
+  const [sharedUrl, setSharedUrl] = useState<string>("");
+  useEffect(() => {
+    if (url) {
+      setSharedUrl(url);
+    } else {
+      setSharedUrl(window.location.href);
+    }
+  }, []);
 
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 

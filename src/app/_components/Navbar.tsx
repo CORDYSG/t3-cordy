@@ -52,7 +52,7 @@ const Navbar: React.FC<NavbarProps> = ({ session }) => {
               <div className="flex-shrink-0">
                 <Link
                   href="/"
-                  className="bg-primary font-brand rounded-full px-4 py-1 text-2xl font-bold text-white uppercase"
+                  className="bg-primary font-brand rounded-full px-4 py-1 align-baseline text-2xl font-extrabold text-white uppercase"
                 >
                   Cordy
                 </Link>
