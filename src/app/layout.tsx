@@ -16,6 +16,30 @@ import { Toaster } from "@/components/ui/sonner";
 export const metadata: Metadata = {
   title: "CORDY",
   description: "Find your passion. Find your opportunity.",
+  openGraph: {
+    title: "CORDY - Explore Opportunities.",
+    description: "Explore opportunities with Cordy, find your passion.",
+    url: "https://app.cordy.sg",
+    siteName: "CORDY",
+    images: [
+      {
+        url: "https://images.ctfassets.net/ayry21z1dzn2/34TCgC9EvR51gzdSpY3WJ8/6c4b4a3ccaceff0f765e65714b042489/Mask_group.jpg?h=250",
+        width: 1200,
+        height: 630,
+        alt: "CORDY - Opportunity Platform Thumbnail",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CORDY – Explore Opportunities.",
+    description: "Explore opportunities with Cordy, find your passion",
+    images: [
+      "https://images.ctfassets.net/ayry21z1dzn2/34TCgC9EvR51gzdSpY3WJ8/6c4b4a3ccaceff0f765e65714b042489/Mask_group.jpg?h=250",
+    ],
+  },
   icons: {
     icon: [
       { rel: "icon", url: "/favicon.ico" },
