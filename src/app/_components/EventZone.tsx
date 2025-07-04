@@ -13,16 +13,38 @@ const EventTag: React.FC<EventTagProps> = ({
   onClickZone,
   active,
 }) => {
+  const defaultBg = zone.colour as React.CSSProperties["backgroundColor"];
+
+  const backgroundColor = !interactive
+    ? defaultBg
+    : active
+      ? defaultBg
+      : "white";
+
   return (
     <div onClick={onClickZone}>
       <span
-        className={`rounded-full border-2 border-black px-2 py-1 font-semibold whitespace-nowrap text-black transition-all ${small ? "text-[0.65rem]" : "text-xs"} ${
-          interactive &&
-          "cursor-pointer hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]"
-        } ${active && "shadow-[3px_3px_0px_0px_rgba(0,0,0,1)]"}`}
+        className={`font-brand rounded-full border-2 border-black px-2 py-1 font-semibold whitespace-nowrap text-black transition-all ${
+          small ? "text-[0.65rem]" : "text-xs"
+        } ${interactive && "cursor-pointer"} ${active && ""}`}
         style={{
-          backgroundColor:
-            zone.colour as React.CSSProperties["backgroundColor"],
+          backgroundColor,
+          ...(interactive &&
+            !active && {
+              // use inline hover background simulation
+              transition: "background-color 0.2s ease",
+            }),
+        }}
+        onMouseEnter={(e) => {
+          if (interactive && !active) {
+            (e.currentTarget as HTMLElement).style.backgroundColor =
+              defaultBg ?? "";
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (interactive && !active) {
+            (e.currentTarget as HTMLElement).style.backgroundColor = "white";
+          }
         }}
       >
         {zone.name}

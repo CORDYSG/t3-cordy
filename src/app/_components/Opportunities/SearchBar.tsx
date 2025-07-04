@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, ChevronDown, X } from "lucide-react";
+import { ChevronUp, ChevronDown, X, Search } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -44,17 +44,19 @@ const SearchBar = ({
   };
 
   return (
-    <div className="container mt-4 flex w-3/4 flex-col">
-      <div className="flex flex-row rounded-lg border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+    <div className="container flex w-5/6 flex-col md:w-3/4">
+      <div className="flex flex-row justify-around rounded-lg border-2 border-black bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
         {/* Search Bar */}
-        <div className="w-10 border-r-2 border-black"></div>
-        <div className="relative flex w-3/4 border-r-2 border-black md:w-5/6">
+        <div className="flex w-8 items-center justify-center pl-2 md:w-10 md:border-r-2 md:border-black">
+          <Search width={24} height={24} className="block md:hidden" />
+        </div>
+        <div className="relative flex w-full border-r-2 border-black md:w-5/6">
           <input
             type="text"
             placeholder="Search..."
             value={search}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full px-4 py-2 focus:outline-none"
+            className="font-brand w-full px-4 py-2 font-medium focus:outline-none"
           />
           {search && (
             <button
@@ -68,8 +70,8 @@ const SearchBar = ({
 
         <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
           <PopoverTrigger asChild>
-            <div className="flex w-32 cursor-pointer items-center justify-between gap-4 px-4 text-center font-semibold text-black">
-              <p>FILTERS</p>
+            <div className="flex cursor-pointer items-center justify-between gap-4 px-4 text-center font-semibold text-black">
+              <p className="font-brand hidden font-bold md:block">FILTERS</p>
               {isFilterOpen ? (
                 <ChevronUp size={24} />
               ) : (
@@ -79,7 +81,7 @@ const SearchBar = ({
           </PopoverTrigger>
 
           <PopoverContent
-            className="mt-2 border-2 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
+            className="mt-2 border-1 bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]"
             align="end"
           >
             <div className="space-y-4">
@@ -116,7 +118,7 @@ const SearchBar = ({
         </Popover>
       </div>
 
-      <div className="mt-8 flex flex-wrap justify-center gap-4">
+      <div className="mx-auto mt-4 flex flex-wrap justify-center gap-x-1 gap-y-1.5 md:w-5/6 md:gap-y-3">
         {zones.length > 0 &&
           zones.map((zone) => (
             <div key={zone.id}>

@@ -118,27 +118,28 @@ model UserRecommendation {
 }
 
 model User {
-  id                  String               @id @default(dbgenerated("gen_random_uuid()"))
+  id                  String                @id @default(dbgenerated("gen_random_uuid()"))
   username            String?
-  email               String?              @unique
+  email               String?               @unique
   emailVerified       DateTime?
   image               String?
   telegramId          String?
   lastActive          DateTime?
-  onboardingCompleted Boolean              @default(false)
+  onboardingCompleted Boolean               @default(false)
   name                String?
-  createdAt           DateTime             @default(now()) @db.Timestamptz(6)
+  createdAt           DateTime              @default(now()) @db.Timestamptz(6)
+  teleUserid          String?
   accounts            Account[]
   views               OppView[]
+  ReportedOpportunity ReportedOpportunity[]
   sessions            Session[]
+  teleUser            TeleUser?             @relation(fields: [teleUserid], references: [id])
   opportunities       UserOpportunity[]
   profile             UserProfile?
   recommendations     UserRecommendation[]
   typePreferences     UserType[]
   zonePreferences     UserZone[]
   userActions         UserAction[]
-  teleUser            TeleUser?  @relation(fields: [teleUserid], references: [id])
-  teleUserid String?
 }
 
 model Account {
@@ -230,6 +231,7 @@ model Opps {
   OppType             OppType[]
   views               OppView[]
   OppZone             OppZone[]
+  ReportedOpportunity ReportedOpportunity[]
   TeleUserOpportunity TeleUserOpportunity[]
   userInteractions    UserOpportunity[]
   recommendations     UserRecommendation[]
@@ -271,8 +273,7 @@ model TeleUser {
   school_name          String?
   web_user_id          String?               @unique
   TeleUserOpportunity  TeleUserOpportunity[]
-
-  User User[]
+  User                 User[]
 }
 
 model TeleUserOpportunity {
@@ -328,6 +329,39 @@ model UserProfile {
   user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model ReportedOpportunity {
+  id          String       @id @default(cuid())
+  userId      String
+  oppId       BigInt
+  reason      ReportReason
+  description String?
+  status      ReportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  Opps        Opps         @relation(fields: [oppId], references: [id], onDelete: Cascade)
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([oppId])
+}
+
+enum ReportReason {
+  SPAM
+  SCAM
+  INAPPROPRIATE
+  MISLEADING
+  DUPLICATE
+  OTHER_REPORT
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  DISMISSED
+  RESOLVED
 }
 
 enum non_school_type {

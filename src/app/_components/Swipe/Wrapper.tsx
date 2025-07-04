@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+
 import SwipeCardWrapper from "@/app/_components/Swipe/SwipeCardWrapper";
 
 import SwipeButtons from "@/app/_components/Swipe/SwipeButtons";
@@ -20,6 +21,7 @@ const Wrapper = () => {
         ref={cardRef}
         onEmptyChange={(empty) => setIsEmpty(empty)}
       />
+
       {isEmpty ? null : <SwipeButtons cardRef={cardRef} />}
     </>
   );

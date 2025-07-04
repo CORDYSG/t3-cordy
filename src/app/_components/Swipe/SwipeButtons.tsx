@@ -53,7 +53,7 @@ const SwipeButtons: React.FC<SwipeBarProps> = ({ cardRef }) => {
   };
 
   return (
-    <div className="relative container mx-auto max-w-1/2 min-w-4/6">
+    <div className="relative container mx-auto max-w-1/3 min-w-4/6">
       <div className="absolute bottom-20 mb-4 hidden w-full min-w-[200px] items-center justify-between lg:flex">
         {/* Thumbs Down Button */}
         <motion.button

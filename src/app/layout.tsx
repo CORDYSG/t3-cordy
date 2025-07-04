@@ -1,15 +1,17 @@
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
-import { DM_Sans } from "next/font/google";
+import { DM_Sans, Patrick_Hand } from "next/font/google";
 import { TRPCReactProvider } from "@/trpc/react";
 import { auth } from "@/server/auth";
 import Navbar from "./_components/Navbar";
+import NewNavbar from "./_components/NewNavbar";
 import Footer from "./_components/Footer";
 import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
 import { Suspense } from "react";
 import Loading from "./loading";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "CORDY",
@@ -90,23 +92,32 @@ const dmSans = DM_Sans({
   display: "swap",
 });
 
+const patrickHand = Patrick_Hand({
+  variable: "--font-patrick-hand",
+  subsets: ["latin"],
+  weight: ["400"],
+  style: "normal",
+  fallback: ["cursive"],
+});
+
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const session = await auth();
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable}`}
+      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable} ${patrickHand.variable}`}
     >
       <body className="flex min-h-screen w-screen flex-col justify-between overflow-x-hidden">
         <TRPCReactProvider>
           <SessionProvider session={session}>
-            <Navbar session={session} />
+            <NewNavbar session={session} />
             <div className="min-h-48">
               {" "}
               <Suspense fallback={<Loading />}>{children}</Suspense>
             </div>
 
             <Footer />
+            <Toaster />
           </SessionProvider>
         </TRPCReactProvider>
       </body>

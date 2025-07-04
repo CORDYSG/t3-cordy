@@ -20,16 +20,7 @@ const Footer: React.FC = () => {
               YOUTH-LED NON-PROFIT
             </p>
           </div>
-          {/* <div className="flex items-center gap-2 text-sm font-semibold text-white">
-            <Link
-              href="https://www.instagram.com/cordy.sg/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white hover:text-gray-300"
-            >
-              Instagram
-            </Link>
-          </div> */}
+
           <Link
             href="https://www.tiktok.com/@cordy.sg?lang=en"
             target="_blank"
@@ -46,18 +37,6 @@ const Footer: React.FC = () => {
           >
             Instagram
           </Link>
-          {/* <Link href="/about" className="text-white hover:text-gray-300">
-            About
-          </Link> */}
-          {/* <Link href="/contact" className="text-white hover:text-gray-300">
-            Contact
-          </Link>
-          <Link href="/privacy" className="text-white hover:text-gray-300">
-            Privacy Policy
-          </Link>
-          <Link href="/terms" className="text-white hover:text-gray-300">
-            Terms of Service
-          </Link> */}
         </div>
 
         {/* Right side - Image placeholder */}
@@ -86,6 +65,13 @@ const Footer: React.FC = () => {
             GET CORDY IN <br /> YOUR PHONE!
           </p>
         </button>
+      </div>
+      <div className="mt-2">
+        <p className="text-center text-white italic opacity-60">
+          &quot;Caution: This website may contain traces of bugs, experimental
+          features, and the occasional existential crisis. We&apos;re working on
+          it!&quot; - Team CORDY
+        </p>
       </div>
     </footer>
   );

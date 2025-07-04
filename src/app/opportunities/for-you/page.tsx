@@ -58,7 +58,7 @@ const ForYouPage = () => {
           }}
         />
       </main>
-      <div className="relative mx-auto mt-24 flex h-24 w-2/3 items-center justify-center md:mt-16 md:h-46 md:w-full">
+      <div className="relative mx-auto -mb-12 flex w-2/3 items-center justify-center md:w-full">
         <Image
           src={
             "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg"

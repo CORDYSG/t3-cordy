@@ -4,6 +4,13 @@ import { api } from "@/trpc/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
+import Link from "next/link";
+import { LogOutIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const ProfileCard = () => {
   const router = useRouter();
@@ -29,8 +36,9 @@ const ProfileCard = () => {
     : "U";
 
   return (
-    <div className="card pointer-events-none flex w-full touch-none flex-col overflow-hidden bg-white">
+    <div className="shadow-brand static flex w-full touch-none flex-col rounded-xl border-2 bg-white p-6">
       {/* Colored header section */}
+
       <div className="bg-primary h-36 w-full rounded-t-md border-2"></div>
 
       {/* Main content area with profile picture overlapping */}
@@ -84,6 +92,18 @@ const ProfileCard = () => {
               </p>
               <p className="text-sm text-gray-500">Liked</p>
             </div>
+          </div>
+          <div className="mt-4 flex w-full justify-end">
+            <Tooltip>
+              <TooltipTrigger>
+                <Link href="api/auth/signout" className="btn-brand-white ]">
+                  {" "}
+                  <span className="hidden md:block">Log out</span>
+                  <LogOutIcon size={24} />
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>Log out</TooltipContent>
+            </Tooltip>
           </div>
         </div>
       </div>

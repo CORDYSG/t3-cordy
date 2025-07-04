@@ -11,6 +11,7 @@ import { ChevronLeft, Check } from "lucide-react";
 import { TypingText } from "../TypingText";
 import { motion } from "framer-motion";
 import SubmitAnimation from "../SubmitCheckAnimation/SubmitCheckAnimation";
+import { useRouter } from "next/navigation";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +23,7 @@ const initialProfile: ProfileData = {
 };
 
 const ProfileQuestionnaire: React.FC = () => {
+  const router = useRouter();
   const [profileData, setProfileData] = useState<ProfileData>(initialProfile);
   const [step, setStep] = useState(0);
   const [typingDone, setTypingDone] = useState(false);
@@ -45,6 +47,9 @@ const ProfileQuestionnaire: React.FC = () => {
       setIsSubmitting(false);
     },
     onError: (error) => {
+      if (error.data?.code === "UNAUTHORIZED") {
+        return router.push("/api/auth/signin"); // Or wherever your login page is
+      }
       console.error("Error creating profile:", error);
       alert("Failed to submit profile. Please try again.");
       setIsSubmitting(false);
