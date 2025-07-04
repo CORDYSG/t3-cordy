@@ -603,7 +603,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       <div className="flex min-h-[620px] w-full flex-col items-center gap-2 p-4 md:min-h-[660px] md:p-8">
         <div className="flex w-11/12 flex-col items-center justify-between px-6">
           {visibleOpps.length > 0 && (
-            <div className="container mt-[5vw] hidden w-full max-w-md justify-between md:flex lg:mt-8">
+            <div className="container mt-[5vw] mb-2 hidden w-full max-w-md justify-between md:flex lg:mt-8">
               <div className="flex gap-2">
                 <button
                   className={`btn-brand-white flex items-center px-4 transition-all duration-200 ${

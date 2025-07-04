@@ -161,7 +161,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
       <div className="mt-4 mb-8 w-full border-2 border-dashed"></div>
       <div className="space-y-4">
         <h2 className="hidden text-2xl font-bold md:block">{opp.name}</h2>
-        <div className="flex gap-2">
+        <div className="flex w-full gap-2">
           {types.map((type) => (
             <span
               key={type.id}
@@ -171,7 +171,17 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
             </span>
           ))}
         </div>
-        <p className="text-lg whitespace-pre-line"> {opp.information}</p>
+        <p
+          className="w-full text-lg break-words hyphens-auto whitespace-pre-line"
+          style={{
+            overflowWrap: "break-word",
+            wordBreak: "break-word",
+            hyphens: "auto",
+          }}
+        >
+          {" "}
+          {opp.information}
+        </p>
         <div className="flex w-full items-center justify-end gap-x-8">
           <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
           <BookmarkButton

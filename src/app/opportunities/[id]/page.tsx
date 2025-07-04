@@ -122,7 +122,7 @@ const OpportunityDetail = async ({
             {opps.length > 0 &&
               opps.map((opp: OppWithZoneType) => (
                 <div
-                  className="my-2 flex items-center justify-center px-8 md:my-0 md:px-0"
+                  className="my-2 flex items-center justify-center"
                   key={opp.id}
                 >
                   <EventCard

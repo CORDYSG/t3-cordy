@@ -36,7 +36,7 @@ const ProfileCard = () => {
     : "U";
 
   return (
-    <div className="shadow-brand static flex w-full touch-none flex-col rounded-xl border-2 bg-white p-6">
+    <div className="shadow-brand flex w-full flex-col rounded-xl border-2 bg-white p-6">
       {/* Colored header section */}
 
       <div className="bg-primary h-36 w-full rounded-t-md border-2"></div>
@@ -96,7 +96,7 @@ const ProfileCard = () => {
           <div className="mt-4 flex w-full justify-end">
             <Tooltip>
               <TooltipTrigger>
-                <Link href="api/auth/signout" className="btn-brand-white ]">
+                <Link href="api/auth/signout" className="btn-brand-white -mr-4">
                   {" "}
                   <span className="hidden md:block">Log out</span>
                   <LogOutIcon size={24} />
