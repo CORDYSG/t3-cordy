@@ -12,6 +12,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import { UserActionType, type Prisma } from "@prisma/client";
+import { TRPCError } from "@trpc/server";
 
 // Create a new type for guest session data
 type GuestSessionData = {
@@ -206,7 +207,7 @@ export const userOppRouter = createTRPCRouter({
         applied: userOpp.applied,
       };
     }),
-    getUserOppMetricCounts: protectedProcedure
+   getUserOppMetricCounts: protectedProcedure
     .query(async ({ ctx }) => {
       const userId = ctx.session.user.id;
       if (!userId) {
@@ -245,7 +246,7 @@ export const userOppRouter = createTRPCRouter({
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      if (!userId) { return null; }
+      if (!userId) { throw new TRPCError({ code: "UNAUTHORIZED" }); }
       const existing = await db.userOpportunity.findUnique({
         where: {
           userId_oppId: {
@@ -282,6 +283,38 @@ export const userOppRouter = createTRPCRouter({
           applied: input.applied ?? false,
         },
       });
+    }),
+
+createReportOpp: protectedProcedure
+    .input(
+      z.object({
+       oppId: z.union([z.number(), z.bigint()]),
+        reason: z.enum([
+          "SPAM",
+          "SCAM",
+          "INAPPROPRIATE",
+          "MISLEADING",
+          "DUPLICATE",
+          "OTHER_REPORT",
+        ]),
+        description: z.string().optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const { user } = ctx.session;
+      if (!user){ 
+     throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
+      const report = await ctx.db.reportedOpportunity.create({
+        data: {
+          userId: user.id,
+          oppId: input.oppId,
+          reason: input.reason,
+          description: input.description,
+        },
+      });
+
+      return report;
     }),
     
 updateUserOppMetrics: publicProcedure

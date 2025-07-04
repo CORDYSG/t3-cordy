@@ -173,7 +173,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
         </div>
         <p className="text-lg whitespace-pre-line"> {opp.information}</p>
         <div className="flex w-full items-center justify-end gap-x-8">
-          <ShareButton url={opp.url} oppId={opp.id} />
+          <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
           <BookmarkButton
             isBookmarked={isBookmarked}
             handleBookmark={handleSave}
@@ -181,7 +181,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
           <LikeButton isLiked={mockLike} handleLike={handleLike} />
           <Link
             className=""
-            href={opp.url_og}
+            href={opp.url_source}
             target="_blank"
             rel="noopener noreferrer"
           >

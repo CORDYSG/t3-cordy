@@ -19,15 +19,17 @@ import {
   animate,
   type PanInfo,
 } from "framer-motion";
+import ReportModal from "./ReportModal";
 import { api } from "@/trpc/react";
 import EventCard from "../EventCard";
-import { Check, Undo2, X } from "lucide-react";
+import { Check, Undo2, X, Home } from "lucide-react";
 import LoadingComponent from "../LoadingComponent";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import ShareButton from "../ShareButton";
 
 type SwipeDirection = "left" | "right";
 
@@ -54,7 +56,7 @@ const GUEST_LIMIT = 8;
 const SWIPE_THRESHOLD = 120;
 const VELOCITY_THRESHOLD = 800;
 const CARD_OFFSET_Y = 8;
-const CARD_ROTATION = 6;
+const CARD_ROTATION = 3;
 
 const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
   ({ onEmptyChange }, ref) => {
@@ -301,6 +303,11 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     }, [current, limitReached, opportunities.length, isAuthenticated, refetch]);
 
     // Submit pending swipes (authenticated only)
+    const handleReportSubmitted = async () => {
+      // Swipe the current opportunity left (dislike) after report is submitted
+      await animateSwipe("left");
+    };
+
     useEffect(() => {
       if (!isAuthenticated || pendingSwipes.length < 2) return;
 
@@ -452,16 +459,35 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     );
     const stackSize = Math.min(visibleOpps.length, 4);
 
+    // Update the animateSwipe function
+
+    useImperativeHandle(ref, () => ({
+      swipeLeft: () => animateSwipe("left"),
+      swipeRight: () => animateSwipe("right"),
+    }));
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (visibleOpps.length === 0 || isSwiping || undoing) return;
 
+        // Check if user is typing in an input field
+        const target = e.target as HTMLElement;
+        const isTyping =
+          target.tagName === "INPUT" ||
+          target.tagName === "TEXTAREA" ||
+          target.tagName === "SELECT" ||
+          target.isContentEditable ||
+          target.closest('[contenteditable="true"]');
+
+        if (isTyping) return;
+
         // Left arrow or 'D' key
         if (e.key === "ArrowLeft" || e.key.toLowerCase() === "d") {
+          e.preventDefault(); // Prevent default behavior
           void animateSwipe("left");
         }
         // Right arrow or 'J' key
         else if (e.key === "ArrowRight" || e.key.toLowerCase() === "j") {
+          e.preventDefault(); // Prevent default behavior
           void animateSwipe("right");
         }
       };
@@ -469,14 +495,6 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [visibleOpps, isSwiping, undoing]);
-
-    // Update the animateSwipe function
-
-    useImperativeHandle(ref, () => ({
-      swipeLeft: () => animateSwipe("left"),
-      swipeRight: () => animateSwipe("right"),
-    }));
-
     useEffect(() => {
       if (!onEmptyChange) return;
 
@@ -568,29 +586,51 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           />
           <p className="mb-4 italic">&quot;Oh, poop&quot;</p>
           <p className="font-brand">No new opportunities.</p>
+          <Link
+            href="/opportunities"
+            className="font-brand btn-brand-primary mt-4 px-4 font-bold"
+          >
+            <span className="font-brand hidden font-bold md:block">
+              Back to Home
+            </span>
+            <Home size={24} className="md:hidden" />
+          </Link>
         </div>
       );
     }
 
     return (
-      <div className="flex min-h-[620px] w-full flex-col items-center gap-2 p-6 sm:p-4 md:min-h-[660px]">
-        {visibleOpps.length > 0 && (
-          <div className="container flex w-full max-w-sm justify-start gap-4 md:my-4 md:w-1/2">
-            <button
-              className={`btn-secondary flex items-center gap-2 font-semibold uppercase transition-all duration-200 ${
-                undoing
-                  ? "translate-y-0.5 rotate-[-5deg] [box-shadow:1px_1px_0px_0px_rgba(0,0,0,1)]"
-                  : ""
-              } ${!canUndo ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
-              onClick={undo}
-              disabled={!canUndo || undoing}
-            >
-              <Undo2 size={24} color="black" />
-              <p>Back</p>
-            </button>
-          </div>
-        )}
-        <div className="flex w-full items-center justify-center px-6">
+      <div className="flex min-h-[620px] w-full flex-col items-center gap-2 p-4 md:min-h-[660px] md:p-8">
+        <div className="flex w-11/12 flex-col items-center justify-between px-6">
+          {visibleOpps.length > 0 && (
+            <div className="container mt-[5vw] hidden w-full max-w-md justify-between md:flex lg:mt-8">
+              <div className="flex gap-2">
+                <button
+                  className={`btn-brand-white flex items-center px-4 transition-all duration-200 ${
+                    undoing
+                      ? "translate-y-0.5 rotate-[-5deg] [box-shadow:1px_1px_0px_0px_rgba(0,0,0,1)]"
+                      : ""
+                  } ${!canUndo ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                  onClick={undo}
+                  disabled={!canUndo || undoing}
+                >
+                  <span className="sr-only">Undo</span>
+                  <Undo2 size={24} color="black" />
+                </button>
+                <ReportModal
+                  currentOpportunity={visibleOpps[0] ?? null}
+                  onReportSubmitted={handleReportSubmitted}
+                  disabled={undoing}
+                />
+              </div>
+              <ShareButton
+                titleOnly
+                opp_airtable_id={visibleOpps[0]?.airtable_id}
+                oppId={visibleOpps[0]?.id}
+                disabled={undoing}
+              />
+            </div>
+          )}
           <div
             ref={containerRef}
             className="relative flex min-h-[490px] w-full max-w-sm items-center"
@@ -716,9 +756,38 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
               })
             )}
           </div>
+          {visibleOpps.length > 0 && (
+            <div className="container mt-[5vw] flex w-full max-w-md justify-between md:hidden lg:mt-8">
+              <div className="flex gap-2">
+                <button
+                  className={`btn-brand-white flex items-center px-4 transition-all duration-200 ${
+                    undoing
+                      ? "translate-y-0.5 rotate-[-5deg] [box-shadow:1px_1px_0px_0px_rgba(0,0,0,1)]"
+                      : ""
+                  } ${!canUndo ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+                  onClick={undo}
+                  disabled={!canUndo || undoing}
+                >
+                  <span className="sr-only">Undo</span>
+                  <Undo2 size={24} color="black" />
+                </button>
+                <ReportModal
+                  currentOpportunity={visibleOpps[0] ?? null}
+                  onReportSubmitted={handleReportSubmitted}
+                  disabled={undoing}
+                />
+              </div>
+              <ShareButton
+                titleOnly
+                opp_airtable_id={visibleOpps[0]?.airtable_id}
+                oppId={visibleOpps[0]?.id}
+                disabled={undoing}
+              />
+            </div>
+          )}
         </div>
         {!isAuthenticated && !limitReached && (
-          <div className="mt-[10vw] rounded-lg bg-gray-100 p-4 text-center text-sm lg:mt-16">
+          <div className="my-4 rounded-lg bg-gray-100 p-4 text-center text-sm md:mt-12">
             <p>
               You&apos;re browsing as a guest.
               <Link

@@ -30,22 +30,26 @@ import { api } from "@/trpc/react";
 type ShareContent = {
   title?: string;
   text?: string;
-  url?: string;
+  opp_airtable_id?: string;
   oppId?: number | bigint;
+  titleOnly?: boolean;
+  disabled?: boolean;
 };
 
 const ShareButton = ({
   title = "Check this out! - Cordy",
   text = "I found an interesting opportunity!",
-  url,
   oppId,
+  opp_airtable_id,
+  titleOnly,
+  disabled,
 }: ShareContent) => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
   const [sharedUrl, setSharedUrl] = useState<string>("");
   useEffect(() => {
-    if (url) {
-      setSharedUrl(url);
+    if (opp_airtable_id) {
+      setSharedUrl(`https://app.cordy.sg/opportunities/${opp_airtable_id}`);
     } else {
       setSharedUrl(window.location.href);
     }
@@ -107,9 +111,21 @@ const ShareButton = ({
 
   return (
     <Dialog>
-      <DialogTrigger className="-mx-2 cursor-pointer rounded-md p-2 hover:bg-slate-100">
-        <Share2 size={24} className="text-gray-400" />
-      </DialogTrigger>
+      {titleOnly ? (
+        <DialogTrigger
+          className={`btn-brand-white font-brand flex items-center gap-2 px-4 font-black uppercase transition-all duration-200 ${
+            disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          }`}
+          disabled={disabled}
+        >
+          SEND
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger className="-mx-2 cursor-pointer rounded-md p-2 hover:bg-slate-100">
+          <Share2 size={24} className="text-gray-400" />
+        </DialogTrigger>
+      )}
+
       <DialogContent
         className="border-2 bg-white"
         style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}

@@ -197,15 +197,15 @@ const OpportunitiesClient = ({
     <>
       <section
         aria-label="Opportunities Header"
-        className="flex min-h-64 w-full flex-col items-center justify-center px-5"
+        className="flex w-full flex-col items-center justify-center px-5"
       >
-        <header className="space-y-2 text-center">
-          <h1 className="font-brand text-4xl font-bold text-black uppercase">
-            Opportunities
+        <header className="mb-4 text-center">
+          <h1 className="font-brand sr-only text-4xl font-bold text-black uppercase">
+            All Opportunities
           </h1>
-          <p className="text-primary text-lg font-semibold">
+          <h4 className="text-primary hidden text-xl font-semibold md:block">
             Passion is found from doing, not looking.
-          </p>
+          </h4>
         </header>
 
         <SearchBar

@@ -31,6 +31,7 @@ import { api } from "@/trpc/react";
 import { BookmarkButton } from "./BookmarkButton";
 import { LikeButton } from "./LikeButton";
 import ShareButton from "./ShareButton";
+import { toast } from "sonner";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -145,8 +146,13 @@ export default function EventCard({
     });
   };
 
-  const mutation = api.userOpp.createOrUpdate.useMutation();
-
+  const mutation = api.userOpp.createOrUpdate.useMutation({
+    onError: (error) => {
+      if (error.data?.code === "UNAUTHORIZED") {
+        toast.error("You must be logged in to save this opportunity.");
+      }
+    },
+  });
   const handleSave = () => {
     const currentBookmarkStatus = !isBookmarked;
     setIsBookmarked(currentBookmarkStatus);
@@ -204,10 +210,10 @@ export default function EventCard({
               <div className="grid flex-1 grid-cols-4 items-center gap-4">
                 {/* Column 1: Name and Organization */}
                 <div className="col-span-2 flex flex-col justify-center">
-                  <h2 className="mb-1 line-clamp-2 text-left text-base leading-tight font-black">
+                  <h2 className="font-brand mb-1 line-clamp-2 text-left text-base leading-tight font-bold">
                     {opp.name}
                   </h2>
-                  <p className="text-xs leading-tight font-bold text-gray-500">
+                  <p className="line-clamp-2 truncate text-xs leading-tight font-bold text-gray-500">
                     {opp.organisation}
                   </p>
                 </div>
@@ -271,19 +277,19 @@ export default function EventCard({
 
               <div
                 ref={zonesContainerRef}
-                className="mb-4 flex w-full flex-col items-center gap-2"
+                className="mb-4 flex w-full flex-col items-center gap-1"
               >
-                <div ref={zonesRef} className="flex w-full flex-col gap-2">
+                <div ref={zonesRef} className="flex w-full flex-col gap-1">
                   {opp.zones.map((zone: ZoneType) => (
                     <EventZone key={zone.id} zone={zone} />
                   ))}
                 </div>
               </div>
 
-              <h2 className="mb-2 line-clamp-3 text-left text-base leading-tight font-black">
+              <h2 className="font-brand mb-2 line-clamp-3 truncate text-left text-base leading-tight font-bold">
                 {opp.name}
               </h2>
-              <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
+              <p className="mb-2 line-clamp-2 truncate text-xs leading-tight font-bold text-gray-500">
                 {opp.organisation}
               </p>
               <p className="mb-auto line-clamp-3 text-left text-sm">
@@ -340,7 +346,7 @@ export default function EventCard({
             </div>
             <div className="flex w-full flex-col justify-between pb-4">
               <div>
-                <DialogTitle className="text-3xl font-black">
+                <DialogTitle className="font-brand text-3xl font-bold">
                   {opp.name}
                 </DialogTitle>
                 <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
@@ -380,7 +386,7 @@ export default function EventCard({
           </DialogDescription>
           <div className="flex w-full items-center justify-end gap-8">
             {opp.url}
-            <ShareButton url={opp.url_og} oppId={opp.id} />
+            <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
             <BookmarkButton
               isBookmarked={isBookmarked}
               handleBookmark={handleSave}
@@ -442,10 +448,10 @@ export default function EventCard({
             <div className="">
               {/* Column 1: Name and Organization */}
               <div className="mb-2 flex flex-col justify-center">
-                <h2 className="mb-1 line-clamp-2 text-left text-base leading-tight font-black">
+                <h2 className="font-brand mb-1 line-clamp-3 text-left text-base leading-tight font-bold">
                   {opp.name}
                 </h2>
-                <p className="text-xs leading-tight font-bold text-gray-700">
+                <p className="line-clamp-2 truncate text-xs leading-tight font-bold text-gray-700">
                   {opp.organisation}
                 </p>
               </div>
@@ -509,19 +515,19 @@ export default function EventCard({
 
             <div
               ref={zonesContainerRef}
-              className="mb-4 flex w-full flex-col items-center gap-2"
+              className="mb-4 flex w-full flex-col items-center"
             >
-              <div ref={zonesRef} className="flex w-full flex-col gap-2">
+              <div ref={zonesRef} className="flex w-full flex-col gap-1">
                 {opp.zones.map((zone: ZoneType) => (
                   <EventZone key={zone.id} zone={zone} />
                 ))}
               </div>
             </div>
 
-            <h2 className="mb-1 line-clamp-1 text-left text-base font-bold">
+            <h2 className="font-brand mb-1 line-clamp-3 text-left text-base leading-tight font-bold">
               {opp.name}
             </h2>
-            <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
+            <p className="mb-2 line-clamp-2 truncate text-xs leading-tight font-bold text-gray-500">
               {opp.organisation}
             </p>
             <p className="mb-auto line-clamp-3 text-left text-sm text-gray-700">
@@ -574,7 +580,7 @@ export default function EventCard({
                 </div>
               )}
             </div>
-            <DrawerTitle className="mt-4 text-2xl font-black">
+            <DrawerTitle className="font-brand mt-4 text-2xl font-bold">
               {opp.name}
             </DrawerTitle>
             <p className="mb-2 text-xs leading-tight font-bold text-gray-500">
@@ -607,7 +613,7 @@ export default function EventCard({
           </DrawerHeader>
           <DrawerFooter>
             <div className="flex w-full items-center justify-end gap-8">
-              <ShareButton url={opp.url_og} oppId={opp.id} />
+              <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
               <BookmarkButton
                 isBookmarked={isBookmarked}
                 handleBookmark={handleSave}

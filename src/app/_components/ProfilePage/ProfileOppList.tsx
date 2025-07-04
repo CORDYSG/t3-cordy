@@ -50,6 +50,9 @@ export default function ProfileOppList({
 
         <EventCard key={opp.id} opp={opp} listView />
       ))}
+      {opps.length == 0 && (
+        <p className="font-medium italic">It&apos;s a bit empty here...</p>
+      )}
     </div>
   );
 }

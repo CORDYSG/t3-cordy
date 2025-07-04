@@ -40,7 +40,7 @@ export default function ProfileTabs() {
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="grid grid-cols-2 gap-2 bg-transparent md:w-1/5">
+      <TabsList className="flex w-full items-center gap-2 bg-transparent md:grid md:w-1/5 md:grid-cols-2">
         <TabsTrigger
           value="saved"
           className="data-[state=active]:text-primary border-2 border-black bg-white font-bold hover:cursor-pointer hover:bg-slate-100 data-[state=active]:bg-white"

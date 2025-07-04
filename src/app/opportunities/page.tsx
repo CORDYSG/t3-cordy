@@ -119,7 +119,7 @@ const OpportunitiesPage = async ({
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center py-16">
+    <main className="flex min-h-screen flex-col items-center py-12">
       <Suspense fallback={<LoadingComponent />}>
         <OpportunitiesClient
           initialOpps={opps}
