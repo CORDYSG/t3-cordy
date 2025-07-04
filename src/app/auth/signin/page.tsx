@@ -31,15 +31,15 @@ function SignInContent() {
   });
   return (
     <main
-      className="bg-primary flex min-h-screen w-full items-center overflow-hidden"
+      className="bg-primary flex min-h-screen w-full overflow-hidden"
       style={{
         // If using custom vars, replace above with actual color values:
         backgroundImage: `linear-gradient(135deg, #e84855 50%, #cc2c39 50%)`, // example using yellow and darker yellow
       }}
     >
-      <div className="relative h-screen max-h-[800px] w-full">
+      <div className="relative w-full pt-16 md:min-h-[750px]">
         {/* Sign-In Card Container */}
-        <div className="z-10 container mx-auto flex h-screen max-h-[790px] w-full items-center justify-center p-4 md:min-h-[820px] md:justify-center md:p-8">
+        <div className="z-10 container mx-auto flex w-full items-start justify-center p-4 md:mt-24 md:min-h-[700px]">
           <motion.div
             initial={{ x: 200, rotate: 0, opacity: 1 }}
             animate={{ x: 0, rotate: -10, opacity: 1 }}

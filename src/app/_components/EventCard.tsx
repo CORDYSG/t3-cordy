@@ -292,7 +292,7 @@ export default function EventCard({
               <p className="mb-2 line-clamp-2 truncate text-xs leading-tight font-bold text-gray-500">
                 {opp.organisation}
               </p>
-              <p className="mb-auto line-clamp-3 text-left text-sm">
+              <p className="mb-auto line-clamp-3 text-left text-sm break-words">
                 {opp.caption}
               </p>
 
