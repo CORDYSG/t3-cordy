@@ -62,7 +62,7 @@ const NewNavbar: React.FC<NavbarProps> = ({ session }) => {
           <div className="shadow-brand relative flex overflow-hidden rounded-full border-2 bg-white">
             <Link
               href="/opportunities/for-you"
-              className={`relative z-10 px-4 py-1 text-sm font-bold uppercase transition-colors duration-200 ${
+              className={`relative z-10 px-4 py-1 text-sm font-bold uppercase transition-colors duration-200 hover:cursor-pointer ${
                 !lastSegment.startsWith("for-you") &&
                 !lastSegment.startsWith("opportunities") &&
                 "border-r-2"

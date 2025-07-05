@@ -4,6 +4,7 @@ interface EventTagProps {
   interactive?: boolean;
   onClickZone?: () => void;
   active?: boolean;
+  truncate?: boolean;
 }
 
 const EventTag: React.FC<EventTagProps> = ({
@@ -12,6 +13,7 @@ const EventTag: React.FC<EventTagProps> = ({
   interactive,
   onClickZone,
   active,
+  truncate,
 }) => {
   const defaultBg = zone.colour as React.CSSProperties["backgroundColor"];
 
@@ -25,7 +27,7 @@ const EventTag: React.FC<EventTagProps> = ({
     <div onClick={onClickZone}>
       <span
         className={`font-brand rounded-full border-2 border-black px-2 py-1 font-semibold whitespace-nowrap text-black transition-all ${
-          small ? "text-[0.65rem]" : "text-xs"
+          small ? "text-[0.65rem]" : "text-sm"
         } ${interactive && "cursor-pointer"} ${active && ""}`}
         style={{
           backgroundColor,
@@ -34,6 +36,12 @@ const EventTag: React.FC<EventTagProps> = ({
               // use inline hover background simulation
               transition: "background-color 0.2s ease",
             }),
+
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+          maxWidth: "100%",
+          display: "inline-block",
         }}
         onMouseEnter={(e) => {
           if (interactive && !active) {

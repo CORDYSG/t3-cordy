@@ -9,6 +9,7 @@ import OpportunityDetailCard from "../../_components/Opportunities/OpportunityDe
 import EventCard from "../../_components/EventCard";
 import Head from "next/head";
 import { auth } from "@/server/auth";
+import { notFound } from "next/navigation";
 
 const OpportunityDetail = async ({
   params,
@@ -41,6 +42,10 @@ const OpportunityDetail = async ({
       )
     : [];
 
+  if (!opp || !opp.id) {
+    notFound();
+  }
+
   const { opps = [] } = await api.opp.searchOpportunities({
     search: "",
     type: opp?.types?.map((t: TagType) => t.alias) ?? [],
@@ -50,7 +55,7 @@ const OpportunityDetail = async ({
         .filter((name: string): name is string => name !== null) ?? [],
     page: 1,
     limit: 6,
-    excludeOppIds: [opp.airtable_id],
+    excludeOppIds: opp?.airtable_id != null ? [opp.airtable_id] : [],
   });
 
   const jsonLd = {

@@ -118,7 +118,7 @@ const SearchBar = ({
         </Popover>
       </div>
 
-      <div className="mx-auto mt-4 flex flex-wrap justify-center gap-x-1 gap-y-1.5 md:w-5/6 md:gap-y-3">
+      <div className="mx-auto mt-6 flex flex-wrap justify-center gap-x-1 gap-y-1.5 md:w-5/6 md:gap-y-1">
         {zones.length > 0 &&
           zones.map((zone) => (
             <div key={zone.id}>

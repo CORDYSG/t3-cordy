@@ -35,7 +35,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
 
-  const daysLeft = opp.deadline ? calculateDaysLeft(opp.deadline) : null;
+  const daysLeft = opp?.deadline ? calculateDaysLeft(opp.deadline) : null;
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
   const initialData = api.userOpp.getUserOppMetrics.useQuery(
@@ -60,7 +60,6 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
 
   useEffect(() => {
     if (initialData.data) {
-      console.log("Initial data:", initialData.data);
       setMockLke(initialData.data.liked);
       setIsBookmarked(initialData.data.saved);
     }

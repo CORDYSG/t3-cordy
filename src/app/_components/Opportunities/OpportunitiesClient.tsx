@@ -230,7 +230,7 @@ const OpportunitiesClient = ({
         ) : (
           <>
             {(search || selectedType || selectedZone.length > 0) && (
-              <div className="mb-4">
+              <div className="mb-4 ml-4">
                 <h2 className="sr-only">Search Results</h2>
                 <p className="font-semibold" aria-live="polite">
                   {displayTotal}{" "}
