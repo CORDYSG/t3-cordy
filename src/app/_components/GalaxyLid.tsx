@@ -3,7 +3,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
+"use client";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -124,7 +124,7 @@ export default function GalaxyLidIndicator({ session }: { session?: any }) {
         />
 
         {/* Label */}
-        <span className="font-brand text-lg font-black text-black">
+        <span className="font-brand mt-0.5 text-lg font-black text-black">
           {session?.user ? "PROFILE" : "NOT SAVED"}
         </span>
       </motion.div>

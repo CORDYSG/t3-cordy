@@ -421,11 +421,11 @@ const ProfileQuestionnaire: React.FC = () => {
                 {isLastStep ? (
                   <>
                     <Check className="h-4 w-4" />
-                    <span>Complete</span>
+                    <span className="mt-0.5">Complete</span>
                   </>
                 ) : (
                   <>
-                    <span className="font-brand font-black text-white uppercase">
+                    <span className="font-brand mt-0.5 font-black text-white uppercase">
                       Next
                     </span>
                   </>
@@ -437,8 +437,10 @@ const ProfileQuestionnaire: React.FC = () => {
         {(isSubmitting || isCompleted) && (
           <div className="flex w-full flex-col items-center justify-center gap-4">
             <div className="font-brand mb-4 text-center text-3xl font-bold">
-              {isSubmitting && <p className="">Cordy is taking notes...</p>}{" "}
-              {isCompleted && <p className="">Customisation complete!</p>}
+              {isSubmitting && (
+                <p className="mt-0.5">Cordy is taking notes...</p>
+              )}{" "}
+              {isCompleted && <p className="mt-0.5">Customisation complete!</p>}
             </div>
             <div className="my-8">
               <SubmitAnimation
@@ -454,7 +456,7 @@ const ProfileQuestionnaire: React.FC = () => {
                   className={`btn-brand-primary flex w-2xs min-w-fit items-center justify-center gap-2 md:w-sm`}
                 >
                   <>
-                    <span className="font-brand font-black text-white uppercase">
+                    <span className="font-brand mt-0.5 font-black text-white uppercase">
                       LET&apos;S GO
                     </span>
                   </>

@@ -53,33 +53,40 @@ const SwipeButtons: React.FC<SwipeBarProps> = ({ cardRef }) => {
   };
 
   return (
-    <div className="relative container mx-auto max-w-1/3 min-w-4/6">
-      <div className="absolute bottom-20 mb-4 hidden w-full min-w-[200px] items-center justify-between lg:flex">
-        {/* Thumbs Down Button */}
-        <motion.button
-          className={`cursor-pointer rounded-xl border-2 border-black bg-white p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-300 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
-          onClick={handleThumbsDown}
-          onTouchStart={handleThumbsDown}
-          variants={buttonVariants}
-          animate={isAnimating === "left" ? "left" : "rest"}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <ThumbsDown size={42} fill="white" strokeWidth={1.5} color="black" />
-        </motion.button>
+    <div className="relative mx-auto w-full">
+      <div className="absolute bottom-20 left-1/2 container mb-4 w-full max-w-[800px] min-w-[200px] -translate-x-1/2">
+        <div className="hidden items-center justify-between lg:flex">
+          {/* Thumbs Down Button */}
+          <motion.button
+            className={`cursor-pointer rounded-xl border-2 border-black bg-white p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:bg-gray-300 hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
+            onClick={handleThumbsDown}
+            onTouchStart={handleThumbsDown}
+            variants={buttonVariants}
+            animate={isAnimating === "left" ? "left" : "rest"}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ThumbsDown
+              size={42}
+              fill="white"
+              strokeWidth={1.5}
+              color="black"
+            />
+          </motion.button>
 
-        {/* Thumbs Up Button */}
-        <motion.button
-          className={`bg-accent-green hover:bg-accent-blue-hover cursor-pointer rounded-xl border-2 border-black p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
-          onClick={handleThumbsUp}
-          onTouchStart={handleThumbsUp}
-          variants={buttonVariants}
-          animate={isAnimating === "right" ? "right" : "rest"}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          <ThumbsUp size={42} strokeWidth={1.5} fill="white" color="black" />
-        </motion.button>
+          {/* Thumbs Up Button */}
+          <motion.button
+            className={`bg-accent-green hover:bg-accent-blue-hover cursor-pointer rounded-xl border-2 border-black p-6 font-semibold text-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]`}
+            onClick={handleThumbsUp}
+            onTouchStart={handleThumbsUp}
+            variants={buttonVariants}
+            animate={isAnimating === "right" ? "right" : "rest"}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            <ThumbsUp size={42} strokeWidth={1.5} fill="white" color="black" />
+          </motion.button>
+        </div>
       </div>
     </div>
   );

@@ -73,87 +73,121 @@ export const oppRouter = createTRPCRouter({
     const zoneMap = buildZoneMap(zones);
     return enrichOppsWithZones(opps, zoneMap);
   }),
-  getUserLikedOpps: protectedProcedure
-     .query(async ({ ctx }) => {
-      const userId = ctx.session.user.id;
-      if (!userId) {
-        return [];
-      }
-      
-      
-      const likedOpps = await db.userOpportunity.findMany({
-        where: {
-          userId,
-          liked: true,
-        },
-        select: {
-          updatedAt: true,
-          opportunity: { 
-            select: {
-              id: true,
-              name: true,
-              organisation: true,
-              information: true,
-              deadline: true,
-              caption: true,
-              thumbnail_url: true,
-              airtable_id: true,
-              zone: true, // Include zone information
-              // Add any other fields you need from the Opps model
-            },
-          }
-        },
-        orderBy: {
-          updatedAt: "desc", // Sort by the most recently liked opportunities
-        }
-      });
+ getUserLikedOpps: protectedProcedure
+  .query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) {
+      return { opps: [], expiredCount: 0 };
+    }
 
-      const zones = await fetchAllZones();
-      const zoneMap = buildZoneMap(zones);
-
-  
-      // Return just the opportunities, not the wrapper objects
-      return enrichOppsWithZones(likedOpps.map(item => item.opportunity), zoneMap);
-    }),
-  
-    getUserSavedOpps: protectedProcedure
-      .query(async ({ ctx }) => {
-        const userId = ctx.session.user.id;
-        if (!userId) {
-          return [];
-        }
-        const savedOpps = await db.userOpportunity.findMany({
-          where: {
-            userId,
-            saved: true,
-          },
+    const likedOpps = await db.userOpportunity.findMany({
+      where: {
+        userId,
+        liked: true,
+        opportunity: {
+          deadline: { gt: new Date() }, // active
+        },
+      },
+      select: {
+        updatedAt: true,
+        opportunity: { 
           select: {
-            updatedAt: true,
-            opportunity: { 
-              select: {
-                id: true,
-                name: true,
-                organisation: true,
-                deadline: true,
-                information: true,
-                caption: true,
-                thumbnail_url: true,
-                airtable_id: true,
-                zone: true, // Include zone information
-                // Add any other fields you need from the Opps model
-              },
-            }
+            id: true,
+            name: true,
+            organisation: true,
+            information: true,
+            deadline: true,
+            caption: true,
+            thumbnail_url: true,
+            airtable_id: true,
+            zone: true,
           },
-            orderBy: {
-          updatedAt: "desc", // Sort by the most recently liked opportunities
         }
-        });
+      },
+      orderBy: {
+        updatedAt: "desc",
+      }
+    });
 
-           const zones = await fetchAllZones();
-           const zoneMap = buildZoneMap(zones);
-        // Return just the opportunities, not the wrapper objects
-          return enrichOppsWithZones(savedOpps.map(item => item.opportunity), zoneMap);
-      }),
+    const expiredCount = await db.userOpportunity.count({
+      where: {
+        userId,
+        liked: true,
+        opportunity: {
+          deadline: { lte: new Date() }, // expired
+        },
+      },
+    });
+
+    const zones = await fetchAllZones();
+    const zoneMap = buildZoneMap(zones);
+
+    const enrichedOpps = enrichOppsWithZones(likedOpps.map(item => item.opportunity), zoneMap);
+
+    return {
+      opps: enrichedOpps,
+      expiredCount,
+    };
+  }),
+
+  
+  getUserSavedOpps: protectedProcedure
+  .query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) {
+      return { opps: [], expiredCount: 0 };
+    }
+
+    const savedOpps = await db.userOpportunity.findMany({
+      where: {
+        userId,
+        saved: true,
+        opportunity: {
+          deadline: { gt: new Date() }, // active
+        },
+      },
+      select: {
+        updatedAt: true,
+        opportunity: { 
+          select: {
+            id: true,
+            name: true,
+            organisation: true,
+            information: true,
+            deadline: true,
+            caption: true,
+            thumbnail_url: true,
+            airtable_id: true,
+            zone: true,
+          },
+        }
+      },
+      orderBy: {
+        updatedAt: "desc",
+      }
+    });
+
+    const expiredCount = await db.userOpportunity.count({
+      where: {
+        userId,
+        saved: true,
+        opportunity: {
+          deadline: { lte: new Date() }, // expired
+        },
+      },
+    });
+
+    const zones = await fetchAllZones();
+    const zoneMap = buildZoneMap(zones);
+
+    const enrichedOpps = enrichOppsWithZones(savedOpps.map(item => item.opportunity), zoneMap);
+
+    return {
+      opps: enrichedOpps,
+      expiredCount,
+    };
+  }),
+
   
   getOppById: publicProcedure
     .input(z.object({ oppId: z.string() }))

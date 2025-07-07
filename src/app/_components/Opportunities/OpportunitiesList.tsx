@@ -22,7 +22,7 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
   if (isLoading) return <LoadingComponent />;
 
   return (
-    <div className="w-full px-2 sm:px-4">
+    <div className="w-full">
       {opps.length === 0 ? (
         <div className="flex flex-col items-center justify-center text-center">
           <p className="text-lg font-medium text-gray-600">

@@ -8,6 +8,7 @@ import Image from "next/image";
 import EventZone from "../EventZone";
 import Link from "next/link";
 import { api } from "@/trpc/react";
+import { Info, InfoIcon } from "lucide-react";
 
 import { LikeButton } from "../LikeButton";
 import { BookmarkButton } from "../BookmarkButton";
@@ -35,7 +36,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
     return Math.ceil(timeDiff / (1000 * 3600 * 24)); // Convert milliseconds to days
   };
 
-  const daysLeft = opp.deadline ? calculateDaysLeft(opp.deadline) : null;
+  const daysLeft = opp?.deadline ? calculateDaysLeft(opp.deadline) : null;
   const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
   const initialData = api.userOpp.getUserOppMetrics.useQuery(
@@ -60,7 +61,6 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
 
   useEffect(() => {
     if (initialData.data) {
-      console.log("Initial data:", initialData.data);
       setMockLke(initialData.data.liked);
       setIsBookmarked(initialData.data.saved);
     }
@@ -102,9 +102,9 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   };
 
   return (
-    <div className="shadow-brand w-full rounded-md border-2 bg-white p-5">
+    <div className="shadow-brand w-full rounded-lg border-2 bg-white p-5 text-black">
       <div className="flex flex-col gap-8 md:flex-row md:items-center">
-        <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48 md:max-w-80">
+        <div className="relative min-h-56 w-full rounded-md border-2 md:max-w-[500px]">
           {opp.thumbnail_url && (
             <Image
               src={opp.thumbnail_url}
@@ -135,21 +135,40 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
           )}
         </div>
         <div className="mb-2 space-y-4 md:mb-0">
-          <h2 className="text-2xl font-bold">{opp.name}</h2>
-          <div className="space-y-2 space-x-2">
-            {" "}
+          <h1
+            className="text-4xl font-extrabold text-black"
+            style={{
+              overflowWrap: "break-word",
+              wordBreak: "break-word",
+              hyphens: "auto",
+            }}
+          >
+            {opp.name}
+          </h1>
+          <p
+            className="text-lg leading-tight text-black"
+            style={{
+              overflowWrap: "break-word",
+              wordBreak: "break-word",
+              hyphens: "auto",
+            }}
+          >
+            {opp.organisation}
+          </p>
+          <div className="flex flex-wrap gap-2">
             {opp.zones &&
               opp.zones.length > 0 &&
               opp.zones.map((zone: ZoneType) => (
                 <EventZone key={zone.id} zone={zone} />
               ))}
           </div>
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">
+
+          <div className="">
+            <p className="text-md font-medium">
               {opp.deadline ? formatDate(opp.deadline) : "Forever"}
             </p>
             {daysLeft !== null ? (
-              <p className="text-primary text-sm font-bold">
+              <p className="text-primary text-md font-bold">
                 {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
               </p>
             ) : (
@@ -160,12 +179,14 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
       </div>
       <div className="mt-4 mb-8 w-full border-2 border-dashed"></div>
       <div className="space-y-4">
-        <h2 className="hidden text-2xl font-bold md:block">{opp.name}</h2>
+        <h2 className="text-slate hidden text-3xl font-extrabold text-black md:block">
+          Details
+        </h2>
         <div className="flex w-full gap-2">
           {types.map((type) => (
             <span
               key={type.id}
-              className="rounded-md border-2 px-2 py-1 text-sm font-semibold"
+              className="border-2 px-2 py-1 text-sm font-semibold"
             >
               {type.name}
             </span>
@@ -182,13 +203,37 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
           {" "}
           {opp.information}
         </p>
+        <div>
+          {opp.eligibility && (
+            <div className="shadow-brand mt-4 overflow-hidden rounded-lg border-2">
+              <h3 className="flex items-center gap-4 border-b-2 bg-slate-200 p-5 text-3xl font-semibold text-black">
+                <InfoIcon size={36} />{" "}
+                <span className="mt-0.5">Eligibility</span>
+              </h3>
+              <p
+                className="text-md p-5 break-words hyphens-auto whitespace-pre-line"
+                style={{
+                  overflowWrap: "break-word",
+                  wordBreak: "break-word",
+                  hyphens: "auto",
+                }}
+              >
+                {opp.eligibility}
+              </p>
+            </div>
+          )}
+        </div>
         <div className="flex w-full items-center justify-end gap-x-8">
-          <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
+          <ShareButton
+            opp_airtable_id={opp.airtable_id}
+            oppId={opp.id}
+            opp={opp}
+          />
           <BookmarkButton
             isBookmarked={isBookmarked}
             handleBookmark={handleSave}
           />
-          <LikeButton isLiked={mockLike} handleLike={handleLike} />
+          {/* <LikeButton isLiked={mockLike} handleLike={handleLike} /> */}
           <Link
             className=""
             href={opp.url_source}

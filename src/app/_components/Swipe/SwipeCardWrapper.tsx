@@ -628,6 +628,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
                 opp_airtable_id={visibleOpps[0]?.airtable_id}
                 oppId={visibleOpps[0]?.id}
                 disabled={undoing}
+                opp={visibleOpps[0] ?? null}
               />
             </div>
           )}
@@ -782,6 +783,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
                 opp_airtable_id={visibleOpps[0]?.airtable_id}
                 oppId={visibleOpps[0]?.id}
                 disabled={undoing}
+                opp={visibleOpps[0] ?? null}
               />
             </div>
           )}

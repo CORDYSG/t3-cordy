@@ -12,6 +12,11 @@ import localFont from "next/font/local";
 import { Suspense } from "react";
 import Loading from "./loading";
 import { Toaster } from "@/components/ui/sonner";
+import DarkReaderOverride from "./_components/DarkModeOverride";
+
+export const viewport = {
+  colorScheme: "light", // ✅ correct place
+};
 
 export const metadata: Metadata = {
   title: "CORDY",
@@ -58,6 +63,9 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: "/apple-touch-icon.png" }],
   },
+  other: {
+    "darkreader-lock": "",
+  },
 };
 
 const fatFrank = localFont({
@@ -69,6 +77,7 @@ const fatFrank = localFont({
   preload: true,
   fallback: ["sans-serif"],
 });
+
 const gilroy = localFont({
   src: [
     {
@@ -108,10 +117,33 @@ const gilroy = localFont({
   fallback: ["sans-serif"],
 });
 
+const mohrRounded = localFont({
+  src: [
+    {
+      path: "../../public/fonts/mohr-rounded.otf",
+      weight: "100",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/mohr-rounded-bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/mohr-rounded-black.otf",
+      weight: "800",
+      style: "normal",
+    },
+  ],
+  variable: "--font-mohr-rounded",
+  display: "swap",
+  preload: true,
+  fallback: ["sans-serif"],
+});
+
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
-  // Include all weights you need - adjust based on your requirements
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
   display: "swap",
 });
@@ -129,17 +161,22 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable} ${patrickHand.variable}`}
+      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable} ${patrickHand.variable} ${mohrRounded.variable}`}
     >
+      <head>
+        <meta name="color-scheme" content="light" />
+        <meta name="theme-color" content="#fff7e7" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="darkreader-lock" content="" />
+      </head>
       <body className="flex min-h-screen w-screen flex-col justify-between overflow-x-hidden">
+        <DarkReaderOverride />
         <TRPCReactProvider>
           <SessionProvider session={session}>
             <NewNavbar session={session} />
             <div className="min-h-48">
-              {" "}
               <Suspense fallback={<Loading />}>{children}</Suspense>
             </div>
-
             <Footer />
             <Toaster />
           </SessionProvider>

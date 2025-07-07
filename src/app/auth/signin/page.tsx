@@ -21,19 +21,11 @@ function SignInContent() {
     OAuthAccountNotLinked:
       "That email is already linked with another provider. Please use the originally linked sign-in method.",
   };
-  const { RiveComponent } = useRive({
-    src: "https://assets.ctfassets.net/ayry21z1dzn2/TPU3i28vPxEqq3Pz85L71/90466153079d1051adf888cb5975bf87/cordyidlenew.riv", // Place the file in `public/animations/`
-    autoplay: true,
-    layout: new Layout({
-      fit: Fit.Contain,
-      alignment: Alignment.Center,
-    }),
-  });
+
   return (
     <main
       className="bg-primary flex min-h-screen w-full overflow-hidden"
       style={{
-        // If using custom vars, replace above with actual color values:
         backgroundImage: `linear-gradient(135deg, #e84855 50%, #cc2c39 50%)`, // example using yellow and darker yellow
       }}
     >
