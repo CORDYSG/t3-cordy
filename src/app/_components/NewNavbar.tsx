@@ -3,18 +3,55 @@
 import type { Session } from "next-auth";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import GalaxyLidIndicator from "./GalaxyLid";
+import CordyLogo from "./CordyLogo";
 
 interface NavbarProps {
   session?: Session | null;
 }
+
 const NewNavbar: React.FC<NavbarProps> = ({ session }) => {
   const pathName = usePathname();
   const segments = pathName.split("/").filter(Boolean);
   const lastSegment = segments[segments.length - 1] ?? "";
+
+  // Determine active tab
+  const isForYouActive = lastSegment.startsWith("for-you");
+  const isAllActive =
+    lastSegment.startsWith("opportunities") &&
+    !lastSegment.startsWith("for-you");
+
+  // Refs for measuring tab widths
+  const forYouRef = useRef<HTMLAnchorElement>(null);
+  const allRef = useRef<HTMLAnchorElement>(null);
+  const [tabDimensions, setTabDimensions] = useState({
+    forYouWidth: 0,
+    allWidth: 0,
+    forYouOffset: 0,
+    allOffset: 0,
+  });
+
+  useEffect(() => {
+    if (forYouRef.current && allRef.current) {
+      const forYouRect = forYouRef.current.getBoundingClientRect();
+      const allRect = allRef.current.getBoundingClientRect();
+      const containerRect =
+        forYouRef.current.parentElement?.getBoundingClientRect();
+
+      if (containerRect) {
+        setTabDimensions({
+          forYouWidth: forYouRect.width,
+          allWidth: allRect.width,
+          forYouOffset: forYouRect.left - containerRect.left,
+          allOffset: allRect.left - containerRect.left,
+        });
+      }
+    }
+  }, [pathName]);
+
   let userInitials = "U";
 
   if (session?.user) {
@@ -40,14 +77,7 @@ const NewNavbar: React.FC<NavbarProps> = ({ session }) => {
             </p>
           </div>
           <div className="block md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2">
-            <div className="flex-shrink-0">
-              <Link
-                href="/"
-                className="bg-primary font-brand rounded-full px-4 py-1 align-baseline text-2xl font-extrabold text-white uppercase md:px-8"
-              >
-                Cordy
-              </Link>
-            </div>
+            <CordyLogo />
           </div>
           <div>
             <GalaxyLidIndicator session={session} />
@@ -60,61 +90,50 @@ const NewNavbar: React.FC<NavbarProps> = ({ session }) => {
       >
         <div className="absolute -top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
           <div className="shadow-brand relative flex overflow-hidden rounded-full border-2 bg-white">
+            {/* Animated background pill */}
+            <motion.div
+              className={`absolute inset-y-0 cursor-pointer rounded-full ${isAllActive || isForYouActive ? "bg-gray-400 outline-2 outline-black" : ""}`}
+              initial={false}
+              animate={{
+                x: isForYouActive ? 0 : tabDimensions.allOffset,
+                width: isForYouActive
+                  ? tabDimensions.forYouWidth
+                  : tabDimensions.allWidth,
+              }}
+              transition={{
+                type: "spring",
+                stiffness: 500,
+                damping: 30,
+              }}
+            />
+
             <Link
+              ref={forYouRef}
               href="/opportunities/for-you"
-              className={`relative z-10 px-4 py-1 text-sm font-bold uppercase transition-colors duration-200 hover:cursor-pointer ${
-                !lastSegment.startsWith("for-you") &&
-                !lastSegment.startsWith("opportunities") &&
-                "border-r-2"
-              }`}
+              className="relative z-10 px-4 py-1 text-center text-sm font-bold whitespace-nowrap uppercase transition-colors duration-200 hover:cursor-pointer"
             >
-              {lastSegment.startsWith("for-you") && (
-                <motion.div
-                  className="absolute inset-0 rounded-full bg-gray-400 outline-2 outline-black"
-                  layoutId="activeTab"
-                  initial={false}
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 30,
-                  }}
-                />
-              )}
               <span
-                className={`font-brand relative z-10 font-black ${
-                  lastSegment.startsWith("for-you")
+                className={`font-brand relative z-10 font-black transition-colors duration-200 ${
+                  isForYouActive
                     ? "text-slate-900"
                     : "text-slate-500 hover:text-slate-800"
-                } `}
+                }`}
               >
                 For You
               </span>
             </Link>
+            {!isAllActive && !isForYouActive && (
+              <div className="h-full border-l-2 pr-1" />
+            )}
 
             <Link
+              ref={allRef}
               href="/opportunities"
-              className="relative z-10 rounded-full px-4 py-1 text-sm font-bold uppercase transition-colors duration-200"
+              className="relative z-10 rounded-full px-4 py-1 text-center text-sm font-bold whitespace-nowrap uppercase transition-colors duration-200"
             >
-              {lastSegment.startsWith("opportunities") &&
-                !lastSegment.startsWith("for-you") && (
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-gray-400 outline-2 outline-black"
-                    layoutId="activeTab"
-                    initial={false}
-                    style={{
-                      boxShadow: "-2px 0 0 0 #d1d5db",
-                    }}
-                    transition={{
-                      type: "spring",
-                      stiffness: 500,
-                      damping: 30,
-                    }}
-                  />
-                )}
               <span
-                className={`font-brand relative z-10 font-black ${
-                  lastSegment.startsWith("opportunities") &&
-                  !lastSegment.startsWith("for-you")
+                className={`font-brand relative z-10 font-black transition-colors duration-200 ${
+                  isAllActive
                     ? "text-slate-900"
                     : "text-slate-500 hover:text-slate-800"
                 }`}

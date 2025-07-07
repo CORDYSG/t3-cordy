@@ -43,14 +43,14 @@ export default function ProfileTabs() {
       <TabsList className="flex w-full items-center gap-2 bg-transparent md:grid md:w-1/5 md:grid-cols-2">
         <TabsTrigger
           value="saved"
-          className="data-[state=active]:text-primary border-2 border-black bg-white font-bold hover:cursor-pointer hover:bg-slate-100 data-[state=active]:bg-white"
+          className="data-[state=active]:text-primary data-[state=active]:bg-primary! border-2 border-black bg-white font-bold hover:cursor-pointer hover:bg-slate-100 data-[state=active]:border-2! data-[state=active]:border-black!"
           style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
         >
           Saved
         </TabsTrigger>
         <TabsTrigger
           value="liked"
-          className="data-[state=active]:text-primary border-2 border-black bg-white font-bold hover:cursor-pointer hover:bg-slate-50 data-[state=active]:bg-white"
+          className="data-[state=active]:text-primary data-[state=active]:bg-primary! border-2 border-black bg-white font-bold hover:cursor-pointer hover:bg-slate-100 data-[state=active]:border-2! data-[state=active]:border-black!"
           style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
         >
           Liked

@@ -39,7 +39,7 @@ const ProfilePage = async () => {
   return (
     <main className="container mx-auto flex flex-col items-center justify-center gap-4 p-8 md:w-5/6">
       <Head>
-        <title>{`${title} | Opportunity Details`}</title>
+        <title>{`User Profile`}</title>
         <meta name="description" content={description} />
         <meta name="keywords" content={`opportunity, user, profile, details`} />
         <meta property="og:title" content={title} />

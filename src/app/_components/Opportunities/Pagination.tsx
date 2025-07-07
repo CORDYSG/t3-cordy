@@ -20,11 +20,11 @@ const Pagination = ({
           {currentPage > 1 && (
             <button
               type="button"
-              className="btn-brand-white flex items-center text-sm uppercase"
+              className="btn-brand-white flex items-center gap-1 px-4 text-sm uppercase"
               onClick={() => onPageChange(currentPage - 1)}
             >
               <ArrowLeft size={20} />
-              <p className="hidden md:block">PREVIOUS PAGE</p>
+              <p className="mt-0.5 hidden md:block">PREVIOUS PAGE</p>
             </button>
           )}
         </div>
@@ -32,10 +32,10 @@ const Pagination = ({
           {currentPage !== totalPages && (
             <button
               type="button"
-              className="btn-brand-white flex text-sm uppercase"
+              className="btn-brand-white flex gap-1 px-4 text-sm uppercase"
               onClick={() => onPageChange(currentPage + 1)}
             >
-              <p className="hidden md:block">NEXT PAGE</p>
+              <p className="mt-0.5 hidden md:block">NEXT PAGE</p>
               <ArrowRight size={20} />
             </button>
           )}

@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import Image from "next/image";
+import CordyLogo from "./CordyLogo";
 
 const Footer: React.FC = () => {
   return (
@@ -10,13 +11,8 @@ const Footer: React.FC = () => {
         {/* Left side - Links */}
         <div className="flex flex-col space-y-4">
           <div className="flex-shrink-0">
-            <Link
-              href="/"
-              className="bg-primary font-brand rounded-full px-4 py-1 text-2xl font-bold text-white uppercase md:text-3xl"
-            >
-              Cordy
-            </Link>
-            <p className="text-md mt-4 font-black text-white uppercase md:text-xl">
+            <CordyLogo fixWidth />
+            <p className="text-md mt-4 font-bold text-white uppercase md:text-xl">
               YOUTH-LED NON-PROFIT
             </p>
           </div>
@@ -61,7 +57,7 @@ const Footer: React.FC = () => {
               className="h-full w-full"
             />
           </div>
-          <p className="my-4 text-center text-sm font-black text-white uppercase md:text-xl">
+          <p className="my-4 text-center text-sm font-bold text-white uppercase md:text-lg">
             GET CORDY IN <br /> YOUR PHONE!
           </p>
         </button>

@@ -220,7 +220,7 @@ const EventContent = ({
       )}
 
       <h2
-        className="font-brand mb-1 line-clamp-3 text-left text-base leading-tight font-bold lg:mb-2"
+        className="font-brand mb-1 line-clamp-3 text-left text-lg leading-tight font-bold lg:mb-2"
         style={{
           overflowWrap: "break-word",
           wordBreak: "break-word",
@@ -240,7 +240,7 @@ const EventContent = ({
         {opp.organisation}
       </p>
       <p
-        className="mb-auto line-clamp-3 text-left text-sm text-gray-700 lg:break-words"
+        className="mb-auto line-clamp-3 text-left text-sm font-medium text-gray-700 lg:break-words"
         style={{
           overflowWrap: "break-word",
           wordBreak: "break-word",
@@ -251,11 +251,11 @@ const EventContent = ({
       </p>
 
       <div className="mt-3 border-t border-gray-100 pt-2">
-        <p className="text-left text-xs text-gray-500">
+        <p className="text-left text-sm font-medium text-black">
           {opp.deadline ? formatDate(opp.deadline) : "Forever"}
         </p>
         {daysLeft !== null ? (
-          <p className="text-primary text-left text-xs font-bold">
+          <p className="text-primary text-md mt-1 text-left font-semibold">
             {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
           </p>
         ) : (
@@ -452,7 +452,7 @@ export default function EventCard({
         zonesContainerRef={zonesContainerRef}
         layout={listView ? "list" : "card"}
       />
-      <div className="flex justify-end">
+      <div className={` ${!listView && "-mt-5"} flex justify-end`}>
         <Maximize2 size={16} />
       </div>
     </div>
@@ -461,12 +461,16 @@ export default function EventCard({
   const ModalContent = () => (
     <>
       <div className="flex w-full items-center justify-end gap-8">
-        <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
+        <ShareButton
+          opp_airtable_id={opp.airtable_id}
+          oppId={opp.id}
+          opp={opp}
+        />
         <BookmarkButton
           isBookmarked={isBookmarked}
           handleBookmark={handleBookmark}
         />
-        <LikeButton isLiked={isLiked} handleLike={handleLike} />
+        {/* <LikeButton isLiked={isLiked} handleLike={handleLike} /> */}
         <Link
           href={`/opportunities/${opp.airtable_id}`}
           target="_blank"
@@ -491,7 +495,7 @@ export default function EventCard({
           style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
         >
           <DialogHeader className="flex w-full flex-row gap-5">
-            <div className="relative min-h-56 w-full rounded-md border-2 md:max-h-48 md:max-w-2/5">
+            <div className="relative min-h-56 w-full rounded-lg border-2 md:max-h-48 md:max-w-3/5">
               <EventImage
                 src={opp.thumbnail_url}
                 alt={opp.name}
@@ -512,7 +516,7 @@ export default function EventCard({
                   {opp.name}
                 </DialogTitle>
                 <p
-                  className="mb-2 text-xs leading-tight font-bold text-gray-500"
+                  className="my-2 text-sm leading-tight font-medium text-gray-500"
                   style={{
                     overflowWrap: "break-word",
                     wordBreak: "break-word",
@@ -521,19 +525,19 @@ export default function EventCard({
                 >
                   {opp.organisation}
                 </p>
-                <div className="my-4 flex flex-wrap gap-2">
+                <div className="my-2 flex flex-wrap gap-2">
                   {opp.zones?.map((zone: ZoneType) => (
                     <EventZone key={zone.id} zone={zone} />
                   ))}
                 </div>
               </div>
-              <div className="my-2 w-full border-2 border-b border-dashed"></div>
-              <div className="space-y-1">
-                <p className="text-sm text-gray-500">
+              <div className="mb-2 w-full border-2 border-b border-dashed"></div>
+              <div className="space-y-0">
+                <p className="text-md font-medium text-black">
                   {opp.deadline ? formatDate(opp.deadline) : "Forever"}
                 </p>
                 {daysLeft !== null ? (
-                  <p className="text-primary text-sm font-bold">
+                  <p className="text-primary text-md font-medium">
                     {daysLeft > 0
                       ? `${daysLeft} days left`
                       : "Deadline has passed"}
@@ -636,12 +640,16 @@ export default function EventCard({
           </DrawerHeader>
           <DrawerFooter>
             <div className="flex w-full items-center justify-end gap-8">
-              <ShareButton opp_airtable_id={opp.airtable_id} oppId={opp.id} />
+              <ShareButton
+                opp_airtable_id={opp.airtable_id}
+                oppId={opp.id}
+                opp={opp}
+              />
               <BookmarkButton
                 isBookmarked={isBookmarked}
                 handleBookmark={handleBookmark}
               />
-              <LikeButton isLiked={isLiked} handleLike={handleLike} />
+              {/* <LikeButton isLiked={isLiked} handleLike={handleLike} /> */}
             </div>
             <Link
               className="flex w-full"

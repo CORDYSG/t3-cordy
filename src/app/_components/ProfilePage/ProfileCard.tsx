@@ -1,5 +1,6 @@
 "use client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { X } from "lucide-react";
 import { api } from "@/trpc/react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -11,15 +12,35 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useEffect, useState } from "react";
+import { set } from "zod";
 
 const ProfileCard = () => {
   const router = useRouter();
-  const { data: session } = useSession();
+  const { data: session, status } = useSession();
+  const [hasDoneUserProfileCheck, setHasDoneUserProfileCheck] = useState(false);
 
   if (!session?.user) {
     router.push("/api/auth/signin");
     return null; // or a loading state
   }
+  const userCheck = api.user.getUserProfile.useQuery(undefined, {
+    enabled: status === "authenticated" && !!session?.user,
+  });
+
+  useEffect(() => {
+    // Wait for session + tRPC result
+    if (status === "authenticated") {
+      if (userCheck.status === "success") {
+        if (!userCheck.data?.id) {
+          setHasDoneUserProfileCheck(false);
+          router.replace("/new-user");
+        } else {
+          setHasDoneUserProfileCheck(true);
+        }
+      }
+    }
+  }, [status, userCheck.status, userCheck.data, router]);
 
   const { data: userData, isLoading: isLoadingTeleUser } =
     api.user.getUserData.useQuery();
@@ -37,8 +58,6 @@ const ProfileCard = () => {
 
   return (
     <div className="shadow-brand flex w-full flex-col rounded-xl border-2 bg-white p-6">
-      {/* Colored header section */}
-
       <div className="bg-primary h-36 w-full rounded-t-md border-2"></div>
 
       {/* Main content area with profile picture overlapping */}
@@ -105,6 +124,17 @@ const ProfileCard = () => {
               <TooltipContent>Log out</TooltipContent>
             </Tooltip>
           </div>
+          {!hasDoneUserProfileCheck && (
+            <div className="flex w-full justify-center">
+              <Link
+                className="btn-brand-primary flex items-center gap-2 text-sm"
+                href={"/new-user"}
+              >
+                <X size={24} />
+                <span> You have not done your profiling!</span>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -8,6 +8,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import WavingCordyLottie from "../../../../public/lottie/waving_white.json";
+import Lottie from "lottie-react";
+
 import {
   Tooltip,
   TooltipContent,
@@ -26,6 +29,7 @@ import {
 } from "next-share";
 import { useState, useEffect } from "react";
 import { api } from "@/trpc/react";
+import EventCard from "../EventCard";
 
 type ShareContent = {
   title?: string;
@@ -34,6 +38,7 @@ type ShareContent = {
   oppId?: number | bigint;
   titleOnly?: boolean;
   disabled?: boolean;
+  opp?: OppWithZoneType;
 };
 
 const ShareButton = ({
@@ -43,6 +48,7 @@ const ShareButton = ({
   opp_airtable_id,
   titleOnly,
   disabled,
+  opp,
 }: ShareContent) => {
   const [copiedLink, setCopiedLink] = useState(false);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -127,74 +133,103 @@ const ShareButton = ({
       )}
 
       <DialogContent
-        className="border-2 bg-white"
+        className="flex max-h-[90vh] flex-col items-center overflow-x-hidden border-2 bg-white"
         style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
       >
-        <DialogHeader>
-          <DialogTitle className="sr-only">Share this opportunity</DialogTitle>
-          <div className="flex w-full gap-4">
-            <TooltipProvider>
-              <Tooltip open={showTooltip}>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    className={`flex h-8 w-8 items-center justify-center rounded-full transition-all duration-200 ${
-                      copiedLink
-                        ? "scale-110 bg-green-100 text-green-600"
-                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    }`}
-                    onClick={handleCopyLink}
-                    title="Copy link"
-                  >
-                    <div className="relative">
-                      {copiedLink ? (
-                        <Check
-                          size={16}
-                          className="animate-in zoom-in-50 duration-200"
-                        />
-                      ) : (
-                        <Link
-                          size={16}
-                          className="animate-in zoom-in-50 duration-200"
-                        />
-                      )}
-                    </div>
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent
-                  side="top"
-                  className="animate-in fade-in-50 zoom-in-95 bg-dark-muted"
-                >
-                  <p>Link copied!</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            <TelegramShareButton
-              url={sharedUrl}
-              title={text}
-              onClick={() => handleButtonClick("telegram")}
-            >
-              <TelegramIcon size={32} round />
-            </TelegramShareButton>
-            <WhatsappShareButton
-              url={sharedUrl}
-              title={text}
-              onClick={() => handleButtonClick("whatsapp")}
-            >
-              <WhatsappIcon size={32} round />
-            </WhatsappShareButton>
-            <EmailShareButton
-              url={sharedUrl}
-              subject={title}
-              body={text}
-              onClick={() => handleButtonClick("email")}
-            >
-              <EmailIcon size={32} round />
-            </EmailShareButton>
+        <div className="w-1/3">
+          <Lottie
+            animationData={WavingCordyLottie}
+            loop={false}
+            autoplay={true}
+            className="h-full w-full scale-110"
+          />
+        </div>
 
-            <RedditShareButton url={sharedUrl} title={title}>
-              <RedditIcon size={32} round />
-            </RedditShareButton>
+        <DialogHeader className="flex-shrink-0">
+          <DialogTitle className="text-center text-2xl">
+            Share this opportunity!
+          </DialogTitle>
+          <div className="flex w-full flex-col gap-4 text-center">
+            <p className="mx-auto w-5/6 text-sm text-gray-600 md:text-base">
+              Tag your partner-in-crime — this one's too good solo.
+            </p>
+            <div className="w-full scale-95 text-left">
+              {opp && <EventCard opp={opp} listView />}
+            </div>
+            <div className="flex w-full flex-col items-center justify-center gap-4 px-2">
+              <div className="flex w-full flex-1/4 items-center gap-2 rounded-lg border border-black bg-gray-50 px-4 py-2">
+                <div className="w-full items-center overflow-hidden">
+                  <span className="block w-[45vw] truncate text-xs text-gray-700 sm:pr-2 md:max-w-[300px] md:text-sm">
+                    {sharedUrl}
+                  </span>
+                </div>
+
+                <TooltipProvider>
+                  <Tooltip open={showTooltip}>
+                    <TooltipTrigger asChild>
+                      <button
+                        type="button"
+                        onClick={handleCopyLink}
+                        className={`ml-auto flex items-center justify-center gap-2 rounded-md border-2 border-black px-3 py-1 text-sm font-semibold uppercase transition-all duration-200 ${
+                          copiedLink
+                            ? "bg-green-100 text-green-600"
+                            : "bg-white text-black hover:bg-gray-200"
+                        }`}
+                        style={{ minWidth: "70px" }}
+                      >
+                        <span className="flex flex-row-reverse items-center gap-2">
+                          <span className="hidden md:block">
+                            {copiedLink ? "Copied" : "Copy"}
+                          </span>
+                          {copiedLink ? (
+                            <ClipboardCheck size={16} />
+                          ) : (
+                            <Link size={16} />
+                          )}
+                        </span>
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent
+                      side="top"
+                      className="animate-in fade-in-50 zoom-in-95 bg-dark-muted"
+                    >
+                      <p>Copied to clipboard!</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+
+              <p className="text-md text-left font-bold">
+                Share via your favorite platform:
+              </p>
+              <div className="flex gap-4">
+                <TelegramShareButton
+                  url={sharedUrl}
+                  title={text}
+                  onClick={() => handleButtonClick("telegram")}
+                >
+                  <TelegramIcon size={32} round />
+                </TelegramShareButton>
+                <WhatsappShareButton
+                  url={sharedUrl}
+                  title={text}
+                  onClick={() => handleButtonClick("whatsapp")}
+                >
+                  <WhatsappIcon size={32} round />
+                </WhatsappShareButton>
+                <EmailShareButton
+                  url={sharedUrl}
+                  subject={title}
+                  body={text}
+                  onClick={() => handleButtonClick("email")}
+                >
+                  <EmailIcon size={32} round />
+                </EmailShareButton>
+                <RedditShareButton url={sharedUrl} title={title}>
+                  <RedditIcon size={32} round />
+                </RedditShareButton>
+              </div>
+            </div>
           </div>
         </DialogHeader>
       </DialogContent>

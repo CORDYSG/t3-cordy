@@ -124,7 +124,7 @@ export default function GalaxyLidIndicator({ session }: { session?: any }) {
         />
 
         {/* Label */}
-        <span className="font-brand text-lg font-black text-black">
+        <span className="font-brand mt-0.5 text-lg font-black text-black">
           {session?.user ? "PROFILE" : "NOT SAVED"}
         </span>
       </motion.div>

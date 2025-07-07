@@ -197,7 +197,7 @@ const OpportunitiesClient = ({
     <>
       <section
         aria-label="Opportunities Header"
-        className="flex w-full flex-col items-center justify-center px-5"
+        className="flex w-full flex-col items-center justify-center"
       >
         <header className="mb-4 text-center">
           <h1 className="font-brand sr-only text-4xl font-bold text-black uppercase">
@@ -230,7 +230,7 @@ const OpportunitiesClient = ({
         ) : (
           <>
             {(search || selectedType || selectedZone.length > 0) && (
-              <div className="mb-4 ml-4">
+              <div className="mb-4">
                 <h2 className="sr-only">Search Results</h2>
                 <p className="font-semibold" aria-live="polite">
                   {displayTotal}{" "}

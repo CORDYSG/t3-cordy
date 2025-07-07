@@ -31,10 +31,20 @@ export default function ProfileOppList({
 
   const opps = useMemo(() => {
     if (likedOpps && likedOppsQuery.data) {
-      return likedOppsQuery.data;
+      return likedOppsQuery.data.opps;
     }
     if (savedOpps && savedOppsQuery.data) {
-      return savedOppsQuery.data;
+      return savedOppsQuery.data.opps;
+    }
+    return [];
+  }, [likedOpps, savedOpps, likedOppsQuery.data, savedOppsQuery.data]);
+
+  const expiredCount = useMemo(() => {
+    if (likedOpps && likedOppsQuery.data) {
+      return likedOppsQuery.data.expiredCount;
+    }
+    if (savedOpps && savedOppsQuery.data) {
+      return savedOppsQuery.data.expiredCount;
     }
     return [];
   }, [likedOpps, savedOpps, likedOppsQuery.data, savedOppsQuery.data]);
@@ -52,6 +62,19 @@ export default function ProfileOppList({
       ))}
       {opps.length == 0 && (
         <p className="font-medium italic">It&apos;s a bit empty here...</p>
+      )}
+      {opps.length > 0 && (
+        <div>
+          <p className="font-brand mt-8 text-center font-medium text-gray-500 italic">
+            Showing active opportunities only.{" "}
+            {typeof expiredCount === "number" && expiredCount > 0 && (
+              <>
+                <span className="font-bold">{expiredCount}</span> opportunities
+                have expired.
+              </>
+            )}
+          </p>
+        </div>
       )}
     </div>
   );

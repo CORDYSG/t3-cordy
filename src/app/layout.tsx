@@ -114,6 +114,30 @@ const gilroy = localFont({
   fallback: ["sans-serif"],
 });
 
+const mohrRounded = localFont({
+  src: [
+    {
+      path: "../../public/fonts/mohr-rounded.otf",
+      weight: "100",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/mohr-rounded-bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+    {
+      path: "../../public/fonts/mohr-rounded-black.otf",
+      weight: "800",
+      style: "normal",
+    },
+  ],
+  variable: "--font-mohr-rounded",
+  display: "swap",
+  preload: true,
+  fallback: ["sans-serif"],
+});
+
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",
   subsets: ["latin"],
@@ -134,7 +158,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <html
       lang="en"
-      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable} ${patrickHand.variable}`}
+      className={`${dmSans.variable} ${fatFrank.variable} ${gilroy.variable} ${patrickHand.variable} ${mohrRounded.variable}`}
     >
       <head>
         <meta name="color-scheme" content="light" />

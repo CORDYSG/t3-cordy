@@ -56,9 +56,7 @@ const SelectableInput: React.FC<SelectableInputProps> = ({
           {...props}
           className="sr-only"
         />
-        <span className={`text-sm ${checked ? "font-black" : "font-medium"}`}>
-          {label}
-        </span>
+        <span className={`text-sm font-medium`}>{label}</span>
       </label>
 
       {other && checked && (
