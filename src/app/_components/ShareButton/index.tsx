@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
 import { Share2, Link, ClipboardCheck, Check } from "lucide-react";
 import {

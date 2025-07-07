@@ -13,20 +13,21 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
-import { set } from "zod";
 
 const ProfileCard = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [hasDoneUserProfileCheck, setHasDoneUserProfileCheck] = useState(false);
+  const [hasDoneUserProfileCheck, setHasDoneUserProfileCheck] = useState(true);
 
-  if (!session?.user) {
-    router.push("/api/auth/signin");
-    return null; // or a loading state
-  }
+  // All hooks must be called before any conditional logic
   const userCheck = api.user.getUserProfile.useQuery(undefined, {
     enabled: status === "authenticated" && !!session?.user,
   });
+
+  const { data: userData, isLoading: isLoadingTeleUser } =
+    api.user.getUserData.useQuery();
+
+  const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery();
 
   useEffect(() => {
     // Wait for session + tRPC result
@@ -34,7 +35,7 @@ const ProfileCard = () => {
       if (userCheck.status === "success") {
         if (!userCheck.data?.id) {
           setHasDoneUserProfileCheck(false);
-          router.replace("/new-user");
+          // router.replace("/new-user");
         } else {
           setHasDoneUserProfileCheck(true);
         }
@@ -42,10 +43,21 @@ const ProfileCard = () => {
     }
   }, [status, userCheck.status, userCheck.data, router]);
 
-  const { data: userData, isLoading: isLoadingTeleUser } =
-    api.user.getUserData.useQuery();
+  // Handle redirect after all hooks are called
+  useEffect(() => {
+    if (
+      status === "unauthenticated" ||
+      (status === "authenticated" && !session?.user)
+    ) {
+      router.push("/api/auth/signin");
+    }
+  }, [status, session, router]);
 
-  const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery();
+  // Early return after all hooks
+  if (!session?.user) {
+    router.push("/api/auth/signin");
+    return null; // or a loading state
+  }
 
   const userInitials = session.user.name
     ? session.user.name
@@ -124,8 +136,9 @@ const ProfileCard = () => {
               <TooltipContent>Log out</TooltipContent>
             </Tooltip>
           </div>
+
           {!hasDoneUserProfileCheck && (
-            <div className="flex w-full justify-center">
+            <div className="mt-4 flex w-full justify-center">
               <Link
                 className="btn-brand-primary flex items-center gap-2 text-sm"
                 href={"/new-user"}

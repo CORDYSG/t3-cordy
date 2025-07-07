@@ -35,7 +35,7 @@ export default function DarkReaderOverride() {
       mutations.forEach((mutation) => {
         if (mutation.type === "attributes") {
           const attributeName = mutation.attributeName;
-          if (attributeName && attributeName.includes("darkreader")) {
+          if (attributeName?.includes("darkreader")) {
             removeDarkReaderAttributes();
           }
         }

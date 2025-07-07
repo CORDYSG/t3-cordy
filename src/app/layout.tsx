@@ -14,8 +14,11 @@ import Loading from "./loading";
 import { Toaster } from "@/components/ui/sonner";
 import DarkReaderOverride from "./_components/DarkModeOverride";
 
+export const viewport = {
+  colorScheme: "light", // ✅ correct place
+};
+
 export const metadata: Metadata = {
-  colorScheme: "light",
   title: "CORDY",
   description: "Find your passion. Find your opportunity.",
   openGraph: {

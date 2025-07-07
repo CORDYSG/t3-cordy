@@ -42,7 +42,7 @@ const OpportunityDetail = async ({
       )
     : [];
 
-  if (!opp || !opp.id) {
+  if (!opp?.id) {
     notFound();
   }
 
