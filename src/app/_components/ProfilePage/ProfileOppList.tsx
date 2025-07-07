@@ -69,8 +69,10 @@ export default function ProfileOppList({
             Showing active opportunities only.{" "}
             {typeof expiredCount === "number" && expiredCount > 0 && (
               <>
-                <span className="font-bold">{expiredCount}</span> opportunities
-                have expired.
+                <span className="font-bold">{expiredCount}</span>
+                {expiredCount === 1 ? " opportunity" : " opportunities"}{" "}
+                {expiredCount === 1 ? "has" : "have"} expired and{" "}
+                {expiredCount === 1 ? "is" : "are"} not shown here.
               </>
             )}
           </p>

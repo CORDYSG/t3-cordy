@@ -151,7 +151,8 @@ const ShareButton = ({
           </DialogTitle>
           <div className="flex w-full flex-col gap-4 text-center">
             <p className="mx-auto w-5/6 text-sm text-gray-600 md:text-base">
-              Tag your partner-in-crime — this one's too good solo.
+              Tag your partner-in-crime &mdash; this one&apos;s too good to
+              solo.
             </p>
             <div className="w-full scale-95 text-left">
               {opp && <EventCard opp={opp} listView />}
@@ -178,7 +179,7 @@ const ShareButton = ({
                         style={{ minWidth: "70px" }}
                       >
                         <span className="flex flex-row-reverse items-center gap-2">
-                          <span className="hidden md:block">
+                          <span className="hidden md:mt-0.5 md:block">
                             {copiedLink ? "Copied" : "Copy"}
                           </span>
                           {copiedLink ? (

@@ -1,4 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
 import "./BookmarkButton.css";
 
 import {
@@ -6,6 +7,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { toast } from "sonner";
 
 type BookmarkButtonProps = {
   isBookmarked: boolean;
@@ -16,6 +18,21 @@ export const BookmarkButton = ({
   isBookmarked,
   handleBookmark,
 }: BookmarkButtonProps) => {
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  const handleClick = () => {
+    if (handleBookmark) {
+      setIsAnimating(true);
+
+      handleBookmark();
+      if (!isBookmarked) {
+        toast.success("Saved to your bookmarks!");
+      }
+      // Reset animation state after animation completes
+      setTimeout(() => setIsAnimating(false), 1000);
+    }
+  };
+
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -25,11 +42,11 @@ export const BookmarkButton = ({
           <AnimatePresence>
             <motion.button
               whileTap="tap"
-              onClick={handleBookmark && handleBookmark}
+              onClick={handleClick}
               type="button"
               className="bookmark-btn"
             >
-              {isBookmarked && (
+              {isBookmarked && isAnimating && (
                 <svg
                   className="svg-icon-bookmark-circle"
                   width="26"
@@ -45,8 +62,8 @@ export const BookmarkButton = ({
                       opacity: 1,
                     }}
                     animate={{
-                      scale: isBookmarked ? [0, 2] : 0,
-                      opacity: isBookmarked ? [1, 0] : 0,
+                      scale: [0, 2],
+                      opacity: [1, 0],
                     }}
                     transition={{
                       duration: 0.6,
@@ -68,14 +85,17 @@ export const BookmarkButton = ({
                 xmlns="http://www.w3.org/2000/svg"
               >
                 <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                  }}
-                  animate={{
-                    scale: isBookmarked ? [1, 0, 1] : 1,
-                    opacity: isBookmarked ? 1 : 1,
-                  }}
+                  animate={
+                    isAnimating
+                      ? {
+                          scale: [1, 0, 1],
+                          opacity: 1,
+                        }
+                      : {
+                          scale: 1,
+                          opacity: 1,
+                        }
+                  }
                   transition={{
                     duration: 0.3,
                   }}
@@ -83,171 +103,175 @@ export const BookmarkButton = ({
                   fill="inherit"
                 />
 
-                {/* Sparkle animations - stars around the bookmark */}
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    x: 6,
-                    y: 0,
-                  }}
-                  animate={{
-                    scale: [1, 2.5],
-                    x: isBookmarked ? [6, -6] : 6,
-                    y: 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                  }}
-                  d="M4.5 12L5 11L5.5 12L5 13L4.5 12Z"
-                  fill="inherit"
-                />
+                {/* Sparkle animations - only animate when clicking to bookmark */}
+                {isAnimating && !isBookmarked && (
+                  <>
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        x: 6,
+                        y: 0,
+                      }}
+                      animate={{
+                        scale: [1, 2.5],
+                        x: [6, -6],
+                        y: 0,
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                      }}
+                      d="M4.5 12L5 11L5.5 12L5 13L4.5 12Z"
+                      fill="inherit"
+                    />
 
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    x: 0,
-                    y: -6,
-                  }}
-                  animate={{
-                    scale: [1, 2.5],
-                    y: isBookmarked ? [-6, 6] : -6,
-                    x: 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                  }}
-                  d="M13 24L13.5 23L14 24L13.5 25L13 24Z"
-                  fill="inherit"
-                />
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        x: 0,
+                        y: -6,
+                      }}
+                      animate={{
+                        scale: [1, 2.5],
+                        y: [-6, 6],
+                        x: 0,
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                      }}
+                      d="M13 24L13.5 23L14 24L13.5 25L13 24Z"
+                      fill="inherit"
+                    />
 
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    x: 0,
-                    y: 6,
-                  }}
-                  animate={{
-                    scale: [1, 2.5],
-                    y: isBookmarked ? [6, -6] : 6,
-                    x: 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                  }}
-                  d="M13 2L13.5 1L14 2L13.5 3L13 2Z"
-                  fill="inherit"
-                />
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        x: 0,
+                        y: 6,
+                      }}
+                      animate={{
+                        scale: [1, 2.5],
+                        y: [6, -6],
+                        x: 0,
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                      }}
+                      d="M13 2L13.5 1L14 2L13.5 3L13 2Z"
+                      fill="inherit"
+                    />
 
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    y: 0,
-                    x: -6,
-                  }}
-                  animate={{
-                    scale: [1, 2.5],
-                    x: isBookmarked ? [-6, 6] : 6,
-                    y: 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                  }}
-                  d="M22.5 12L23 11L23.5 12L23 13L22.5 12Z"
-                  fill="inherit"
-                />
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        y: 0,
+                        x: -6,
+                      }}
+                      animate={{
+                        scale: [1, 2.5],
+                        x: [-6, 6],
+                        y: 0,
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                      }}
+                      d="M22.5 12L23 11L23.5 12L23 13L22.5 12Z"
+                      fill="inherit"
+                    />
 
-                {/* Diagonal sparkles */}
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    y: 0,
-                    x: 0,
-                  }}
-                  animate={{
-                    scale: [1, 2],
-                    x: isBookmarked ? [0, 4] : 0,
-                    y: isBookmarked ? [0, -4] : 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.3,
-                  }}
-                  d="M20 7L20.5 6.5L21 7L20.5 7.5L20 7Z"
-                  fill="inherit"
-                />
+                    {/* Diagonal sparkles */}
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        y: 0,
+                        x: 0,
+                      }}
+                      animate={{
+                        scale: [1, 2],
+                        x: [0, 4],
+                        y: [0, -4],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.3,
+                      }}
+                      d="M20 7L20.5 6.5L21 7L20.5 7.5L20 7Z"
+                      fill="inherit"
+                    />
 
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    y: 0,
-                    x: 0,
-                  }}
-                  animate={{
-                    scale: [1, 2],
-                    x: isBookmarked ? [0, -4] : 0,
-                    y: isBookmarked ? [0, -4] : 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.3,
-                  }}
-                  d="M6 7L6.5 6.5L7 7L6.5 7.5L6 7Z"
-                  fill="inherit"
-                />
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        y: 0,
+                        x: 0,
+                      }}
+                      animate={{
+                        scale: [1, 2],
+                        x: [0, -4],
+                        y: [0, -4],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.3,
+                      }}
+                      d="M6 7L6.5 6.5L7 7L6.5 7.5L6 7Z"
+                      fill="inherit"
+                    />
 
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    y: 0,
-                    x: 0,
-                  }}
-                  animate={{
-                    scale: [1, 2],
-                    x: isBookmarked ? [0, -4] : 0,
-                    y: isBookmarked ? [0, 4] : 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.3,
-                  }}
-                  d="M7 19L7.5 18.5L8 19L7.5 19.5L7 19Z"
-                  fill="inherit"
-                />
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        y: 0,
+                        x: 0,
+                      }}
+                      animate={{
+                        scale: [1, 2],
+                        x: [0, -4],
+                        y: [0, 4],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.3,
+                      }}
+                      d="M7 19L7.5 18.5L8 19L7.5 19.5L7 19Z"
+                      fill="inherit"
+                    />
 
-                <motion.path
-                  initial={{
-                    scale: 0,
-                    opacity: 0,
-                    y: 0,
-                    x: 0,
-                  }}
-                  animate={{
-                    scale: [1, 2],
-                    x: isBookmarked ? [0, 4] : 0,
-                    y: isBookmarked ? [0, 4] : 0,
-                    opacity: isBookmarked ? [0, 1, 0] : 0,
-                  }}
-                  transition={{
-                    duration: 0.6,
-                    delay: 0.3,
-                  }}
-                  d="M19 19L19.5 18.5L20 19L19.5 19.5L19 19Z"
-                  fill="inherit"
-                />
+                    <motion.path
+                      initial={{
+                        scale: 0,
+                        opacity: 0,
+                        y: 0,
+                        x: 0,
+                      }}
+                      animate={{
+                        scale: [1, 2],
+                        x: [0, 4],
+                        y: [0, 4],
+                        opacity: [0, 1, 0],
+                      }}
+                      transition={{
+                        duration: 0.6,
+                        delay: 0.3,
+                      }}
+                      d="M19 19L19.5 18.5L20 19L19.5 19.5L19 19Z"
+                      fill="inherit"
+                    />
+                  </>
+                )}
               </motion.svg>
             </motion.button>
           </AnimatePresence>
