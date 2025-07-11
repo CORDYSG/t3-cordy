@@ -112,44 +112,6 @@ const OpportunitiesClient = ({
     };
   }, [search, selectedType, selectedZone, page, sortBy, isNavigating, refetch]);
 
-  // Sort function
-  const sortOpportunities = useCallback(
-    (opps: OppWithZoneType[], sortOption: SortOption) => {
-      const sorted = [...opps].sort((a, b) => {
-        switch (sortOption) {
-          case "newest":
-            return (
-              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-          case "oldest":
-            return (
-              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            );
-          case "deadline-asc":
-            // Handle null/undefined deadlines - put them at the end
-            if (!a.deadline && !b.deadline) return 0;
-            if (!a.deadline) return 1;
-            if (!b.deadline) return -1;
-            return (
-              new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
-            );
-          case "deadline-desc":
-            // Handle null/undefined deadlines - put them at the end
-            if (!a.deadline && !b.deadline) return 0;
-            if (!a.deadline) return 1;
-            if (!b.deadline) return -1;
-            return (
-              new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
-            );
-          default:
-            return 0;
-        }
-      });
-      return sorted;
-    },
-    [],
-  );
-
   // Event handlers with useCallback
   const handlePageChange = useCallback(
     (newPage: number) => {

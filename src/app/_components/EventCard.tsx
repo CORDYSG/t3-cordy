@@ -37,7 +37,7 @@ import {
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { BookmarkButton } from "./BookmarkButton";
-import { LikeButton } from "./LikeButton";
+
 import ShareButton from "./ShareButton";
 import { toast } from "sonner";
 import React from "react";
@@ -69,8 +69,6 @@ const EventImage = React.memo(
     sizes?: string;
     fill?: boolean;
   }) => {
-    const [imageError, setImageError] = useState(false);
-    const [imageLoaded, setImageLoaded] = useState(false);
     const fallbackSrc =
       "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg";
 
@@ -102,6 +100,7 @@ const EventImage = React.memo(
   },
 );
 
+EventImage.displayName = "EventImage";
 // Memoized content component to reduce duplication
 const EventContent = ({
   opp,

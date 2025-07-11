@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React, { useState } from "react";
 import {
   Dialog,
@@ -13,30 +15,10 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { X } from "lucide-react";
-import SwipeLeftTutorial from "../../../../public/lottie/SwipeLeftTut.json";
-import SwipeRightTutorial from "../../../../public/lottie/SwipeRightTut.json";
-import SwipePressTutorial from "../../../../public/lottie/SwipePressTut.json";
+
 import Image from "next/image";
-import Lottie from "lottie-react";
-import { a } from "node_modules/framer-motion/dist/types.d-DDSxwf0n";
 
 // Mock Lottie Animation Component (replace with actual Lottie when available)
-const MockLottieAnimation = ({
-  animationData,
-  className = "",
-}: {
-  animationData: { emoji: string };
-  className?: string;
-}) => {
-  return (
-    <div
-      className={`flex items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-purple-100 ${className}`}
-    >
-      <div className="animate-bounce text-6xl">{animationData.emoji}</div>
-    </div>
-  );
-};
 
 interface SwipeTutorialModalProps {
   isOpen: boolean;

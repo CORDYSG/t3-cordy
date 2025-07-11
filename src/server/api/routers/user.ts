@@ -22,57 +22,72 @@ const SchoolTypeSchema = z.nativeEnum(school_type);
 
 export const userRouter = createTRPCRouter({
 
- linkToTelegram: protectedProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        first_name: z.string(),
-        last_name: z.string().optional(),
-        username: z.string().optional(),
-        photo_url: z.string().optional(),
-        auth_date: z.string(),
-        hash: z.string(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const isValid = verifyTelegramLogin(input, process.env.TELEGRAM_BOT_TOKEN!);
-      if (!isValid) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid Telegram login" });
-      }
-    if (!ctx.session.user) {
-            throw new Error("User not authenticated");
+linkToTelegram: protectedProcedure
+  .input(
+    z.object({
+      id: z.number(),
+      first_name: z.string(),
+      last_name: z.string().optional(),
+      username: z.string().optional(),
+      photo_url: z.string().optional(),
+      auth_date: z.string(),
+      hash: z.string(),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const isValid = verifyTelegramLogin(input, process.env.TELEGRAM_BOT_TOKEN!);
+    if (!isValid) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid Telegram login" });
     }
 
-      // Check if user exists
-      const existing = await ctx.db.user.findFirst({
-        where: { telegramId: input.id.toString() },
+    if (!ctx.session.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const telegramIdString = input.id.toString();
+
+    // Check if this telegram ID already exists in another User (avoid duplication)
+    const existingUser = await ctx.db.user.findFirst({
+      where: {
+        telegramId: telegramIdString,
+        NOT: { id: ctx.session.user.id },
+      },
+    });
+
+    if (existingUser) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "This Telegram account is already linked to another user.",
       });
+    }
 
-      if (existing) {
-        return { status: "ok", userId: existing.id };
-      }
+    // Find existing TeleUser by telegramId
+    const teleUser = await ctx.db.teleUser.findFirst({
+      where: { telegramId: telegramIdString },
+    });
 
+    // Update the User, and if teleUser exists, connect the foreign key
+    const updatedUser = await ctx.db.user.update({
+      where: { id: ctx.session.user.id },
+      data: {
+        telegramId: telegramIdString,
+        teleUserHandle: input.username ?? undefined,
+        name: input.first_name,
+        username: input.username ?? undefined,
+        teleUser: teleUser ? { connect: { id: teleUser.id } } : undefined,
+      },
+    });
 
-      const result = await ctx.db.user.update({
-          data: {
-              telegramId: input.id.toString(),
-              name: input.first_name,
-              username: input.username ?? undefined,
-          },
-          where: { 
-            id: ctx.session.user.id
-          }
-      });
+    return { status: "ok", userId: updatedUser.id, teleLinked: !!teleUser };
+  }),
 
-      return { status: "ok", userId: result.id };
-    }),
     getUserData: protectedProcedure
     .query(async ({ ctx }) => {
 
         if (!ctx.session.user) {
             throw new Error("User not authenticated");
         }
-        const user = await db.user.findUnique({
+        const user = await ctx.db.user.findUnique({
             where: { id: ctx.session.user.id },
             select: {
                 id: true,
@@ -81,9 +96,11 @@ export const userRouter = createTRPCRouter({
                 image: true,
                 createdAt: true,
                 telegramId: true,
+                teleUserHandle: true,
             },
         });
 
+  
         return user;
         }),
 

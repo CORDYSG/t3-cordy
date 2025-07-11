@@ -129,6 +129,7 @@ model User {
   name                String?
   createdAt           DateTime              @default(now()) @db.Timestamptz(6)
   teleUserid          String?
+  teleUserHandle      String?              
   accounts            Account[]
   views               OppView[]
   ReportedOpportunity ReportedOpportunity[]
