@@ -65,6 +65,14 @@ const SwipeTutorialModal = ({ isOpen, onClose }: SwipeTutorialModalProps) => {
       description:
         "Tap on the card to view more details about the opportunity!",
     },
+    {
+      id: 5,
+      animation:
+        "https://images.ctfassets.net/ayry21z1dzn2/1lDlBJmolApqT6fT1XXUy2/64e1a449c1367b65fef21d9e79529b3c/26__1_.svg",
+      title: "View your likes",
+      description:
+        "Head to your profile see your likes! (Logged in users only)",
+    },
   ];
 
   React.useEffect(() => {

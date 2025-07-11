@@ -136,27 +136,15 @@ const EventContent = ({
         )}
 
         <div className="grid flex-1 grid-cols-2 items-center gap-4 md:grid-cols-4 lg:block lg:space-y-2">
-          <div className="col-span-3 flex flex-col justify-center lg:col-span-1">
-            <h2
-              className="font-brand line-clamp-2 text-left text-sm leading-tight font-bold md:mb-1 lg:line-clamp-3"
-              style={{
-                overflowWrap: "break-word",
-                wordBreak: "break-word",
-                hyphens: "auto",
-              }}
-            >
-              {opp.name}
-            </h2>
-            <p
-              className="line-clamp-2 hidden truncate text-xs leading-tight font-bold text-gray-500 md:block lg:text-gray-700"
-              style={{
-                overflowWrap: "break-word",
-                wordBreak: "break-word",
-                hyphens: "auto",
-              }}
-            >
-              {opp.organisation}
-            </p>
+          <div className="col-span-3 flex min-w-0 flex-col justify-center lg:col-span-1">
+            <div className="col-span-3 flex min-w-0 flex-col justify-center lg:col-span-1">
+              <h2 className="font-brand line-clamp-2 text-left text-sm leading-tight font-bold break-words md:mb-1 lg:line-clamp-3">
+                {opp.name}
+              </h2>
+              <p className="line-clamp-2 hidden text-xs leading-tight font-bold break-words text-gray-500 md:flex lg:text-gray-700">
+                {opp.organisation}
+              </p>
+            </div>
             <div className="flex flex-col justify-center md:hidden">
               <p className="text-left text-xs text-gray-700">
                 {opp.deadline ? formatDate(opp.deadline) : "Forever"}

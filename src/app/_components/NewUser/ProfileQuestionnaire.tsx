@@ -401,19 +401,22 @@ const ProfileQuestionnaire: React.FC = () => {
     }
   };
   const isLastStep = step === visibleQuestions.length - 1;
-  const progressQuestions = visibleQuestions.filter((q) =>
+  const allPossibleQuestions = questions.filter((q) =>
     ["input", "scrollable-picker", "radio", "checkbox", "boolean"].includes(
       q.type,
     ),
   );
 
-  const answeredSteps = progressQuestions.findIndex(
+  // Find the current question's position in the overall question flow
+  const currentQuestionIndex = allPossibleQuestions.findIndex(
     (q) => q === currentQuestion,
   );
 
+  // Calculate progress based on total possible questions
   const progressPercentage = Math.round(
-    ((answeredSteps + 1) / progressQuestions.length) * 100,
+    ((currentQuestionIndex + 1) / allPossibleQuestions.length) * 100,
   );
+
   const safeProgress = isNaN(progressPercentage) ? 0 : progressPercentage;
 
   const prevQuestionTypeRef = useRef<string | null>(null);
