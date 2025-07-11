@@ -540,7 +540,7 @@ export default function EventCard({
                   ))}
                 </div>
               </div>
-              <div className="mb-2 w-full border-2 border-b border-dashed"></div>
+              <div className="mb-2 w-full border-b-2 border-dashed"></div>
               <div className="space-y-0">
                 <p className="text-md font-medium text-black">
                   {opp.deadline ? formatDate(opp.deadline) : "Forever"}
@@ -637,7 +637,7 @@ export default function EventCard({
                 <p className="text-md font-medium text-gray-700">No deadline</p>
               )}
             </div>
-            <div className="my-4 w-full border-2 border-dashed"></div>
+            <div className="my-4 w-full border-b-2 border-dashed"></div>
             <DrawerDescription
               className="text-text line-clamp-6 whitespace-pre-line"
               style={{
