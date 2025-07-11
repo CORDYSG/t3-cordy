@@ -84,7 +84,6 @@ export default function FeedbackForm() {
         // fileName: imageFile ? imageFile.name : null,
       });
     } catch (err) {
-      console.log("Submit error:", err);
       // Error handling is done in the mutation's onError callback
     } finally {
       setIsFeedbackLoading(false);
