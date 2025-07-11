@@ -118,7 +118,6 @@ const ProfileQuestionnaire: React.FC = () => {
 
   const createUserProfileMutation = api.user.createUserProfile.useMutation({
     onSuccess: (data) => {
-      console.log("Profile created successfully:", data);
       setIsCompleted(true);
       setIsSubmitting(false);
     },
@@ -159,8 +158,6 @@ const ProfileQuestionnaire: React.FC = () => {
 
   const handleSubmit = () => {
     setIsSubmitting(true);
-
-    console.log("Submitting profile data:", profileData);
 
     createUserProfileMutation.mutate({
       ageRange: profileData.ageRange!,

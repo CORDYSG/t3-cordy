@@ -13,7 +13,7 @@ const CordyLogo: React.FC<CordyLogoProps> = ({
     <div className={`flex-shrink-0 ${fixWidth ? "w-40" : "w-auto"}`}>
       <Link
         href="/opportunities/for-you"
-        className={`bg-primary font-logo flex items-center justify-center rounded-full px-4 pt-1 text-center align-baseline text-2xl font-bold text-white uppercase md:px-8 md:text-3xl`}
+        className={`bg-primary font-logo flex items-center justify-center rounded-full px-4 pt-1 text-center align-baseline text-2xl font-black text-white uppercase md:px-8 md:text-3xl`}
       >
         Cordy
       </Link>

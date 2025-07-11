@@ -33,11 +33,11 @@ const Wrapper = () => {
   const [guestId, setGuestId] = useState<string>("");
 
   const { data: session } = useSession();
-  const searchParams = useSearchParams();
+
   const isAuthenticated = !!session?.user;
 
   const hasSwipedBefore = api.userOpp.hasSwipedBefore.useQuery({
-    guestId: guestId,
+    guestId: guestId ?? "",
   });
 
   useEffect(() => {
@@ -52,22 +52,21 @@ const Wrapper = () => {
       if (storedGuestId) {
         setGuestId(storedGuestId);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        setGuestHistory(JSON.parse(storedHistory));
       } else {
         const newGuestId = crypto.randomUUID();
         localStorage.setItem("guestId", newGuestId);
         setGuestId(newGuestId);
       }
+      if (storedHistory) setGuestHistory(JSON.parse(storedHistory));
     }
   }, [isAuthenticated]);
 
   useEffect(() => {
     if (hasSwipedBefore.data?.hasSwipedBefore === false) {
       // If the user has swiped before, we can fetch the next set of opportunities
-      console.log("User has not swiped before, showing tutorial");
+
       setShowTutorial(true);
     } else {
-      console.log("User has swiped");
       setShowTutorial(false);
     }
   }, [hasSwipedBefore.data]);
