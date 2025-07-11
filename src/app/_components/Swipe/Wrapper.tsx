@@ -52,12 +52,12 @@ const Wrapper = () => {
       if (storedGuestId) {
         setGuestId(storedGuestId);
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        if (storedHistory) setGuestHistory(JSON.parse(storedHistory));
       } else {
         const newGuestId = crypto.randomUUID();
         localStorage.setItem("guestId", newGuestId);
         setGuestId(newGuestId);
       }
+      if (storedHistory) setGuestHistory(JSON.parse(storedHistory));
     }
   }, [isAuthenticated]);
 
