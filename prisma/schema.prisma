@@ -141,6 +141,8 @@ model User {
   typePreferences     UserType[]
   zonePreferences     UserZone[]
   userActions         UserAction[]
+
+  WebsiteFeedback WebsiteFeedback[]
 }
 
 model Account {
@@ -473,4 +475,18 @@ enum GoalType {
   COMMUNITY_SERVICE
   PERSONAL_GROWTH
   OTHER_GOALS
+}
+
+
+model WebsiteFeedback {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  message     String
+  email       String?
+  imageUrl    String?   // Store Contentful URL instead of base64
+  imageType   String?   // "image/png" or "image/jpeg"
+  createdAt   DateTime  @default(now())
+
+  @@map("feedback")
 }

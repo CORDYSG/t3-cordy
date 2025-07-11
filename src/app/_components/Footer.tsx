@@ -33,6 +33,9 @@ const Footer: React.FC = () => {
           >
             Instagram
           </Link>
+          <Link href="/feedback" className="text-white hover:text-gray-300">
+            Feedback
+          </Link>
         </div>
 
         {/* Right side - Image placeholder */}
