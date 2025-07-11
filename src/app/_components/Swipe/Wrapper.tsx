@@ -51,12 +51,12 @@ const Wrapper = () => {
       // If the user is not authenticated, we can check if they have swiped before
       if (storedGuestId) {
         setGuestId(storedGuestId);
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       } else {
         const newGuestId = crypto.randomUUID();
         localStorage.setItem("guestId", newGuestId);
         setGuestId(newGuestId);
       }
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       if (storedHistory) setGuestHistory(JSON.parse(storedHistory));
     }
   }, [isAuthenticated]);
