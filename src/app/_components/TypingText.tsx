@@ -63,7 +63,7 @@ export const TypingText: React.FC<TypingTextProps> = ({
         animate={{ opacity: [0, 1] }}
         transition={{ duration: 0.9, repeat: Infinity, ease: "anticipate" }}
         style={{
-          height: "1.5rem", // match the font size
+          height: "1.3rem", // match the font size
           verticalAlign: "baseline", // ensures it sits at text baseline
         }}
       />

@@ -37,9 +37,10 @@ import {
 import Link from "next/link";
 import { api } from "@/trpc/react";
 import { BookmarkButton } from "./BookmarkButton";
-import { LikeButton } from "./LikeButton";
+
 import ShareButton from "./ShareButton";
 import { toast } from "sonner";
+import React from "react";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -53,50 +54,53 @@ type EventCardProps = {
 };
 
 // Memoized image component to prevent unnecessary re-renders
-const EventImage = ({
-  src,
-  alt,
-  className,
-  sizes,
-  fill = true,
-}: {
-  src?: string;
-  alt: string;
-  className?: string;
-  sizes?: string;
-  fill?: boolean;
-}) => {
-  const fallbackSrc =
-    "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg";
 
-  if (src) {
+const EventImage = React.memo(
+  ({
+    src,
+    alt,
+    className,
+    sizes,
+    fill = true,
+  }: {
+    src?: string;
+    alt: string;
+    className?: string;
+    sizes?: string;
+    fill?: boolean;
+  }) => {
+    const fallbackSrc =
+      "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg";
+
+    if (src) {
+      return (
+        <Image
+          src={src}
+          fill={fill}
+          sizes={sizes}
+          placeholder="empty"
+          alt={alt}
+          className={className}
+          priority
+        />
+      );
+    }
+
     return (
-      <Image
-        src={src}
-        fill={fill}
-        loading="lazy"
-        sizes={sizes}
-        blurDataURL={src}
-        placeholder="blur"
-        alt={alt}
-        className={className}
-      />
+      <div className="bg-background absolute inset-0 flex items-center justify-center">
+        <Image
+          src={fallbackSrc}
+          width={64}
+          height={64}
+          alt="Cordy Face"
+          className="object-contain"
+        />
+      </div>
     );
-  }
+  },
+);
 
-  return (
-    <div className="bg-background absolute inset-0 flex items-center justify-center">
-      <Image
-        src={fallbackSrc}
-        width={64}
-        height={64}
-        alt="Cordy Face"
-        className="object-contain"
-      />
-    </div>
-  );
-};
-
+EventImage.displayName = "EventImage";
 // Memoized content component to reduce duplication
 const EventContent = ({
   opp,
@@ -548,7 +552,9 @@ export default function EventCard({
                       : "Deadline has passed"}
                   </p>
                 ) : (
-                  <p className="text-sm font-bold text-gray-700">No deadline</p>
+                  <p className="text-md font-medium text-gray-700">
+                    No deadline
+                  </p>
                 )}
               </div>
             </div>
@@ -618,17 +624,17 @@ export default function EventCard({
               ))}
             </div>
             <div className="mt-4 space-y-1">
-              <p className="text-sm text-gray-500">
+              <p className="text-md font-medium text-black">
                 {opp.deadline ? formatDate(opp.deadline) : "Forever"}
               </p>
               {daysLeft !== null ? (
-                <p className="text-primary text-sm font-bold">
+                <p className="text-primary text-md font-medium">
                   {daysLeft > 0
                     ? `${daysLeft} days left`
                     : "Deadline has passed"}
                 </p>
               ) : (
-                <p className="text-sm font-bold text-gray-700">No deadline</p>
+                <p className="text-md font-medium text-gray-700">No deadline</p>
               )}
             </div>
             <div className="my-4 w-full border-2 border-dashed"></div>

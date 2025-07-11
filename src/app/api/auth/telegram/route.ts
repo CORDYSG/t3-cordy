@@ -5,13 +5,11 @@ import crypto from "crypto";
 
 const BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function verifyTelegramAuth(data: Record<string, any>) {
   const { hash, ...rest } = data;
 
   const sorted = Object.keys(rest)
     .sort()
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     .map((key) => `${key}=${rest[key]}`)
     .join("\n");
 

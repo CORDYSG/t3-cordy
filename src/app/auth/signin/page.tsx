@@ -5,12 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Suspense } from "react";
 import { FaGoogle, FaDiscord } from "react-icons/fa";
-import SlidingCards from "@/app/_components/SlidingCardsAnimation";
-import oppCardsLottie from "../../../../public/lottie/oppCards.json";
-import CordyMoveLeftRight from "../../../../public/lottie/CordyMoveLeftRight.json";
-import Lottie from "lottie-react";
-import { useRive, Layout, Fit, Alignment } from "@rive-app/react-canvas";
-import Image from "next/image";
 
 // Wrap the component that uses useSearchParams in Suspense
 function SignInContent() {
@@ -24,12 +18,12 @@ function SignInContent() {
 
   return (
     <main
-      className="bg-primary flex min-h-screen w-full overflow-hidden"
+      className="bg-primary flex min-h-screen w-full items-center overflow-hidden"
       style={{
         backgroundImage: `linear-gradient(135deg, #e84855 50%, #cc2c39 50%)`, // example using yellow and darker yellow
       }}
     >
-      <div className="relative w-full pt-16 md:min-h-[750px]">
+      <div className="relative min-h-[750px] w-full pt-16">
         {/* Sign-In Card Container */}
         <div className="z-10 container mx-auto flex w-full items-start justify-center p-4 md:mt-24 md:min-h-[700px]">
           <motion.div

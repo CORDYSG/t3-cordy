@@ -4,7 +4,6 @@ import { type Metadata } from "next";
 import { DM_Sans, Patrick_Hand } from "next/font/google";
 import { TRPCReactProvider } from "@/trpc/react";
 import { auth } from "@/server/auth";
-import Navbar from "./_components/Navbar";
 import NewNavbar from "./_components/NewNavbar";
 import Footer from "./_components/Footer";
 import { SessionProvider } from "next-auth/react";

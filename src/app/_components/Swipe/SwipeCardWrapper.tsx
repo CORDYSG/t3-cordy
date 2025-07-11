@@ -22,7 +22,7 @@ import {
 import ReportModal from "./ReportModal";
 import { api } from "@/trpc/react";
 import EventCard from "../EventCard";
-import { Check, Undo2, X, Home } from "lucide-react";
+import { Check, Undo2, X, Home, InfoIcon } from "lucide-react";
 import LoadingComponent from "../LoadingComponent";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
@@ -50,6 +50,8 @@ type SwipeWrapperRef = {
 };
 interface OpportunitiesPageProps {
   onEmptyChange?: (isEmpty: boolean) => void;
+
+  setShowTutorial?: (show: boolean) => void;
 }
 
 const GUEST_LIMIT = 8;
@@ -59,7 +61,7 @@ const CARD_OFFSET_Y = 8;
 const CARD_ROTATION = 3;
 
 const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
-  ({ onEmptyChange }, ref) => {
+  ({ onEmptyChange, setShowTutorial }, ref) => {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const isAuthenticated = !!session?.user;
@@ -604,7 +606,12 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
         <div className="flex w-11/12 flex-col items-center justify-between px-6">
           {visibleOpps.length > 0 && (
             <div className="container mt-[5vw] mb-2 hidden w-full max-w-md justify-between md:flex lg:mt-8">
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <InfoIcon
+                  className="opacity-30"
+                  size={24}
+                  onClick={() => setShowTutorial && setShowTutorial(true)}
+                />
                 <button
                   className={`btn-brand-white flex items-center px-4 transition-all duration-200 ${
                     undoing
@@ -623,13 +630,15 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
                   disabled={undoing}
                 />
               </div>
-              <ShareButton
-                titleOnly
-                opp_airtable_id={visibleOpps[0]?.airtable_id}
-                oppId={visibleOpps[0]?.id}
-                disabled={undoing}
-                opp={visibleOpps[0] ?? null}
-              />
+              <div className="flex items-center gap-2">
+                <ShareButton
+                  titleOnly
+                  opp_airtable_id={visibleOpps[0]?.airtable_id}
+                  oppId={visibleOpps[0]?.id}
+                  disabled={undoing}
+                  opp={visibleOpps[0] ?? null}
+                />
+              </div>
             </div>
           )}
           <div
@@ -759,7 +768,12 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           </div>
           {visibleOpps.length > 0 && (
             <div className="container mt-[5vw] flex w-full max-w-md justify-between md:hidden lg:mt-8">
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
+                <InfoIcon
+                  className="opacity-30"
+                  size={24}
+                  onClick={() => setShowTutorial && setShowTutorial(true)}
+                />
                 <button
                   className={`btn-brand-white flex items-center px-4 transition-all duration-200 ${
                     undoing
@@ -778,13 +792,15 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
                   disabled={undoing}
                 />
               </div>
-              <ShareButton
-                titleOnly
-                opp_airtable_id={visibleOpps[0]?.airtable_id}
-                oppId={visibleOpps[0]?.id}
-                disabled={undoing}
-                opp={visibleOpps[0] ?? null}
-              />
+              <div className="flex items-center gap-2">
+                <ShareButton
+                  titleOnly
+                  opp_airtable_id={visibleOpps[0]?.airtable_id}
+                  oppId={visibleOpps[0]?.id}
+                  disabled={undoing}
+                  opp={visibleOpps[0] ?? null}
+                />
+              </div>
             </div>
           )}
         </div>

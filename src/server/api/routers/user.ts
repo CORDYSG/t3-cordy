@@ -22,57 +22,72 @@ const SchoolTypeSchema = z.nativeEnum(school_type);
 
 export const userRouter = createTRPCRouter({
 
- linkToTelegram: protectedProcedure
-    .input(
-      z.object({
-        id: z.number(),
-        first_name: z.string(),
-        last_name: z.string().optional(),
-        username: z.string().optional(),
-        photo_url: z.string().optional(),
-        auth_date: z.string(),
-        hash: z.string(),
-      })
-    )
-    .mutation(async ({ input, ctx }) => {
-      const isValid = verifyTelegramLogin(input, process.env.TELEGRAM_BOT_TOKEN!);
-      if (!isValid) {
-        throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid Telegram login" });
-      }
-    if (!ctx.session.user) {
-            throw new Error("User not authenticated");
+linkToTelegram: protectedProcedure
+  .input(
+    z.object({
+      id: z.number(),
+      first_name: z.string(),
+      last_name: z.string().optional(),
+      username: z.string().optional(),
+      photo_url: z.string().optional(),
+      auth_date: z.string(),
+      hash: z.string(),
+    })
+  )
+  .mutation(async ({ input, ctx }) => {
+    const isValid = verifyTelegramLogin(input, process.env.TELEGRAM_BOT_TOKEN!);
+    if (!isValid) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "Invalid Telegram login" });
     }
 
-      // Check if user exists
-      const existing = await ctx.db.user.findFirst({
-        where: { telegramId: input.id.toString() },
+    if (!ctx.session.user) {
+      throw new TRPCError({ code: "UNAUTHORIZED", message: "User not authenticated" });
+    }
+
+    const telegramIdString = input.id.toString();
+
+    // Check if this telegram ID already exists in another User (avoid duplication)
+    const existingUser = await ctx.db.user.findFirst({
+      where: {
+        telegramId: telegramIdString,
+        NOT: { id: ctx.session.user.id },
+      },
+    });
+
+    if (existingUser) {
+      throw new TRPCError({
+        code: "CONFLICT",
+        message: "This Telegram account is already linked to another user.",
       });
+    }
 
-      if (existing) {
-        return { status: "ok", userId: existing.id };
-      }
+    // Find existing TeleUser by telegramId
+    const teleUser = await ctx.db.teleUser.findFirst({
+      where: { telegramId: telegramIdString },
+    });
 
+    // Update the User, and if teleUser exists, connect the foreign key
+    const updatedUser = await ctx.db.user.update({
+      where: { id: ctx.session.user.id },
+      data: {
+        telegramId: telegramIdString,
+        teleUserHandle: input.username ?? undefined,
+        name: input.first_name,
+        username: input.username ?? undefined,
+        teleUser: teleUser ? { connect: { id: teleUser.id } } : undefined,
+      },
+    });
 
-      const result = await ctx.db.user.update({
-          data: {
-              telegramId: input.id.toString(),
-              name: input.first_name,
-              username: input.username ?? undefined,
-          },
-          where: { 
-            id: ctx.session.user.id
-          }
-      });
+    return { status: "ok", userId: updatedUser.id, teleLinked: !!teleUser };
+  }),
 
-      return { status: "ok", userId: result.id };
-    }),
     getUserData: protectedProcedure
     .query(async ({ ctx }) => {
 
         if (!ctx.session.user) {
             throw new Error("User not authenticated");
         }
-        const user = await db.user.findUnique({
+        const user = await ctx.db.user.findUnique({
             where: { id: ctx.session.user.id },
             select: {
                 id: true,
@@ -81,9 +96,11 @@ export const userRouter = createTRPCRouter({
                 image: true,
                 createdAt: true,
                 telegramId: true,
+                teleUserHandle: true,
             },
         });
 
+  
         return user;
         }),
 
@@ -110,62 +127,84 @@ export const userRouter = createTRPCRouter({
     goalsOther: z.string().optional(),
     hearAboutSource: HearAboutSourceSchema,
     hearAboutOther: z.string().optional(),
-    interests: z.array(InterestCategorySchema),
+interests: z.array(z.string()),
     interestsOther: z.string().optional(),
     isStudent: z.boolean(),
     schoolName: z.string().optional(),
     schoolType: SchoolTypeSchema.optional(),
   }))
-  .mutation(async ({ ctx, input }) => {
-    const userId = ctx.session.user.id;
+.mutation(async ({ ctx, input }) => {
+  const userId = ctx.session.user.id;
 
-    try {
-      // No need for type casting since validation ensures correct types
-      const userProfile = await ctx.db.userProfile.upsert({
-        where: {
-          userId: userId,
-        },
-        create: {
-          userId: userId,
-          ageRange: input.ageRange,
-          goals: input.goals,
-          goalsOther: input.goalsOther,
-          hearAboutSource: input.hearAboutSource,
-          hearAboutOther: input.hearAboutOther,
-          interests: input.interests,
-          interestsOther: input.interestsOther,
-          isStudent: input.isStudent,
-          schoolName: input.schoolName,
-          schoolType: input.schoolType,
-        },
-        update: {
-          ageRange: input.ageRange,
-          goals: input.goals,
-          goalsOther: input.goalsOther,
-          hearAboutSource: input.hearAboutSource,
-          hearAboutOther: input.hearAboutOther,
-          interests: input.interests,
-          interestsOther: input.interestsOther,
-          isStudent: input.isStudent,
-          schoolName: input.schoolName,
-          schoolType: input.schoolType,
-          updatedAt: new Date(),
-        },
-      });
+  try {
+    // Upsert the main profile (excluding interests first)
+    const userProfile = await ctx.db.userProfile.upsert({
+      where: { userId },
+      create: {
+        userId,
+        ageRange: input.ageRange,
+        goals: input.goals,
+        goalsOther: input.goalsOther,
+        hearAboutSource: input.hearAboutSource,
+        hearAboutOther: input.hearAboutOther,
+        interestsOther: input.interestsOther,
+        isStudent: input.isStudent,
+        schoolName: input.schoolName,
+        schoolType: input.schoolType,
+      },
+      update: {
+        ageRange: input.ageRange,
+        goals: input.goals,
+        goalsOther: input.goalsOther,
+        hearAboutSource: input.hearAboutSource,
+        hearAboutOther: input.hearAboutOther,
+        interestsOther: input.interestsOther,
+        isStudent: input.isStudent,
+        schoolName: input.schoolName,
+        schoolType: input.schoolType,
+        updatedAt: new Date(),
+      },
+    });
 
-      return {
-        success: true,
-        userProfile,
-      };
-    } catch (error) {
-      console.error('Error creating/updating user profile:', error);
-      throw new TRPCError({
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'Failed to create or update user profile',
-        cause: error,
-      });
-    }
-  }),
+    // Step 1: Find Zones by airtable_id
+    const matchedZones = await ctx.db.zones.findMany({
+      where: {
+        airtable_id: {
+          in: input.interests,
+        },
+      },
+      select: { id: true },
+    });
+
+    // Step 2: Delete existing interests
+    await ctx.db.userProfileZone.deleteMany({
+      where: {
+        userProfileId: userProfile.id,
+      },
+    });
+
+    // Step 3: Create new interest mappings
+    await ctx.db.userProfileZone.createMany({
+      data: matchedZones.map((zone) => ({
+        userProfileId: userProfile.id,
+        zoneId: zone.id,
+      })),
+    });
+
+    return {
+      success: true,
+      userProfile,
+    };
+  } catch (error) {
+    console.error('Error creating/updating user profile:', error);
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Failed to create or update user profile',
+      cause: error,
+    });
+  }
+}),
+
 
 
     })

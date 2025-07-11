@@ -1,5 +1,5 @@
 import { auth } from "@/server/auth";
-import { api, HydrateClient } from "@/trpc/server";
+import { HydrateClient } from "@/trpc/server";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 

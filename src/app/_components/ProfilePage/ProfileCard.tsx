@@ -6,7 +6,14 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { LogOutIcon } from "lucide-react";
+import { Cog } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import {
   Tooltip,
   TooltipContent,
@@ -14,10 +21,18 @@ import {
 } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onTelegramAuth?: (user: any) => void;
+  }
+}
+
 const ProfileCard = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [hasDoneUserProfileCheck, setHasDoneUserProfileCheck] = useState(true);
+  const [showTelegramLogin, setShowTelegramLogin] = useState(false);
 
   // All hooks must be called before any conditional logic
   const userCheck = api.user.getUserProfile.useQuery(undefined, {
@@ -29,13 +44,46 @@ const ProfileCard = () => {
 
   const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery();
 
+  // // Telegram login widget setup
+  // useEffect(() => {
+  //   // Define global function for Telegram auth
+  //   window.onTelegramAuth = function (user: any) {
+  //     fetch("/api/auth/telegram", {
+  //       method: "POST",
+  //       headers: { "Content-Type": "application/json" },
+  //       body: JSON.stringify(user),
+  //     }).then(() => {
+  //       window.location.href = "/profile";
+  //     });
+  //   };
+
+  //   // Load Telegram login widget when needed
+  //   if (showTelegramLogin) {
+  //     const script = document.createElement("script");
+  //     script.src = "https://telegram.org/js/telegram-widget.js?22";
+  //     script.async = true;
+  //     script.setAttribute("data-telegram-login", "cordy_sandbot"); // no "@"
+  //     script.setAttribute("data-size", "large");
+  //     script.setAttribute("data-userpic", "true");
+  //     script.setAttribute("data-request-access", "write");
+  //     script.setAttribute("data-onauth", "onTelegramAuth(user)");
+
+  //     const telegramButton = document.getElementById("telegram-button");
+  //     if (telegramButton) {
+  //       // Clear existing content
+  //       telegramButton.innerHTML = "";
+  //       telegramButton.appendChild(script);
+  //     }
+  //   }
+  // }, [showTelegramLogin]);
+
   useEffect(() => {
     // Wait for session + tRPC result
     if (status === "authenticated") {
       if (userCheck.status === "success") {
         if (!userCheck.data?.id) {
           setHasDoneUserProfileCheck(false);
-          // router.replace("/new-user");
+          router.replace("/new-user");
         } else {
           setHasDoneUserProfileCheck(true);
         }
@@ -97,9 +145,14 @@ const ProfileCard = () => {
             {isLoadingTeleUser ? (
               <Skeleton className="mt-1 h-4 w-2/3" />
             ) : (
-              <p className="text-sm font-normal text-gray-500">
-                Telegram ID: {userData?.telegramId ?? "Not linked"}
-              </p>
+              <Tooltip>
+                <TooltipTrigger>
+                  <p className="text-sm font-normal text-gray-500">
+                    Telegram ID: {userData?.teleUserHandle ?? "Not linked"}
+                  </p>
+                </TooltipTrigger>
+                <TooltipContent side={"right"}>Coming soon!</TooltipContent>
+              </Tooltip>
             )}
           </div>
 
@@ -125,17 +178,46 @@ const ProfileCard = () => {
             </div>
           </div>
           <div className="mt-4 flex w-full justify-end">
-            <Tooltip>
-              <TooltipTrigger>
-                <Link href="api/auth/signout" className="btn-brand-white -mr-4">
-                  {" "}
-                  <span className="hidden md:block">Log out</span>
-                  <LogOutIcon size={24} />
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>Log out</TooltipContent>
-            </Tooltip>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="btn-brand-white -mr-4">
+                <Cog size={24} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                className="border-2 font-medium"
+                sideOffset={10}
+              >
+                {/* <DropdownMenuItem
+                  onClick={() => setShowTelegramLogin(true)}
+                  disabled={!!userData?.telegramId}
+                >
+                  {userData?.telegramId ? "Telegram Linked" : "Link Telegram"}
+                </DropdownMenuItem> */}
+                <DropdownMenuItem asChild>
+                  <Link className="text-red" href="/api/auth/signout">
+                    Log out
+                  </Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
+
+          {/* Telegram login widget container */}
+          {/* {showTelegramLogin && !userData?.telegramId && (
+            <div className="mt-4 flex w-full justify-center">
+              <div className="rounded-lg border-2 border-gray-200 p-4">
+                <p className="mb-3 text-center text-sm font-medium">
+                  Click the button below to link your Telegram account:
+                </p>
+                <div id="telegram-button" className="flex justify-center"></div>
+                <button
+                  onClick={() => setShowTelegramLogin(false)}
+                  className="mt-3 w-full text-sm text-gray-500 hover:text-gray-700"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          )} */}
 
           {!hasDoneUserProfileCheck && (
             <div className="mt-4 flex w-full justify-center">
