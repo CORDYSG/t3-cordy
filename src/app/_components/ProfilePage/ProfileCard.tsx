@@ -35,7 +35,7 @@ const ProfileCard = () => {
       if (userCheck.status === "success") {
         if (!userCheck.data?.id) {
           setHasDoneUserProfileCheck(false);
-          // router.replace("/new-user");
+          router.replace("/new-user");
         } else {
           setHasDoneUserProfileCheck(true);
         }

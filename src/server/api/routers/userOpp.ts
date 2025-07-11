@@ -163,6 +163,76 @@ export const userOppRouter = createTRPCRouter({
       return enrichedOpps;
     }),
 
+    // Add this procedure to your userOppRouter
+
+hasSwipedBefore: publicProcedure
+  .input(
+    z.object({
+      guestId: z.string().optional(), // For guest users
+    })
+  )
+  .query(async ({ ctx, input }) => {
+    const isAuthenticated = !!ctx.session?.user;
+
+    // For authenticated users, check database
+    if (isAuthenticated && ctx.session) {
+      const userId = ctx.session.user.id;
+      
+      // Also check if user has any recorded actions
+      const userActions = await db.userAction.findFirst({
+        where: {
+          userId,
+          actionType: {
+            in: [
+              UserActionType.LIKE,
+              UserActionType.UNLIKE,
+            ],
+          },
+        },
+      });
+
+      return {
+        hasSwipedBefore: !!(userActions),
+        isAuthenticated: true,
+      };
+    }
+
+    // For guest users, check in-memory session
+    if (!input.guestId) {
+      return {
+        hasSwipedBefore: false,
+        isAuthenticated: false,
+      };
+    }
+
+    const guestSession = guestSessions.get(input.guestId);
+    
+    if (!guestSession) {
+      return {
+        hasSwipedBefore: false,
+        isAuthenticated: false,
+      };
+    }
+
+    // Check if guest has any recorded actions
+    const guestActions = await db.userAction.findFirst({
+      where: {
+        guestId: input.guestId,
+        actionType: {
+          in: [
+            UserActionType.LIKE,
+            UserActionType.UNLIKE,
+          ],
+        },
+      },
+    });
+
+    return {
+      hasSwipedBefore: !!guestActions,
+      isAuthenticated: false,
+    };
+  }),
+
     
     
   // Keep the original protected procedures

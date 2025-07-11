@@ -7,7 +7,7 @@ interface ScrollablePickerItem {
 }
 
 interface ScrollablePickerProps {
-  items: (string | number | ScrollablePickerItem)[];
+  items: { label: string; value: string }[];
   selectedValue: string | number;
   onChange: (value: string | number) => void;
   height?: number;

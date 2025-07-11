@@ -7,7 +7,7 @@ import { questions, type ProfileData, type Question } from "./questions";
 import Input from "../QuestionComponents/Input";
 import SelectableInput from "../QuestionComponents/SelectableInput";
 import ScrollablePicker from "../QuestionComponents/ScrollablePicker";
-import { ChevronLeft, Check } from "lucide-react";
+import { ChevronLeft, Check, Loader2 } from "lucide-react";
 import { TypingText } from "../TypingText";
 import { motion } from "framer-motion";
 import SubmitAnimation from "../SubmitCheckAnimation/SubmitCheckAnimation";
@@ -20,6 +20,82 @@ import { api } from "@/trpc/react";
 const initialProfile: ProfileData = {
   interests: [],
   goals: [],
+};
+
+// Helper function to get API query hook
+const getApiQuery = (queryString: string) => {
+  const queryParts = queryString.split(".");
+
+  if (queryParts.length === 2) {
+    const [namespace, method] = queryParts;
+
+    if (typeof namespace !== "string" || !namespace) {
+      throw new Error(`Invalid namespace: ${namespace}`);
+    }
+
+    if (typeof method !== "string" || !method) {
+      throw new Error(`Invalid method: ${method}`);
+    }
+
+    // Dynamically access the API method
+    const apiNamespace = (api as any)[namespace as string];
+    if (!apiNamespace) {
+      throw new Error(`Unknown API namespace: ${namespace}`);
+    }
+
+    const apiMethod = apiNamespace[method];
+    if (!apiMethod || typeof apiMethod.useQuery !== "function") {
+      throw new Error(`Unknown API method: ${namespace}.${method}`);
+    }
+
+    return apiMethod;
+  }
+
+  throw new Error(
+    `Invalid query format: ${queryString}. Expected format: "namespace.method"`,
+  );
+};
+
+// Registry of all possible dynamic queries
+// Add all your possible queries here to maintain stable hook order
+const QUERY_REGISTRY = {
+  "zone.getZonesForOptions": () => api.zone?.getZonesForOptions?.useQuery,
+  // Add more queries as needed:
+  // 'user.getAllUsers': () => api.user?.getAllUsers?.useQuery,
+  // 'category.getAllCategories': () => api.category?.getAllCategories?.useQuery,
+} as const;
+
+// Custom hook that always calls the same hooks in the same order
+const useQuestionData = (currentQuestion: Question | undefined) => {
+  const shouldRunQuery =
+    currentQuestion?.optionQuery && !currentQuestion?.options;
+
+  // Always call ALL possible queries but conditionally enable them
+  // This ensures hooks are called in the same order every time
+  const queries = Object.entries(QUERY_REGISTRY).reduce(
+    (acc, [key, getHook]) => {
+      const hook = getHook();
+      if (hook) {
+        acc[key] = hook(undefined, {
+          enabled: Boolean(
+            shouldRunQuery && currentQuestion?.optionQuery === key,
+          ),
+        });
+      } else {
+        acc[key] = { data: null, isLoading: false, error: null };
+      }
+      return acc;
+    },
+    {} as Record<string, any>,
+  );
+
+  // Return the appropriate query based on the current question
+  if (currentQuestion?.optionQuery && queries[currentQuestion.optionQuery]) {
+    return queries[currentQuestion.optionQuery];
+  }
+
+  // Default return for when no query is needed or query not found
+  return { data: null, isLoading: false, error: null };
 };
 
 const ProfileQuestionnaire: React.FC = () => {
@@ -62,6 +138,9 @@ const ProfileQuestionnaire: React.FC = () => {
 
   const currentQuestion = visibleQuestions[step];
 
+  // Always call the dynamic query hook, but conditionally enable it
+  const dynamicQuery = useQuestionData(currentQuestion);
+
   const handleNext = () => {
     if (step < visibleQuestions.length - 1) {
       setStep((prev) => prev + 1);
@@ -81,6 +160,8 @@ const ProfileQuestionnaire: React.FC = () => {
   const handleSubmit = () => {
     setIsSubmitting(true);
 
+    console.log("Submitting profile data:", profileData);
+
     createUserProfileMutation.mutate({
       ageRange: profileData.ageRange!,
       goals: profileData.goals!,
@@ -94,6 +175,29 @@ const ProfileQuestionnaire: React.FC = () => {
       schoolType: profileData.schoolType!,
     });
   };
+
+  // Get options from either static options or dynamic query
+  const getQuestionOptions = () => {
+    if (currentQuestion?.options) {
+      return currentQuestion.options;
+    }
+
+    if (dynamicQuery?.data) {
+      // Transform the data to match the expected option format
+      // Assuming your API returns an array of objects with id and name/label
+      return dynamicQuery.data.map((item: any) => ({
+        value: item.id || item.value,
+        label: item.name || item.label || item.title,
+      }));
+    }
+
+    return [];
+  };
+
+  const questionOptions = getQuestionOptions();
+  const shouldRunQuery =
+    currentQuestion?.optionQuery && !currentQuestion?.options;
+  const isLoadingOptions = shouldRunQuery && dynamicQuery?.isLoading;
 
   const isCurrentQuestionAnswered = (): boolean => {
     const { field, type } = currentQuestion ?? {};
@@ -130,6 +234,15 @@ const ProfileQuestionnaire: React.FC = () => {
     }
     const { type, field, options, title, placeholder, max } = currentQuestion;
 
+    if (isLoadingOptions) {
+      return (
+        <div className="flex items-center justify-center py-8">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+          <span className="ml-2 text-gray-500">Loading options...</span>
+        </div>
+      );
+    }
+
     switch (type) {
       case "input":
         return (
@@ -154,24 +267,6 @@ const ProfileQuestionnaire: React.FC = () => {
         );
 
       case "scrollable-picker":
-        const ageOptions = [
-          { value: "BELOW_TWELVE", label: "Below 12" },
-          { value: "TWELVE", label: "12" },
-          { value: "THIRTEEN", label: "13" },
-          { value: "FOURTEEN", label: "14" },
-          { value: "FIFTEEN", label: "15" },
-          { value: "SIXTEEN", label: "16" },
-          { value: "SEVENTEEN", label: "17" },
-          { value: "EIGHTEEN", label: "18" },
-          { value: "NINETEEN", label: "19" },
-          { value: "TWENTY", label: "20" },
-          { value: "TWENTY_ONE", label: "21" },
-          { value: "TWENTY_TWO", label: "22" },
-          { value: "TWENTY_THREE", label: "23" },
-          { value: "TWENTY_FOUR", label: "24" },
-          { value: "TWENTY_FIVE", label: "25" },
-          { value: "ABOVE_25", label: "Above 25" },
-        ];
         return (
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
@@ -185,7 +280,7 @@ const ProfileQuestionnaire: React.FC = () => {
             className=""
           >
             <ScrollablePicker
-              items={ageOptions}
+              items={questionOptions ?? []}
               selectedValue={
                 typeof profileData[field] === "string" ||
                 typeof profileData[field] === "number"
@@ -202,7 +297,7 @@ const ProfileQuestionnaire: React.FC = () => {
       case "radio":
         return (
           <div className="flex w-full flex-wrap justify-center gap-4">
-            {options?.map((opt, i) => (
+            {questionOptions?.map((opt: any, i: number) => (
               <motion.div
                 key={opt.value}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -236,7 +331,7 @@ const ProfileQuestionnaire: React.FC = () => {
       case "checkbox":
         return (
           <div className="flex w-full flex-wrap justify-center gap-4">
-            {options?.map((opt, i) => (
+            {questionOptions?.map((opt: any, i: number) => (
               <motion.div
                 key={opt.value}
                 initial={{ opacity: 0, scale: 0.8 }}

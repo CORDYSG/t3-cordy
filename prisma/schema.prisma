@@ -257,6 +257,8 @@ model Zones {
   name            String?
   OppZone         OppZone[]
   userPreferences UserZone[]
+
+  UserProfileZone UserProfileZone[]
 }
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
@@ -315,8 +317,9 @@ model UserProfile {
   id              String             @id @default(cuid())
   userId          String             @unique
   hearAboutSource HearAboutSource?
-  hearAboutOther  String?
-  interests       InterestCategory[]
+  hearAboutOther  String? 
+  interestZones   UserProfileZone[]
+  
   interestsOther  String?
   ageRange        AgeRange?
   isStudent       Boolean?
@@ -331,6 +334,20 @@ model UserProfile {
   @@index([userId])
 }
 
+model UserProfileZone {
+  id             String       @id @default(cuid())
+  userProfileId  String
+  zoneId         BigInt
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  userProfile    UserProfile  @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  zone           Zones        @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+
+  @@unique([userProfileId, zoneId])
+  @@index([userProfileId])
+  @@index([zoneId])
+}
 model ReportedOpportunity {
   id          String       @id @default(cuid())
   userId      String

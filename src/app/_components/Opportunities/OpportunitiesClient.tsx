@@ -4,11 +4,18 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { api } from "@/trpc/react";
 import SearchBar from "./SearchBar";
-import EventCard from "../../_components/EventCard";
+
 import LoadingComponent from "../../_components/LoadingComponent";
 import Pagination from "./Pagination";
 import Image from "next/image";
 import OpportunitiesList from "./OpportunitiesList";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { CalendarArrowDown, CalendarArrowUp, FunnelPlus } from "lucide-react";
 
 type OpportunitiesClientProps = {
   initialOpps: OppWithZoneType[];
@@ -18,6 +25,8 @@ type OpportunitiesClientProps = {
   zones: ZoneType[];
   types: TagTypes[];
 };
+
+type SortOption = "newest" | "oldest" | "deadline-asc" | "deadline-desc";
 
 const OpportunitiesClient = ({
   initialOpps,
@@ -34,6 +43,10 @@ const OpportunitiesClient = ({
   const [selectedType, setSelectedType] = useState("");
   const [selectedZone, setSelectedZone] = useState<ZoneType[]>([]);
   const [page, setPage] = useState(initialPage);
+  const [sortBy, setSortBy] = useState<SortOption>(() => {
+    const urlSort = searchParams.get("sort");
+    return (urlSort as SortOption) || "newest";
+  });
 
   const [isNavigating, setIsNavigating] = useState(false);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
@@ -47,8 +60,8 @@ const OpportunitiesClient = ({
     () => search !== "" || selectedType !== "" || selectedZone.length > 0,
     [search, selectedType, selectedZone],
   );
-  // Setup the TRPC query properly at component level
 
+  // Setup the TRPC query properly at component level
   const {
     data: searchResults,
     isLoading,
@@ -60,11 +73,11 @@ const OpportunitiesClient = ({
       zoneIds: selectedZone.map((z) => z.name).filter(Boolean) as string[],
       page,
       limit,
+      sortBy,
     },
     {
-      enabled: isFiltered,
-      staleTime: Infinity, // Keep the data until new data is fetched
-      refetchOnWindowFocus: false, // Do not refetch on window focus
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
     },
   );
 
@@ -86,7 +99,7 @@ const OpportunitiesClient = ({
       clearTimeout(searchDebounceRef.current);
     }
 
-    if (isFiltered && !isNavigating) {
+    if (!isNavigating) {
       searchDebounceRef.current = setTimeout(() => {
         void refetch();
       }, 300);
@@ -97,28 +110,45 @@ const OpportunitiesClient = ({
         clearTimeout(searchDebounceRef.current);
       }
     };
-  }, [
-    search,
-    selectedType,
-    selectedZone,
-    page,
-    isFiltered,
-    isNavigating,
-    refetch,
-  ]);
-  // Debounce search
-  useEffect(() => {
-    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+  }, [search, selectedType, selectedZone, page, sortBy, isNavigating, refetch]);
 
-    if (isFiltered && !isNavigating) {
-      searchDebounceRef.current = setTimeout(() => {
-        void refetch();
-      }, 300);
-    }
-    return () => {
-      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    };
-  }, [search, selectedType, selectedZone, page, isFiltered, refetch]);
+  // Sort function
+  const sortOpportunities = useCallback(
+    (opps: OppWithZoneType[], sortOption: SortOption) => {
+      const sorted = [...opps].sort((a, b) => {
+        switch (sortOption) {
+          case "newest":
+            return (
+              new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+          case "oldest":
+            return (
+              new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+            );
+          case "deadline-asc":
+            // Handle null/undefined deadlines - put them at the end
+            if (!a.deadline && !b.deadline) return 0;
+            if (!a.deadline) return 1;
+            if (!b.deadline) return -1;
+            return (
+              new Date(a.deadline).getTime() - new Date(b.deadline).getTime()
+            );
+          case "deadline-desc":
+            // Handle null/undefined deadlines - put them at the end
+            if (!a.deadline && !b.deadline) return 0;
+            if (!a.deadline) return 1;
+            if (!b.deadline) return -1;
+            return (
+              new Date(b.deadline).getTime() - new Date(a.deadline).getTime()
+            );
+          default:
+            return 0;
+        }
+      });
+      return sorted;
+    },
+    [],
+  );
 
   // Event handlers with useCallback
   const handlePageChange = useCallback(
@@ -136,16 +166,25 @@ const OpportunitiesClient = ({
           params.append("zone", zone.id.toString());
         });
       }
+      if (sortBy !== "newest") params.set("sort", sortBy);
 
       router.push(`/opportunities?${params.toString()}`);
 
-      if (!isFiltered) {
+      if (!isNavigating) {
         router.refresh();
       }
 
       window.scrollTo({ top: 50, behavior: "smooth" });
     },
-    [search, selectedType, selectedZone, isFiltered, router, searchParams],
+    [
+      search,
+      selectedType,
+      selectedZone,
+      sortBy,
+      isFiltered,
+      router,
+      searchParams,
+    ],
   );
 
   const handleSearch = useCallback((searchText: string) => {
@@ -167,16 +206,24 @@ const OpportunitiesClient = ({
     setPage(1);
   }, []);
 
-  // Calculate display data based on filters
+  const handleSortChange = useCallback((newSort: SortOption) => {
+    setSortBy(newSort);
+    setPage(1);
+  }, []);
+
+  // Calculate display data based on filters and sort
   const { displayedOpps, displayTotal, totalPages } = useMemo(() => {
-    const opps = isFiltered ? (searchResults?.opps ?? []) : initialOpps;
-    const total = isFiltered ? (searchResults?.totalOpps ?? 0) : totalOpps;
+    // Always use searchResults when available, fallback to initialOpps only for loading states
+    const opps = searchResults?.opps ?? initialOpps;
+    const total = searchResults?.totalOpps ?? totalOpps;
+
     return {
       displayedOpps: opps,
       displayTotal: total,
       totalPages: Math.ceil(total / limit),
     };
-  }, [isFiltered, searchResults, initialOpps, totalOpps, limit]);
+  }, [searchResults, initialOpps, totalOpps, limit]);
+
   // Generate filter description for better accessibility and SEO
   const filterDescription = useMemo(() => {
     const parts = [];
@@ -192,6 +239,24 @@ const OpportunitiesClient = ({
     }
     return parts.length > 0 ? `Filtered opportunities ${parts.join(", ")}` : "";
   }, [search, selectedType, selectedZone, types]);
+
+  const sortOptions = [
+    {
+      value: "newest",
+      label: "Newest Added",
+      icon: <FunnelPlus className="h-4 w-4" />,
+    },
+    {
+      value: "deadline-asc",
+      label: "Deadline (Earliest)",
+      icon: <CalendarArrowUp className="h-4 w-4" />,
+    },
+    {
+      value: "deadline-desc",
+      label: "Deadline (Latest)",
+      icon: <CalendarArrowDown className="h-4 w-4" />,
+    },
+  ] as const;
 
   return (
     <>
@@ -229,18 +294,54 @@ const OpportunitiesClient = ({
           <LoadingComponent />
         ) : (
           <>
-            {(search || selectedType || selectedZone.length > 0) && (
-              <div className="mb-4">
-                <h2 className="sr-only">Search Results</h2>
-                <p className="font-semibold" aria-live="polite">
-                  {displayTotal}{" "}
-                  {displayTotal === 1 ? "Opportunity" : "Opportunities"} Found
-                </p>
-                {filterDescription && (
-                  <p className="text-sm text-gray-600">{filterDescription}</p>
+            {/* Sort Controls */}
+            <div className="mb-6 flex flex-col gap-4">
+              <div>
+                {(search || selectedType || selectedZone.length > 0) && (
+                  <>
+                    <h2 className="sr-only">Search Results</h2>
+                    <p className="font-semibold" aria-live="polite">
+                      {displayTotal}{" "}
+                      {displayTotal === 1 ? "Opportunity" : "Opportunities"}{" "}
+                      Found
+                    </p>
+                    {filterDescription && (
+                      <p className="text-sm text-gray-600">
+                        {filterDescription}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
-            )}
+
+              <div className="flex flex-wrap items-center justify-end gap-2">
+                <span className="sr-only">Sort by:</span>
+                <div className="flex flex-wrap gap-2">
+                  {sortOptions.map((option) => (
+                    <TooltipProvider key={option.value}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            onClick={() => handleSortChange(option.value)}
+                            className={`rounded-lg border-2 px-4 py-2 transition-all ${
+                              sortBy === option.value
+                                ? "bg-primary shadow-brand text-black"
+                                : "bg-white hover:bg-gray-300"
+                            }`}
+                            aria-label={option.label}
+                          >
+                            {option.icon}
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="top">
+                          {option.label}
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  ))}
+                </div>
+              </div>
+            </div>
 
             {displayedOpps.length > 0 ? (
               <OpportunitiesList

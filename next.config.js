@@ -7,7 +7,7 @@ import "./src/env.js";
 /** @type {import("next").NextConfig} */
 const config = {
   images: {
-    domains: ["fdxmtgmsbebfggxtkfkg.supabase.co"],
+    domains: ["fdxmtgmsbebfggxtkfkg.supabase.co", "images.ctfassets.net"],
   },
 };
 

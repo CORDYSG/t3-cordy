@@ -244,62 +244,79 @@ export const oppRouter = createTRPCRouter({
       return { opps: enrichedOpps, totalOpps };
     }),
 
-  searchOpportunities: publicProcedure
-    .input(
-      z.object({
-        search: z.string().optional().default(""),
-        type: z.array(z.string().max(20)).optional().default([]),
-        zoneIds: z.array(z.string().max(20)).optional().default([]), //zone names
-        page: z.number().optional().default(1),
-        limit: z.number().optional().default(8),
-        excludeOppIds: z.array(z.string()).optional().default([]),
-      }),
-    )
-    .query(async ({ ctx, input }) => {
-      const { search, type, zoneIds, page, limit, excludeOppIds } = input;
-      const skip = (page - 1) * limit;
-
-      // Build the where clause more efficiently
-      const whereClause: Prisma.OppsWhereInput = {
-        status: "Active",
-        deadline: { gt: new Date() },
-        ...(excludeOppIds.length > 0 && {
-          airtable_id: { notIn: excludeOppIds },
-        }),
-        ...(search && {
-          OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { caption: { contains: search, mode: "insensitive" } },
-          ],
-        }),
-        ...(type.length > 0 && { type: { hasSome: type } }),
-        ...(zoneIds.length > 0 && { zone: { hasSome: zoneIds } }),
-      };
-
-      // Get zones first since we need them for filtering
-      const zones = await fetchAllZones();
-      const zoneMap = buildZoneMap(zones);
-
-      // Use a single count + findMany query with proper pagination
-      const [totalOpps, opps] = await Promise.all([
-        db.opps.count({ where: whereClause }),
-        db.opps.findMany({
-          where: whereClause,
-          take: limit,
-          skip,
-          orderBy: { created_at: "desc" },
-        }),
-      ]);
-
-      // Early return if no results
-      if (opps.length === 0) {
-        return { opps: [], totalOpps };
-      }
-
-      return {
-        opps: enrichOppsWithZones(opps, zoneMap),
-        totalOpps,
-      };
+ searchOpportunities: publicProcedure
+  .input(
+    z.object({
+      search: z.string().optional().default(""),
+      type: z.array(z.string().max(20)).optional().default([]),
+      zoneIds: z.array(z.string().max(20)).optional().default([]), //zone names
+      page: z.number().optional().default(1),
+      limit: z.number().optional().default(8),
+      excludeOppIds: z.array(z.string()).optional().default([]),
+      sortBy: z.enum(["newest", "oldest", "deadline-asc", "deadline-desc"]).optional().default("newest"),
     }),
+  )
+  .query(async ({ ctx, input }) => {
+    const { search, type, zoneIds, page, limit, excludeOppIds, sortBy } = input;
+    const skip = (page - 1) * limit;
+
+    // Build the where clause more efficiently
+    const whereClause: Prisma.OppsWhereInput = {
+      status: "Active",
+      deadline: { gt: new Date() },
+      ...(excludeOppIds.length > 0 && {
+        airtable_id: { notIn: excludeOppIds },
+      }),
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { caption: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+      ...(type.length > 0 && { type: { hasSome: type } }),
+      ...(zoneIds.length > 0 && { zone: { hasSome: zoneIds } }),
+    };
+
+    // Build the orderBy clause based on sortBy parameter
+    const getOrderByClause = (sortBy: string): Prisma.OppsOrderByWithRelationInput => {
+      switch (sortBy) {
+        case "newest":
+          return { created_at: "desc" };
+        case "oldest":
+          return { created_at: "asc" };
+        case "deadline-asc":
+          return { deadline: "asc" };
+        case "deadline-desc":
+          return { deadline: "desc" };
+        default:
+          return { created_at: "desc" };
+      }
+    };
+
+    // Get zones first since we need them for filtering
+    const zones = await fetchAllZones();
+    const zoneMap = buildZoneMap(zones);
+
+    // Use a single count + findMany query with proper pagination
+    const [totalOpps, opps] = await Promise.all([
+      db.opps.count({ where: whereClause }),
+      db.opps.findMany({
+        where: whereClause,
+        take: limit,
+        skip,
+        orderBy: getOrderByClause(sortBy),
+      }),
+    ]);
+
+    // Early return if no results
+    if (opps.length === 0) {
+      return { opps: [], totalOpps };
+    }
+
+    return {
+      opps: enrichOppsWithZones(opps, zoneMap),
+      totalOpps,
+    };
+  }),
     
 });

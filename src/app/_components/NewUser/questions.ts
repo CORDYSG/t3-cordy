@@ -14,12 +14,15 @@ export interface Question {
   preventBack?: boolean;
   placeholder?: string
   max?:number
+  optionQuery?: string; //
+  // scro For checkbox/radio options, the Airtable table to fetch options from
+
 }
 
 export interface ProfileData {
   hearAboutSource?: HearAboutSource;
   hearAboutOther?: string;
-  interests: InterestCategory[];
+  interests: string[];
   interestsOther?: string;
   ageRange?: AgeRange;
   isStudent?: boolean;
@@ -90,6 +93,24 @@ export const questions: Question[] = [
     title: "What is your age? (this year)",
     type: "scrollable-picker",
     field: "ageRange",
+    options: [
+          { value: "BELOW_TWELVE", label: "Below 12" },
+          { value: "TWELVE", label: "12" },
+          { value: "THIRTEEN", label: "13" },
+          { value: "FOURTEEN", label: "14" },
+          { value: "FIFTEEN", label: "15" },
+          { value: "SIXTEEN", label: "16" },
+          { value: "SEVENTEEN", label: "17" },
+          { value: "EIGHTEEN", label: "18" },
+          { value: "NINETEEN", label: "19" },
+          { value: "TWENTY", label: "20" },
+          { value: "TWENTY_ONE", label: "21" },
+          { value: "TWENTY_TWO", label: "22" },
+          { value: "TWENTY_THREE", label: "23" },
+          { value: "TWENTY_FOUR", label: "24" },
+          { value: "TWENTY_FIVE", label: "25" },
+          { value: "ABOVE_25", label: "Above 25" },
+        ]
   },
   {
     id: "student",
@@ -126,15 +147,7 @@ export const questions: Question[] = [
     title: "What are your interests?",
     type: "checkbox",
     field: "interests",
-    options: [
-      { value: "SOCIAL_IMPACT", label: "Social Impact" },
-      { value: "ENTREPRENEURSHIP", label: "Entrepreneurship" },
-      { value: "MUSIC", label: "Music" },
-      { value: "CODING", label: "Coding" },
-      { value: "SPORTS", label: "Sports" },
-      { value: "EXERCISE", label: "Exercise" },
-      { value: "OTHER_INTERESTS", label: "Other" },
-    ],
+    optionQuery: "zone.getZonesForOptions",
     max: 3,
   },
  
