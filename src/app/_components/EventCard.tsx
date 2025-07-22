@@ -43,6 +43,7 @@ import { BookmarkButton } from "./BookmarkButton";
 import ShareButton from "./ShareButton";
 import { toast } from "sonner";
 import React from "react";
+import { useGuestId } from "@/lib/guest-session";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -290,13 +291,7 @@ export default function EventCard({
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mediaQueryRef = useRef<MediaQueryList | null>(null);
 
-  // Memoized values
-  const guestId = useMemo(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("guestId");
-    }
-    return null;
-  }, []);
+  const { guestId } = useGuestId();
 
   const daysLeft = useMemo(() => {
     if (!opp.deadline) return null;

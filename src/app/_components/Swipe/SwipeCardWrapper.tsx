@@ -30,6 +30,7 @@ import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import ShareButton from "../ShareButton";
+import { useGuestId } from "@/lib/guest-session"; // Import your hook
 
 type SwipeDirection = "left" | "right";
 
@@ -37,11 +38,6 @@ interface Opportunity {
   id: number;
   name: string;
   airtable_id?: string;
-}
-
-interface GuestHistory {
-  seenOppIds: string[];
-  likedOppIds: string[];
 }
 
 type SwipeWrapperRef = {
@@ -65,11 +61,18 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const isAuthenticated = !!session?.user;
-    const [guestId, setGuestId] = useState("");
-    const [guestHistory, setGuestHistory] = useState<GuestHistory>({
-      seenOppIds: [],
-      likedOppIds: [],
-    });
+
+    // Use your custom hook instead of managing guest state manually
+    const {
+      guestId,
+      guestHistory,
+      addSeenOpportunity,
+      addLikedOpportunity,
+      removeSeenOpportunity,
+      removeLikedOpportunity,
+      isGuest,
+    } = useGuestId();
+
     const [loginPromptShown, setLoginPromptShown] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(true);
 
@@ -100,38 +103,30 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       searchParams.get("opp") ?? searchParams.get("opportunity");
 
     // Motion values
-    const KEYBOARD_SWIPE_DISTANCE = 1000; // Increased from 300 for faster exit
-    const KEYBOARD_SWIPE_DURATION = 0.5; // Faster than drag animation (was 0.5)
-    const KEYBOARD_ROTATION_ANGLE = 15; // Added rotation for keyboard swipes
+    const KEYBOARD_SWIPE_DISTANCE = 1000;
+    const KEYBOARD_SWIPE_DURATION = 0.5;
+    const KEYBOARD_ROTATION_ANGLE = 15;
     const x = useMotionValue(0);
     const rotate = useTransform(x, [-300, 0, 300], [-30, 0, 30]);
     const opacity = useTransform(
       x,
       [
-        -KEYBOARD_SWIPE_DISTANCE * 0.8, // Start fading only after 80% of distance
-        -KEYBOARD_SWIPE_DISTANCE * 0.9, // More aggressive fade at the end
+        -KEYBOARD_SWIPE_DISTANCE * 0.8,
+        -KEYBOARD_SWIPE_DISTANCE * 0.9,
         -100,
         0,
         100,
-        KEYBOARD_SWIPE_DISTANCE * 0.9, // Mirror for right swipe
+        KEYBOARD_SWIPE_DISTANCE * 0.9,
         KEYBOARD_SWIPE_DISTANCE * 0.8,
       ],
-      [
-        0.4, // Still 80% visible at 80% distance
-        0, // Fully transparent at 90%
-        1, // Fully visible near center
-        1,
-        1,
-        0, // Mirror for right swipe
-        0.4,
-      ],
+      [0.4, 0, 1, 1, 1, 0, 0.4],
     );
     const nopeOpacity = useTransform(x, [0, -50, -100], [0, 0.5, 1]);
     const nopeScale = useTransform(x, [0, -100], [0.8, 1]);
     const likeOpacity = useTransform(x, [0, 50, 100], [0, 0.5, 1]);
     const likeScale = useTransform(x, [0, 100], [0.8, 1]);
 
-    // API queries
+    // API queries - Updated to use hook values
     const {
       data: fetchedOpportunities,
       refetch,
@@ -141,7 +136,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       : api.userOpp.getOpportunities.useQuery(
           {
             limit: GUEST_LIMIT,
-            guestId,
+            guestId: guestId || "",
             seenOppIds: guestHistory.seenOppIds,
           },
           { enabled: !!guestId },
@@ -160,35 +155,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     const mutation = api.userOpp.createOrUpdate.useMutation();
     const updateAction = api.userOpp.updateUserOppMetrics.useMutation();
 
-    // Initialize guest session
-    useEffect(() => {
-      if (isAuthenticated) return;
-
-      const initializeGuestSession = () => {
-        // Guest ID
-        const storedGuestId = localStorage.getItem("guestId") ?? uuidv4();
-        if (!localStorage.getItem("guestId")) {
-          localStorage.setItem("guestId", storedGuestId);
-        }
-        setGuestId(storedGuestId);
-
-        // Guest history
-        try {
-          const storedHistory = localStorage.getItem("guestHistory");
-          const initialHistory: GuestHistory = storedHistory
-            ? JSON.parse(storedHistory)
-            : { seenOppIds: [], likedOppIds: [] };
-          setGuestHistory(initialHistory);
-        } catch (e) {
-          console.error("Error parsing guest history:", e);
-          const newHistory = { seenOppIds: [], likedOppIds: [] };
-          localStorage.setItem("guestHistory", JSON.stringify(newHistory));
-          setGuestHistory(newHistory);
-        }
-      };
-
-      initializeGuestSession();
-    }, [isAuthenticated]);
+    // Remove the manual guest initialization useEffect since the hook handles it
 
     // Update opportunities when data is fetched
     useEffect(() => {
@@ -202,7 +169,6 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
         ) {
           setLimitReached(true);
           if (fetchedOpportunities.cachedOpportunities?.length) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             updateOpportunities(fetchedOpportunities.cachedOpportunities);
           }
           return;
@@ -211,7 +177,6 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
         // Normal processing
         if (Array.isArray(fetchedOpportunities)) {
           if (fetchedOpportunities.length) {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             updateOpportunities(fetchedOpportunities);
           } else {
             isFetchingRef.current = false;
@@ -260,7 +225,6 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           // Move existing opportunity to the front
           const newOpps = [...prev];
           const [specificOpp] = newOpps.splice(existingIndex, 1);
-          // Filter out undefined just in case
           return [specificOpp, ...newOpps].filter(
             (opp): opp is Opportunity => opp !== undefined,
           );
@@ -316,7 +280,6 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
       const submitSwipes = async () => {
         try {
-          // Use mutate instead of mutateAsync to avoid promise issues
           pendingSwipes.forEach((swipe) => {
             mutation.mutate({
               oppId: BigInt(swipe.oppId),
@@ -335,8 +298,9 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       };
 
       void submitSwipes();
-    }, [pendingSwipes, isAuthenticated]); // Remo
+    }, [pendingSwipes, isAuthenticated, mutation, updateAction, guestId]);
 
+    // Updated handleSwipe to use hook methods
     const handleSwipe = useCallback(
       (dir: SwipeDirection, index: number) => {
         const opp = opportunities[index];
@@ -355,21 +319,11 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
             { oppId: opp.id, direction: dir },
           ]);
         } else if (opp.airtable_id) {
-          const updatedHistory = { ...guestHistory };
-
-          if (!updatedHistory.seenOppIds.includes(opp.airtable_id)) {
-            updatedHistory.seenOppIds.push(opp.airtable_id);
+          // Use hook methods instead of manual localStorage management
+          addSeenOpportunity(opp.airtable_id);
+          if (dir === "right") {
+            addLikedOpportunity(opp.airtable_id);
           }
-
-          if (
-            dir === "right" &&
-            !updatedHistory.likedOppIds.includes(opp.airtable_id)
-          ) {
-            updatedHistory.likedOppIds.push(opp.airtable_id);
-          }
-
-          setGuestHistory(updatedHistory);
-          localStorage.setItem("guestHistory", JSON.stringify(updatedHistory));
         }
 
         if (nextSwipeCount === 4 && !loginPromptShown && !isAuthenticated) {
@@ -379,9 +333,18 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
         setCurrent(nextSwipeCount);
       },
-      [opportunities, isAuthenticated, guestHistory, current],
+      [
+        opportunities,
+        isAuthenticated,
+        current,
+        addSeenOpportunity,
+        addLikedOpportunity,
+        loginPromptShown,
+        openLoginModal,
+      ],
     );
 
+    // Updated undo to use hook methods
     const undo = useCallback(() => {
       if (!canUndo || !lastSwipedOpp || undoing) return;
 
@@ -392,21 +355,11 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
         if (isAuthenticated) {
           setPendingSwipes((prev) => prev.slice(0, -1));
         } else if (lastSwipedOpp.airtable_id) {
-          const updatedHistory = { ...guestHistory };
-
-          if (updatedHistory.seenOppIds.at(-1) === lastSwipedOpp.airtable_id) {
-            updatedHistory.seenOppIds.pop();
+          // Use hook methods for undo
+          removeSeenOpportunity(lastSwipedOpp.airtable_id);
+          if (lastSwipeDirection === "right") {
+            removeLikedOpportunity(lastSwipedOpp.airtable_id);
           }
-
-          if (
-            lastSwipeDirection === "right" &&
-            updatedHistory.likedOppIds.at(-1) === lastSwipedOpp.airtable_id
-          ) {
-            updatedHistory.likedOppIds.pop();
-          }
-
-          setGuestHistory(updatedHistory);
-          localStorage.setItem("guestHistory", JSON.stringify(updatedHistory));
         }
 
         setCurrent((prev) => prev - 1);
@@ -419,8 +372,9 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       lastSwipedOpp,
       undoing,
       isAuthenticated,
-      guestHistory,
       lastSwipeDirection,
+      removeSeenOpportunity,
+      removeLikedOpportunity,
     ]);
 
     const handleDragEnd = useCallback(
@@ -440,7 +394,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           await Promise.all([
             animate(x, targetX, {
               type: "tween",
-              duration: 0.4, // Slightly faster than before
+              duration: 0.4,
               ease: "easeOut",
             }).then(() => x.set(0)),
             animate(rotate, targetRotate, {
@@ -461,6 +415,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       },
       [x, rotate, handleSwipe],
     );
+
     // Memoized visible opportunities
     const visibleOpps = useMemo(
       () => opportunities.slice(current, current + 4),
@@ -468,12 +423,11 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     );
     const stackSize = Math.min(visibleOpps.length, 4);
 
-    // Update the animateSwipe function
-
     useImperativeHandle(ref, () => ({
       swipeLeft: () => animateSwipe("left"),
       swipeRight: () => animateSwipe("right"),
     }));
+
     useEffect(() => {
       const handleKeyDown = (e: KeyboardEvent) => {
         if (visibleOpps.length === 0 || isSwiping || undoing) return;
@@ -491,12 +445,12 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
         // Left arrow or 'D' key
         if (e.key === "ArrowLeft" || e.key.toLowerCase() === "d") {
-          e.preventDefault(); // Prevent default behavior
+          e.preventDefault();
           void animateSwipe("left");
         }
         // Right arrow or 'J' key
         else if (e.key === "ArrowRight" || e.key.toLowerCase() === "j") {
-          e.preventDefault(); // Prevent default behavior
+          e.preventDefault();
           void animateSwipe("right");
         }
       };
@@ -504,6 +458,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       window.addEventListener("keydown", handleKeyDown);
       return () => window.removeEventListener("keydown", handleKeyDown);
     }, [visibleOpps, isSwiping, undoing]);
+
     useEffect(() => {
       if (!onEmptyChange) return;
 
@@ -556,10 +511,8 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       [x, rotate, current, visibleOpps, handleSwipe, isSwiping, undoing],
     );
 
-    // Update the card animation in the render section
-
-    // Guest limit reached view
-    if (!isAuthenticated && limitReached && opportunities.length <= current) {
+    // Guest limit reached view - using isGuest from hook
+    if (isGuest && limitReached && opportunities.length <= current) {
       return (
         <div className="flex min-h-[540px] w-full flex-col items-center justify-center gap-2 p-6 text-center">
           <Image
@@ -811,7 +764,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
             </div>
           )}
         </div>
-        {!isAuthenticated && (
+        {isGuest && (
           <div className="my-4 rounded-lg bg-gray-100 p-4 text-center text-sm md:mt-12">
             <p>
               You&apos;re browsing as a guest.

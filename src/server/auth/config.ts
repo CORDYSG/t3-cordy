@@ -6,6 +6,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 import { db } from "@/server/db";
 
+import type { UserRole } from '@prisma/client'
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -16,15 +17,15 @@ declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
+      role: UserRole;
       // ...other properties
-      // role: UserRole;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    role: UserRole;
+    // ...other properties
+  }
 }
 
 /**
@@ -39,7 +40,7 @@ export const authConfig = {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     }),
-       CredentialsProvider({
+    CredentialsProvider({
       id: "telegram",
       name: "Telegram",
       credentials: {
@@ -51,6 +52,7 @@ export const authConfig = {
         const user = {
           id: credentials?.telegramId?.toString(),
           name: credentials?.username?.toString(),
+          role: "USER" as UserRole, // Default role for new users
         };
 
         // You could optionally check DB and create user if needed
@@ -70,25 +72,24 @@ export const authConfig = {
      * @see https://next-auth.js.org/providers/github
      */
   ],
-  adapter: PrismaAdapter(db),
+  adapter: PrismaAdapter(db) as any,
   callbacks: {
     session: ({ session, user }) => ({
       ...session,
       user: {
         ...session.user,
         id: user.id,
+        role: user.role, // Include role in session
       },
     }),
-   async redirect({ url, baseUrl }) {
-  
-       if (url === '/api/auth/signout' || url.includes('signout')) {
-      return baseUrl + '/auth/signin';
-    }
-
-    return baseUrl + '/user-check';
+    async redirect({ url, baseUrl }) {
+      if (url === '/api/auth/signout' || url.includes('signout')) {
+        return baseUrl + '/auth/signin';
+      }
+      return baseUrl + '/user-check';
+    },
   },
-  },
-   pages: {
+  pages: {
     signIn: '/auth/signin',
   },
 } satisfies NextAuthConfig;

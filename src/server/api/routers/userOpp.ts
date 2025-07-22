@@ -398,7 +398,7 @@ updateUserOppMetrics: publicProcedure
   .mutation(async ({ ctx, input }) => {
     const userId = ctx.session?.user.id;
 
-       const guestId = userId ? null : input.guestId ?? generateGuestId();
+       const guestId =  input.guestId ?? null;
 
     return await db.$transaction(async (tx) => {
       // Log the action
