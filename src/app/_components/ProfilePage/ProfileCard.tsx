@@ -1,4 +1,5 @@
 "use client";
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { X } from "lucide-react";
 import { api } from "@/trpc/react";
@@ -21,90 +22,49 @@ import {
 } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
 
-declare global {
-  interface Window {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onTelegramAuth?: (user: any) => void;
-  }
+interface ProfileCardProps {
+  userCheck: { id: string } | null;
 }
 
-const ProfileCard = () => {
+const ProfileCard = ({ userCheck }: ProfileCardProps) => {
   const router = useRouter();
   const { data: session, status } = useSession();
-  const [hasDoneUserProfileCheck, setHasDoneUserProfileCheck] = useState(true);
-  const [showTelegramLogin, setShowTelegramLogin] = useState(false);
 
-  // All hooks must be called before any conditional logic
-  const userCheck = api.user.getUserProfile.useQuery(undefined, {
-    enabled: status === "authenticated" && !!session?.user,
-  });
+  // Manual state management
 
+  const [profileData, setProfileData] = useState<
+    typeof userCheck | null | undefined
+  >(undefined);
+
+  // Handle session state changes
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      return router.push("/api/auth/signin");
+    }
+  }, [status, session?.user?.id, router]);
+
+  useEffect(() => {
+    if (userCheck == null) {
+      return router.replace("/new-user");
+    }
+  }, [userCheck]);
+
+  // Other queries - only run when we have a profile
   const { data: userData, isLoading: isLoadingTeleUser } =
-    api.user.getUserData.useQuery();
+    api.user.getUserData.useQuery(undefined, {
+      enabled: !!userCheck?.id,
+    });
 
-  const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery();
+  const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery(
+    undefined,
+    {
+      enabled: !!userCheck?.id,
+    },
+  );
 
-  // // Telegram login widget setup
-  // useEffect(() => {
-  //   // Define global function for Telegram auth
-  //   window.onTelegramAuth = function (user: any) {
-  //     fetch("/api/auth/telegram", {
-  //       method: "POST",
-  //       headers: { "Content-Type": "application/json" },
-  //       body: JSON.stringify(user),
-  //     }).then(() => {
-  //       window.location.href = "/profile";
-  //     });
-  //   };
-
-  //   // Load Telegram login widget when needed
-  //   if (showTelegramLogin) {
-  //     const script = document.createElement("script");
-  //     script.src = "https://telegram.org/js/telegram-widget.js?22";
-  //     script.async = true;
-  //     script.setAttribute("data-telegram-login", "cordy_sandbot"); // no "@"
-  //     script.setAttribute("data-size", "large");
-  //     script.setAttribute("data-userpic", "true");
-  //     script.setAttribute("data-request-access", "write");
-  //     script.setAttribute("data-onauth", "onTelegramAuth(user)");
-
-  //     const telegramButton = document.getElementById("telegram-button");
-  //     if (telegramButton) {
-  //       // Clear existing content
-  //       telegramButton.innerHTML = "";
-  //       telegramButton.appendChild(script);
-  //     }
-  //   }
-  // }, [showTelegramLogin]);
-
-  useEffect(() => {
-    // Wait for session + tRPC result
-    if (status === "authenticated") {
-      if (userCheck.status === "success") {
-        if (!userCheck.data?.id) {
-          setHasDoneUserProfileCheck(false);
-          router.replace("/new-user");
-        } else {
-          setHasDoneUserProfileCheck(true);
-        }
-      }
-    }
-  }, [status, userCheck.status, userCheck.data, router]);
-
-  // Handle redirect after all hooks are called
-  useEffect(() => {
-    if (
-      status === "unauthenticated" ||
-      (status === "authenticated" && !session?.user)
-    ) {
-      router.push("/api/auth/signin");
-    }
-  }, [status, session, router]);
-
-  // Early return after all hooks
-  if (!session?.user) {
-    router.push("/api/auth/signin");
-    return null; // or a loading state
+  // Don't render if not authenticated or no profile
+  if (!session?.user || !userCheck?.id) {
+    return null;
   }
 
   const userInitials = session.user.name
@@ -186,12 +146,6 @@ const ProfileCard = () => {
                 className="border-2 font-medium"
                 sideOffset={10}
               >
-                {/* <DropdownMenuItem
-                  onClick={() => setShowTelegramLogin(true)}
-                  disabled={!!userData?.telegramId}
-                >
-                  {userData?.telegramId ? "Telegram Linked" : "Link Telegram"}
-                </DropdownMenuItem> */}
                 <DropdownMenuItem asChild>
                   <Link className="text-red" href="/api/auth/signout">
                     Log out
@@ -200,36 +154,6 @@ const ProfileCard = () => {
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
-
-          {/* Telegram login widget container */}
-          {/* {showTelegramLogin && !userData?.telegramId && (
-            <div className="mt-4 flex w-full justify-center">
-              <div className="rounded-lg border-2 border-gray-200 p-4">
-                <p className="mb-3 text-center text-sm font-medium">
-                  Click the button below to link your Telegram account:
-                </p>
-                <div id="telegram-button" className="flex justify-center"></div>
-                <button
-                  onClick={() => setShowTelegramLogin(false)}
-                  className="mt-3 w-full text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          )} */}
-
-          {!hasDoneUserProfileCheck && (
-            <div className="mt-4 flex w-full justify-center">
-              <Link
-                className="btn-brand-primary flex items-center gap-2 text-sm"
-                href={"/new-user"}
-              >
-                <X size={24} />
-                <span> You have not done your profiling!</span>
-              </Link>
-            </div>
-          )}
         </div>
       </div>
     </div>

@@ -1,5 +1,4 @@
 /* eslint-disable */
-
 "use client";
 
 import React, { useState, useCallback, useRef, useEffect } from "react";
@@ -156,7 +155,7 @@ const ProfileQuestionnaire: React.FC = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
     createUserProfileMutation.mutate({

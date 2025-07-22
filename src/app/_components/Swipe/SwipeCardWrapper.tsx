@@ -50,7 +50,7 @@ type SwipeWrapperRef = {
 };
 interface OpportunitiesPageProps {
   onEmptyChange?: (isEmpty: boolean) => void;
-
+  openLoginModal: (showLogin: boolean) => void;
   setShowTutorial?: (show: boolean) => void;
 }
 
@@ -61,7 +61,7 @@ const CARD_OFFSET_Y = 8;
 const CARD_ROTATION = 3;
 
 const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
-  ({ onEmptyChange, setShowTutorial }, ref) => {
+  ({ onEmptyChange, setShowTutorial, openLoginModal }, ref) => {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const isAuthenticated = !!session?.user;
@@ -70,6 +70,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       seenOppIds: [],
       likedOppIds: [],
     });
+    const [loginPromptShown, setLoginPromptShown] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(true);
 
     // Refs
@@ -311,7 +312,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     };
 
     useEffect(() => {
-      if (!isAuthenticated || pendingSwipes.length < 2) return;
+      if (!isAuthenticated || pendingSwipes.length < 1) return;
 
       const submitSwipes = async () => {
         try {
@@ -345,6 +346,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
         setLastSwipedOpp(opp);
         setLastSwipeDirection(dir);
         setCanUndo(true);
+        const nextSwipeCount = current + 1;
 
         // Update state based on auth
         if (isAuthenticated) {
@@ -370,9 +372,14 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           localStorage.setItem("guestHistory", JSON.stringify(updatedHistory));
         }
 
-        setCurrent((prev) => prev + 1);
+        if (nextSwipeCount === 4 && !loginPromptShown && !isAuthenticated) {
+          openLoginModal(true);
+          setLoginPromptShown(true);
+        }
+
+        setCurrent(nextSwipeCount);
       },
-      [opportunities, isAuthenticated, guestHistory],
+      [opportunities, isAuthenticated, guestHistory, current],
     );
 
     const undo = useCallback(() => {
@@ -602,10 +609,10 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     }
 
     return (
-      <div className="flex min-h-[620px] w-full flex-col items-center gap-2 p-4 md:min-h-[660px] md:p-8">
+      <div className="mt-[5vw] flex min-h-[620px] w-full flex-col items-center gap-2 p-4 md:mt-0 md:min-h-[660px] md:p-8">
         <div className="flex w-11/12 flex-col items-center justify-between px-6">
           {visibleOpps.length > 0 && (
-            <div className="container mt-[5vw] mb-2 hidden w-full max-w-md justify-between md:flex lg:mt-8">
+            <div className="container mb-2 hidden w-full max-w-md justify-between md:mb-8 md:flex lg:mt-8">
               <div className="flex items-center gap-2">
                 <InfoIcon
                   className="opacity-30"
@@ -767,7 +774,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
             )}
           </div>
           {visibleOpps.length > 0 && (
-            <div className="container mt-[5vw] flex w-full max-w-md justify-between md:hidden lg:mt-8">
+            <div className="container mt-[7vw] flex w-full max-w-md justify-between md:hidden lg:mt-8">
               <div className="flex items-center gap-2">
                 <InfoIcon
                   className="opacity-30"
@@ -804,7 +811,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
             </div>
           )}
         </div>
-        {!isAuthenticated && !limitReached && (
+        {!isAuthenticated && (
           <div className="my-4 rounded-lg bg-gray-100 p-4 text-center text-sm md:mt-12">
             <p>
               You&apos;re browsing as a guest.

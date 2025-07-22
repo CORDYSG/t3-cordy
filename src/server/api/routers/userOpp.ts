@@ -94,11 +94,11 @@ export const userOppRouter = createTRPCRouter({
       }
 
       // Check if guest has exceeded the fetch limit (3)
-      if (guestSession.fetchCount >= 3) {
+      if (guestSession.fetchCount >= 1) {
         return {
           limitReached: true,
           message:
-            "You've reached the limit of 3 fetches as a guest. Please sign in for more opportunities.",
+            "You've reached the limit of opportunities. Please sign in for more opportunities.",
           cachedOpportunities: guestSession.cachedOpportunities,
         };
       }

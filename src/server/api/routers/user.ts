@@ -104,21 +104,28 @@ linkToTelegram: protectedProcedure
         return user;
         }),
 
-    getUserProfile: protectedProcedure 
-    .query(async ({ ctx }) => {
+   
+getUserProfile: protectedProcedure 
+  .query(async ({ ctx }) => {
+    // Add additional validation
+ 
+    if (!ctx.session?.user?.id) {
+      throw new TRPCError({
+        code: 'UNAUTHORIZED',
+        message: 'User session not found or invalid',
+      });
+    }
 
-        if (!ctx.session.user) {
-            throw new Error("User not authenticated");
-        }
-        const user = await db.userProfile.findUnique({
-            where: { userId: ctx.session.user.id },
-            select: {
-                id: true,
-            },
-        });
+    const user = await db.userProfile.findUnique({
+      where: { userId: ctx.session.user.id },
+      select: {
+        id: true,
+      },
+    });
 
-        return user;
-        }),
+
+    return user;
+  }),
 
    createUserProfile: protectedProcedure
   .input(z.object({
