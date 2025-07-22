@@ -5,6 +5,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import "photoswipe/style.css";
+
 import {
   useEffect,
   useRef,

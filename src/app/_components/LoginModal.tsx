@@ -17,7 +17,7 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
 }) => {
   useEffect(() => {
     if (isLoginModalOpen) {
-      confetti({
+      void confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
