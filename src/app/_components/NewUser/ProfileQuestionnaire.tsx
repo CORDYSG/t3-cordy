@@ -156,7 +156,7 @@ const ProfileQuestionnaire: React.FC = () => {
     }
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
     createUserProfileMutation.mutate({
