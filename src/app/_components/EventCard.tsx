@@ -138,7 +138,7 @@ const EventContent = ({
         <div className="grid flex-1 grid-cols-2 items-center gap-4 md:grid-cols-4 lg:block lg:space-y-2">
           <div className="col-span-3 flex min-w-0 flex-col justify-center lg:col-span-1">
             <div className="col-span-3 flex min-w-0 flex-col justify-center lg:col-span-1">
-              <h2 className="font-brand line-clamp-2 text-left text-sm leading-tight font-bold break-words md:mb-1 lg:line-clamp-3">
+              <h2 className="font-brand line-clamp-2 text-left text-sm leading-tight font-bold break-words md:mb-1 lg:line-clamp-2">
                 {opp.name}
               </h2>
               <p className="line-clamp-2 hidden text-xs leading-tight font-bold break-words text-gray-500 md:flex lg:text-gray-700">
@@ -217,7 +217,7 @@ const EventContent = ({
       )}
 
       <h2
-        className="font-brand mb-1 line-clamp-3 text-left text-lg leading-tight font-bold lg:mb-2"
+        className="font-brand mb-1 line-clamp-2 text-left text-lg leading-tight font-bold lg:mb-2"
         style={{
           overflowWrap: "break-word",
           wordBreak: "break-word",

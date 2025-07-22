@@ -8,6 +8,7 @@ import SwipeButtons from "@/app/_components/Swipe/SwipeButtons";
 import { api } from "@/trpc/react";
 import { useSession } from "next-auth/react";
 import { useSearchParams } from "next/navigation";
+import LoginPopup from "../LoginModal";
 
 import SwipeTutorialModal from "./SwipeModal";
 
@@ -26,6 +27,7 @@ const Wrapper = () => {
   const cardRef = useRef<SwipeWrapperRef>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [showLogin, setShowLogin] = useState(false);
   const [guestHistory, setGuestHistory] = useState<GuestHistory>({
     seenOppIds: [],
     likedOppIds: [],
@@ -63,13 +65,34 @@ const Wrapper = () => {
 
   useEffect(() => {
     if (hasSwipedBefore.data?.hasSwipedBefore === false) {
-      // If the user has swiped before, we can fetch the next set of opportunities
-
-      setShowTutorial(true);
+      if (guestHistory.seenOppIds.length == 0) {
+        setShowTutorial(true);
+      } else {
+        setShowTutorial(false);
+      }
+      // If the user has swiped before, we can fetch the next set of opportunitie
     } else {
       setShowTutorial(false);
     }
-  }, [hasSwipedBefore.data]);
+  }, [guestHistory]);
+
+  const handleSetShowTutorial = (show: boolean) => {
+    setShowTutorial(show);
+
+    if (show == false) {
+      if (!isAuthenticated) {
+        setTimeout(() => setShowLogin(true), 100);
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (!isAuthenticated && !showTutorial) {
+      setShowLogin(true);
+    } else {
+      setShowLogin(false);
+    }
+  }, [isAuthenticated]);
 
   return (
     <>
@@ -77,13 +100,18 @@ const Wrapper = () => {
         ref={cardRef}
         onEmptyChange={(empty) => setIsEmpty(empty)}
         setShowTutorial={setShowTutorial}
+        openLoginModal={() => setShowLogin(true)}
       />
 
       {isEmpty ? null : <SwipeButtons cardRef={cardRef} />}
 
       <SwipeTutorialModal
         isOpen={showTutorial}
-        onClose={() => setShowTutorial(false)}
+        onClose={() => handleSetShowTutorial(false)}
+      />
+      <LoginPopup
+        isLoginModalOpen={showLogin}
+        onCloseLoginModal={() => setShowLogin(false)}
       />
     </>
   );
