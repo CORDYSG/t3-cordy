@@ -21,10 +21,6 @@ type GuestSessionData = {
   cachedOpportunities: OppWithZoneType[];
 };
 
-const generateGuestId = () => {
-  return `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
 
 function getActiveOppsFilter() {
   const now = new Date();

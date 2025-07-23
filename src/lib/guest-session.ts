@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useSession } from 'next-auth/react'
 import Cookies from 'js-cookie'
 
@@ -15,16 +15,17 @@ export function useGuestId() {
     likedOppIds: [],
   })
 
-  const emptyGuestHistory: GuestHistory = {
+  // Use useMemo to create a stable reference for emptyGuestHistory
+  const emptyGuestHistory: GuestHistory = useMemo(() => ({
     seenOppIds: [],
     likedOppIds: [],
-  }
+  }), [])
 
   useEffect(() => {
     if (session?.user) {
       // User is authenticated, clear guest data
       setGuestId(null)
-      setGuestHistory([])
+      setGuestHistory(emptyGuestHistory)
     } else {
       // User is not authenticated, get or create guest ID
       let storedGuestId = Cookies.get('guestId')
@@ -45,14 +46,35 @@ export function useGuestId() {
       const storedHistory = localStorage.getItem('guestHistory')
       if (storedHistory) {
         try {
-          setGuestHistory(JSON.parse(storedHistory))
+          const parsedHistory = JSON.parse(storedHistory) as unknown
+          
+          // Type guard to validate the parsed data structure
+          if (isValidGuestHistory(parsedHistory)) {
+            setGuestHistory(parsedHistory)
+          } else {
+            setGuestHistory(emptyGuestHistory)
+          }
         } catch (error) {
           console.error('Error parsing guest history:', error)
-          setGuestHistory([])
+          setGuestHistory(emptyGuestHistory)
         }
       }
     }
-  }, [session])
+  }, [session, emptyGuestHistory])
+
+  // Type guard function to validate GuestHistory structure
+  const isValidGuestHistory = (obj: unknown): obj is GuestHistory => {
+    return (
+      typeof obj === 'object' &&
+      obj !== null &&
+      'seenOppIds' in obj &&
+      'likedOppIds' in obj &&
+      Array.isArray((obj as GuestHistory).seenOppIds) &&
+      Array.isArray((obj as GuestHistory).likedOppIds) &&
+      (obj as GuestHistory).seenOppIds.every(id => typeof id === 'string') &&
+      (obj as GuestHistory).likedOppIds.every(id => typeof id === 'string')
+    )
+  }
 
   const updateGuestHistory = (type: 'seen' | 'liked', oppId: string) => {
     if (!session?.user && guestId) {

@@ -132,8 +132,10 @@ export const protectedProcedure = t.procedure
     });
   });
 
-  export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
-  if (ctx.session.user.role !== "CORDY") {
+  export const adminProcedure = t.procedure
+  .use(timingMiddleware)
+  .use(({ ctx, next }) => {
+  if (ctx?.session?.user.role !== "CORDY") {
     throw new TRPCError({
       code: "FORBIDDEN",
       message: "Admin access required",
