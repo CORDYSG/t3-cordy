@@ -11,6 +11,7 @@ import { useSearchParams } from "next/navigation";
 import LoginPopup from "../LoginModal";
 
 import SwipeTutorialModal from "./SwipeModal";
+import { useGuestId } from "@/lib/guest-session";
 
 type SwipeWrapperRef = {
   swipeLeft: () => void;
@@ -18,21 +19,18 @@ type SwipeWrapperRef = {
   empty: boolean;
 };
 
-interface GuestHistory {
-  seenOppIds: string[];
-  likedOppIds: string[];
-}
-
 const Wrapper = () => {
   const cardRef = useRef<SwipeWrapperRef>(null);
   const [isEmpty, setIsEmpty] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
-  const [guestHistory, setGuestHistory] = useState<GuestHistory>({
-    seenOppIds: [],
-    likedOppIds: [],
-  });
-  const [guestId, setGuestId] = useState<string>("");
+
+  const {
+    guestId,
+    guestHistory,
+
+    isGuest,
+  } = useGuestId();
 
   const { data: session } = useSession();
 
@@ -44,25 +42,11 @@ const Wrapper = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      // If the user is authenticated, we can fetch the next set of opportunities
+      // User is authenticated
       setShowTutorial(false);
-    } else {
-      const storedGuestId = localStorage.getItem("guestId") ?? "";
-
-      const storedHistory = localStorage.getItem("guestHistory") ?? "";
-      // If the user is not authenticated, we can check if they have swiped before
-      if (storedGuestId) {
-        setGuestId(storedGuestId);
-      } else {
-        const newGuestId = crypto.randomUUID();
-        localStorage.setItem("guestId", newGuestId);
-        setGuestId(newGuestId);
-      }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      if (storedHistory) setGuestHistory(JSON.parse(storedHistory));
+    } else if (isGuest && guestId) {
     }
-  }, [isAuthenticated]);
-
+  }, [isAuthenticated, isGuest, guestId, guestHistory]);
   useEffect(() => {
     if (hasSwipedBefore.data?.hasSwipedBefore === false) {
       if (guestHistory.seenOppIds.length == 0) {

@@ -21,10 +21,6 @@ type GuestSessionData = {
   cachedOpportunities: OppWithZoneType[];
 };
 
-const generateGuestId = () => {
-  return `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
 
 function getActiveOppsFilter() {
   const now = new Date();
@@ -398,7 +394,7 @@ updateUserOppMetrics: publicProcedure
   .mutation(async ({ ctx, input }) => {
     const userId = ctx.session?.user.id;
 
-       const guestId = userId ? null : input.guestId ?? generateGuestId();
+       const guestId =  input.guestId ?? null;
 
     return await db.$transaction(async (tx) => {
       // Log the action

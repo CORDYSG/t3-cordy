@@ -1,6 +1,7 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
 import crypto from "crypto";
+import { format, toZonedTime } from "date-fns-tz";
 
 export interface TelegramAuthData {
   id: number;
@@ -11,6 +12,13 @@ export interface TelegramAuthData {
   auth_date: string;
   hash: string;
 }
+
+export const getFormattedDate = () => {
+  const timeZone = "Asia/Singapore"; // or any IANA time zone string
+  const now = toZonedTime(new Date(), timeZone);
+
+  return format(now, "EEEE, dd MMMM yyyy", { timeZone }); // Example: Monday, 23 January 2024
+};
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -45,3 +53,9 @@ export function verifyTelegramLogin(
 
   return hmac === hash;
 }
+
+export function formatSGT (isoString: string) {
+  const timeZone = "Asia/Singapore";
+  const zoned = toZonedTime(isoString, timeZone);
+  return format(zoned, "MMM d", { timeZone });
+};

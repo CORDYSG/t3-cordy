@@ -141,8 +141,15 @@ model User {
   typePreferences     UserType[]
   zonePreferences     UserZone[]
   userActions         UserAction[]
-
+  role                  UserRole              @default(User)
   WebsiteFeedback WebsiteFeedback[]
+}
+
+enum UserRole { 
+ 
+ User
+ CORDY
+
 }
 
 model Account {

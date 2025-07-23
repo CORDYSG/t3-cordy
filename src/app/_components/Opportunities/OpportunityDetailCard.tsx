@@ -15,6 +15,7 @@ import { BookmarkButton } from "../BookmarkButton";
 import ShareButton from "../ShareButton";
 import { useSession } from "next-auth/react";
 import LoginPopup from "../LoginModal";
+import { useGuestId } from "@/lib/guest-session";
 
 type Props = {
   opp: OppWithZoneType;
@@ -52,12 +53,12 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
-  useEffect(() => {
-    const storedGuestId = localStorage.getItem("guestId");
+  const { guestId, guestHistory } = useGuestId();
 
+  useEffect(() => {
     updateAction.mutate({
       oppId: opp.id,
-      guestId: storedGuestId ?? "",
+      guestId: guestId ?? "",
       action: "VIEW",
     });
 
@@ -78,7 +79,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   const handleLike = () => {
     const currentLikeStatus = !mockLike;
     setMockLke(currentLikeStatus);
-    const storedGuestId = localStorage.getItem("guestId");
+
     mutation.mutate({
       oppId: opp.id,
       liked: currentLikeStatus,
@@ -86,7 +87,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
 
     updateAction.mutate({
       oppId: opp.id,
-      guestId: storedGuestId ?? "",
+      guestId: guestId ?? "",
       action: currentLikeStatus ? "LIKE" : "UNLIKE",
     });
   };
@@ -94,7 +95,6 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   const handleSave = () => {
     const currentBookmarkStatus = !isBookmarked;
     setIsBookmarked(currentBookmarkStatus);
-    const storedGuestId = localStorage.getItem("guestId");
 
     mutation.mutate({
       oppId: opp.id,
@@ -103,7 +103,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
 
     updateAction.mutate({
       oppId: opp.id,
-      guestId: storedGuestId ?? "",
+      guestId: guestId ?? "",
       action: currentBookmarkStatus ? "SAVE" : "UNSAVE",
     });
   };
