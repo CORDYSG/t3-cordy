@@ -200,7 +200,9 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
                 newOpp.id &&
                 !prev.some(
                   (existingOpp) => existingOpp.id === Number(newOpp.id),
-                ),
+                ) &&
+                (!isGuest || // <-- only filter if guest
+                  !guestHistory.seenOppIds.includes(newOpp.airtable_id ?? "")),
             )
             .map((newOpp) => ({
               ...newOpp,
@@ -573,7 +575,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     }
 
     return (
-      <div className="mt-[5vw] flex min-h-[620px] w-full flex-col items-center gap-2 p-4 md:mt-0 md:min-h-[660px] md:p-8">
+      <div className="mt-[5vw] flex min-h-[620px] w-full flex-col items-center gap-2 p-4 md:mt-0 md:min-h-[670px] md:p-8">
         <div className="flex w-11/12 flex-col items-center justify-between px-6">
           {visibleOpps.length > 0 && (
             <div className="container mb-2 hidden w-full max-w-md justify-between md:mb-8 md:flex lg:mt-8">

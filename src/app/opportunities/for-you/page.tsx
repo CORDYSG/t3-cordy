@@ -34,10 +34,9 @@ export type SwipeAction = {
 
 const ForYouPage = () => {
   return (
-    <>
-      <main className="flex w-[100vw] flex-col overflow-hidden">
+    <main className="flex min-h-[90vh] flex-col justify-between">
+      <div className="flex w-[100vw] flex-col overflow-hidden">
         <h1 className="sr-only">Personalized Opportunities For You</h1>
-
         <section aria-label="Opportunity Cards" className="w-full">
           <Wrapper />
         </section>
@@ -57,8 +56,8 @@ const ForYouPage = () => {
             }),
           }}
         />
-      </main>
-      <div className="relative mx-auto -mb-12 flex w-2/3 items-center justify-center md:w-full">
+      </div>
+      <div className="relative z-10 mx-auto mt-2 -mb-12 flex w-2/3 justify-center md:w-full">
         <Image
           src={
             "https://images.ctfassets.net/ayry21z1dzn2/1sbtihkTXqSQpJwAZJYGL0/e98a51c196797dd5248e2ffbb34011d3/CORDY_Couch_Smile.svg"
@@ -70,7 +69,7 @@ const ForYouPage = () => {
           priority
         />
       </div>
-    </>
+    </main>
   );
 };
 
