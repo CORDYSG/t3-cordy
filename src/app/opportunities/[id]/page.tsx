@@ -10,6 +10,7 @@ import EventCard from "../../_components/EventCard";
 import Head from "next/head";
 import { auth } from "@/server/auth";
 import { notFound } from "next/navigation";
+import Link from "next/link";
 
 const OpportunityDetail = async ({
   params,
@@ -54,7 +55,7 @@ const OpportunityDetail = async ({
         ?.map((z: ZoneType) => z.name)
         .filter((name: string): name is string => name !== null) ?? [],
     page: 1,
-    limit: 6,
+    limit: 9,
     excludeOppIds: opp?.airtable_id != null ? [opp.airtable_id] : [],
   });
 
@@ -141,6 +142,18 @@ const OpportunityDetail = async ({
               <p className="col-span-3 text-center text-gray-500">
                 No similar opportunities found
               </p>
+            )}
+          </div>
+          <div className="mt-4 flex justify-center">
+            {opp?.zones && opp.zones.length > 0 && (
+              <Link
+                href={`/opportunities?${opp.zones
+                  .map((z: ZoneType) => `zone=${z.id}`)
+                  .join("&")}`}
+                className="btn-brand-white flex w-fit"
+              >
+                <p>Find more similar opportunities</p>
+              </Link>
             )}
           </div>
         </section>

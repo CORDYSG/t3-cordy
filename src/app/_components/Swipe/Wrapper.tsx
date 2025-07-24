@@ -24,13 +24,9 @@ const Wrapper = () => {
   const [isEmpty, setIsEmpty] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
+  const [showSwipeLogin, setShowSwipeLogin] = useState(false);
 
-  const {
-    guestId,
-    guestHistory,
-
-    isGuest,
-  } = useGuestId();
+  const { guestId, guestHistory, isGuest } = useGuestId();
 
   const { data: session } = useSession();
 
@@ -41,42 +37,42 @@ const Wrapper = () => {
   });
 
   useEffect(() => {
+    if (hasSwipedBefore.isLoading || guestId === undefined) return;
+
     if (isAuthenticated) {
-      // User is authenticated
-      setShowTutorial(false);
-    } else if (isGuest && guestId) {
-    }
-  }, [isAuthenticated, isGuest, guestId, guestHistory]);
-  useEffect(() => {
-    if (hasSwipedBefore.data?.hasSwipedBefore === false) {
-      if (guestHistory.seenOppIds.length == 0) {
+      // Authenticated users: show tutorial only if they haven't swiped
+      if (hasSwipedBefore.data?.hasSwipedBefore === false) {
         setShowTutorial(true);
       } else {
         setShowTutorial(false);
       }
-      // If the user has swiped before, we can fetch the next set of opportunitie
+      setShowLogin(false); // Never show login for auth users
     } else {
-      setShowTutorial(false);
+      // Guests
+      const hasSeenHistory = guestHistory.seenOppIds.length > 0;
+      if (!hasSeenHistory) {
+        // New guest: show tutorial first
+        setShowTutorial(true);
+      } else {
+        // Guest with history: show login immediately
+        setShowLogin(true);
+      }
     }
-  }, [guestHistory]);
+  }, [
+    isAuthenticated,
+    guestId,
+    guestHistory,
+    hasSwipedBefore.data,
+    hasSwipedBefore.isLoading,
+  ]);
 
   const handleSetShowTutorial = (show: boolean) => {
     setShowTutorial(show);
 
-    if (show == false) {
-      if (!isAuthenticated) {
-        setTimeout(() => setShowLogin(true), 100);
-      }
+    if (!show && !isAuthenticated) {
+      setShowLogin(true);
     }
   };
-
-  useEffect(() => {
-    if (!isAuthenticated && !showTutorial) {
-      setShowLogin(true);
-    } else {
-      setShowLogin(false);
-    }
-  }, [isAuthenticated]);
 
   return (
     <>
@@ -85,6 +81,7 @@ const Wrapper = () => {
         onEmptyChange={(empty) => setIsEmpty(empty)}
         setShowTutorial={setShowTutorial}
         openLoginModal={() => setShowLogin(true)}
+        setShowSwipeLogin={() => setShowSwipeLogin(true)}
       />
 
       {isEmpty ? null : <SwipeButtons cardRef={cardRef} />}
@@ -96,6 +93,7 @@ const Wrapper = () => {
       <LoginPopup
         isLoginModalOpen={showLogin}
         onCloseLoginModal={() => setShowLogin(false)}
+        showSwipeLogin={showSwipeLogin}
       />
     </>
   );

@@ -51,6 +51,7 @@ interface OpportunitiesPageProps {
   onEmptyChange?: (isEmpty: boolean) => void;
   openLoginModal: (showLogin: boolean) => void;
   setShowTutorial?: (show: boolean) => void;
+  setShowSwipeLogin: (showSwipeLogin: boolean) => void;
 }
 
 const GUEST_LIMIT = 8;
@@ -60,7 +61,10 @@ const CARD_OFFSET_Y = 8;
 const CARD_ROTATION = 3;
 
 const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
-  ({ onEmptyChange, setShowTutorial, openLoginModal }, ref) => {
+  (
+    { onEmptyChange, setShowTutorial, openLoginModal, setShowSwipeLogin },
+    ref,
+  ) => {
     const { data: session } = useSession();
     const searchParams = useSearchParams();
     const isAuthenticated = !!session?.user;
@@ -329,7 +333,8 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
           }
         }
 
-        if (nextSwipeCount === 4 && !loginPromptShown && !isAuthenticated) {
+        if (nextSwipeCount === 5 && !loginPromptShown && !isAuthenticated) {
+          setShowSwipeLogin(true);
           openLoginModal(true);
           setLoginPromptShown(true);
         }
