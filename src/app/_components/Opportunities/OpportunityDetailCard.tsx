@@ -23,6 +23,7 @@ type Props = {
 };
 const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   const { data: session } = useSession();
+  const [showSwipeLogin, setShowSwipeLogin] = useState(false);
 
   const formatDate = (date: Date): string => {
     return new Intl.DateTimeFormat("en-US", {
@@ -254,6 +255,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
       <LoginPopup
         isLoginModalOpen={showLogin}
         onCloseLoginModal={() => setShowLogin(false)}
+        showSwipeLogin={showSwipeLogin}
       />
     </div>
   );

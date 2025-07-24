@@ -38,7 +38,7 @@ const TimeSeriesGraph = ({
   }
   return (
     <div className="shadow-brand rounded-md border-2 bg-white p-4">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex flex-col lg:flex-row lg:items-center lg:justify-between">
         <h2 className="text-lg font-medium">{title}</h2>
         {period && onPeriodChange && periodOptions && (
           <select

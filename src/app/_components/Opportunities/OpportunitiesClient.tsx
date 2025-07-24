@@ -39,17 +39,39 @@ const OpportunitiesClient = ({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const [search, setSearch] = useState("");
-  const [selectedType, setSelectedType] = useState("");
-  const [selectedZone, setSelectedZone] = useState<ZoneType[]>([]);
+
+  // Initialize states from URL parameters
+  const [search, setSearch] = useState(() => searchParams.get("q") ?? "");
+  const [selectedType, setSelectedType] = useState(
+    () => searchParams.get("type") ?? "",
+  );
+  const [selectedZone, setSelectedZone] = useState<ZoneType[]>(() => {
+    const zoneParams = searchParams.getAll("zone");
+    if (zoneParams.length === 0) return [];
+
+    return zoneParams
+      .map((zoneParam) => {
+        // Try to find by ID first (numeric)
+        const zoneById = zones.find((z) => z.id.toString() === zoneParam);
+        if (zoneById) return zoneById;
+
+        // Fallback to find by name
+        const zoneByName = zones.find((z) => z.name === zoneParam);
+        return zoneByName;
+      })
+      .filter((zone): zone is ZoneType => zone !== undefined);
+  });
+
   const [page, setPage] = useState(initialPage);
   const [sortBy, setSortBy] = useState<SortOption>(() => {
     const urlSort = searchParams.get("sort");
-    return (urlSort as SortOption) || "newest";
+    return (urlSort as SortOption) ?? "newest";
   });
 
   const [isNavigating, setIsNavigating] = useState(false);
   const searchDebounceRef = useRef<NodeJS.Timeout | null>(null);
+
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const currentQueryPage = useMemo(
     () => parseInt(searchParams.get("page") ?? "1") || 1,
@@ -76,10 +98,67 @@ const OpportunitiesClient = ({
       sortBy,
     },
     {
-      staleTime: Infinity,
+      staleTime: 5 * 60 * 1000, // 5 minutes instead of Infinity
       refetchOnWindowFocus: false,
+      enabled: isInitialized, // Only run query after initialization
     },
   );
+
+  useEffect(() => {
+    // Only sync from URL on initial mount or when navigating from external source
+    if (!isInitialized) {
+      const urlSearch = searchParams.get("q") ?? "";
+      const urlType = searchParams.get("type") ?? "";
+      const urlZoneParams = searchParams.getAll("zone");
+      const urlSort = (searchParams.get("sort") as SortOption) ?? "newest";
+
+      // Set search if different from initial
+      if (urlSearch !== search) {
+        setSearch(urlSearch);
+      }
+
+      // Set type if different from initial
+      if (urlType !== selectedType) {
+        setSelectedType(urlType);
+      }
+
+      // Set zones if different from initial
+      const urlZones = urlZoneParams
+        .map((zoneParam) => {
+          const zoneById = zones.find((z) => z.id.toString() === zoneParam);
+          if (zoneById) return zoneById;
+
+          const zoneByName = zones.find((z) => z.name === zoneParam);
+          return zoneByName;
+        })
+        .filter((zone): zone is ZoneType => zone !== undefined);
+
+      const currentZoneIds = selectedZone.map((z) => String(z.id)).sort();
+      const urlZoneIds = urlZones.map((z) => String(z.id)).sort();
+
+      if (
+        currentZoneIds.length !== urlZoneIds.length ||
+        !currentZoneIds.every((id, index) => id === urlZoneIds[index])
+      ) {
+        setSelectedZone(urlZones);
+      }
+
+      // Set sort if different from initial
+      if (urlSort !== sortBy) {
+        setSortBy(urlSort);
+      }
+
+      setIsInitialized(true);
+    }
+  }, [
+    searchParams,
+    zones,
+    isInitialized,
+    search,
+    selectedType,
+    selectedZone,
+    sortBy,
+  ]);
 
   useEffect(() => {
     setIsNavigating(
@@ -89,10 +168,12 @@ const OpportunitiesClient = ({
   }, [pathname]);
 
   useEffect(() => {
-    if (currentQueryPage !== page) {
-      setPage(currentQueryPage);
+    if (!isInitialized) {
+      const currentPage = parseInt(searchParams.get("page") ?? "1") || 1;
+
+      setPage(currentPage);
     }
-  }, [currentQueryPage]);
+  }, [searchParams, isInitialized]);
 
   useEffect(() => {
     if (searchDebounceRef.current) {
@@ -117,37 +198,50 @@ const OpportunitiesClient = ({
     (newPage: number) => {
       setPage(newPage);
 
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("page", newPage.toString());
+      const params = new URLSearchParams();
 
       if (search) params.set("q", search);
       if (selectedType) params.set("type", selectedType);
       if (selectedZone.length > 0) {
-        params.delete("zone");
         selectedZone.forEach((zone) => {
           params.append("zone", zone.id.toString());
         });
       }
       if (sortBy !== "newest") params.set("sort", sortBy);
+      if (newPage > 1) params.set("page", newPage.toString());
 
-      router.push(`/opportunities?${params.toString()}`);
+      const queryString = params.toString();
+      const newUrl = queryString
+        ? `/opportunities?${queryString}`
+        : "/opportunities";
 
-      if (!isNavigating) {
-        router.refresh();
-      }
+      router.push(newUrl);
 
       window.scrollTo({ top: 50, behavior: "smooth" });
     },
-    [
-      search,
-      selectedType,
-      selectedZone,
-      sortBy,
-      isFiltered,
-      router,
-      searchParams,
-    ],
+    [search, selectedType, selectedZone, sortBy, router, page],
   );
+
+  const updateURL = useCallback(() => {
+    const params = new URLSearchParams();
+
+    if (search) params.set("q", search);
+    if (selectedType) params.set("type", selectedType);
+    if (selectedZone.length > 0) {
+      selectedZone.forEach((zone) => {
+        params.append("zone", zone.id.toString());
+      });
+    }
+    if (sortBy !== "newest") params.set("sort", sortBy);
+    if (page > 1) params.set("page", page.toString());
+
+    const queryString = params.toString();
+    const newUrl = queryString
+      ? `/opportunities?${queryString}`
+      : "/opportunities";
+
+    router.push(newUrl);
+  }, [search, selectedType, selectedZone, sortBy, page, router]);
 
   const handleSearch = useCallback((searchText: string) => {
     setSearch(searchText);
@@ -173,22 +267,40 @@ const OpportunitiesClient = ({
     setPage(1);
   }, []);
 
+  // Update URL when filters change (but not during navigation or initialization)
+  useEffect(() => {
+    if (!isNavigating && isInitialized) {
+      updateURL();
+    }
+  }, [
+    search,
+    selectedType,
+    selectedZone,
+    sortBy,
+    page,
+    isNavigating,
+    isInitialized,
+    updateURL,
+  ]);
+
   // Calculate display data based on filters and sort
   const { displayedOpps, displayTotal, totalPages } = useMemo(() => {
-    // Always use searchResults when available, fallback to initialOpps only for loading states
-    const opps = searchResults?.opps ?? initialOpps;
-    const total = searchResults?.totalOpps ?? totalOpps;
+    // Use searchResults when available and when filtering is active, otherwise use initialOpps
+    const opps =
+      isFiltered || searchResults ? (searchResults?.opps ?? []) : initialOpps;
+    const total =
+      isFiltered || searchResults ? (searchResults?.totalOpps ?? 0) : totalOpps;
 
     return {
       displayedOpps: opps,
       displayTotal: total,
       totalPages: Math.ceil(total / limit),
     };
-  }, [searchResults, initialOpps, totalOpps, limit]);
+  }, [searchResults, initialOpps, totalOpps, limit, isFiltered, page]);
 
   // Generate filter description for better accessibility and SEO
   const filterDescription = useMemo(() => {
-    const parts = [];
+    const parts: string[] = [];
     if (search) parts.push(`matching "${search}"`);
     if (selectedType) {
       const typeName =
@@ -204,17 +316,17 @@ const OpportunitiesClient = ({
 
   const sortOptions = [
     {
-      value: "newest",
+      value: "newest" as const,
       label: "Newest Added",
       icon: <FunnelPlus className="h-4 w-4" />,
     },
     {
-      value: "deadline-asc",
+      value: "deadline-asc" as const,
       label: "Deadline (Earliest)",
       icon: <CalendarArrowUp className="h-4 w-4" />,
     },
     {
-      value: "deadline-desc",
+      value: "deadline-desc" as const,
       label: "Deadline (Latest)",
       icon: <CalendarArrowDown className="h-4 w-4" />,
     },

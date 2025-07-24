@@ -12,27 +12,31 @@ import { useSession } from "next-auth/react";
 import { getFormattedDate } from "@/lib/utils";
 import { getActiveUserGrowthRates } from "@/lib/fnc/metrics-calc";
 import { Skeleton } from "@/components/ui/skeleton";
+import ProgressBar from "@/app/_components/AdminCharts/ProgressBar";
 
 const StatBox = ({
   label,
   value,
   isLoading = false,
+  subText,
 }: {
   label: string;
   value: number | string;
   isLoading?: boolean;
+  subText?: string;
 }) => {
   return (
-    <div className="shadow-brand wrap-break-words rounded-md border-2 bg-white p-4 break-words hyphens-auto">
+    <div className="shadow-brand wrap-break-words h-full w-full rounded-md border-2 bg-white p-4 break-words hyphens-auto">
       {" "}
-      <h2 className="text-sm font-medium md:text-lg">{label}</h2>
+      <h2 className="md:text-md text-sm font-medium">{label}</h2>
       {isLoading ? (
         <Skeleton className="h-[20px] w-[100px] rounded-md" />
       ) : (
         <>
-          <p className="text-md font-semibold md:text-xl">{value}</p>
+          <p className="text-md font-semibold md:text-lg">{value}</p>
         </>
       )}
+      {subText && <p className="font-medium text-gray-400">{subText}</p>}
     </div>
   );
 };
@@ -91,6 +95,11 @@ const AdminPage = () => {
   });
 
   const growthRates = getActiveUserGrowthRates(dailyActiveUsers ?? []);
+  const growthRateProgress = {
+    daily: (growthRates.daily.numerical / 134) * 100,
+    weekly: (growthRates.daily.numerical / 951) * 100,
+    monthly: (growthRates.daily.numerical / 4333) * 100,
+  };
   // TRPC query to fetch the data
 
   const getTimeGreeting = () => {
@@ -142,38 +151,69 @@ const AdminPage = () => {
 
       {/* Charts */}
       <div className="space-y-4">
-        <div className="shadow-brand border-l-primary grid grid-cols-1 gap-4 rounded-md border-2 border-l-8 bg-white p-4 lg:grid-cols-4">
-          <div className="lg:col-span-3">
-            <DailyActiveUsersChart
-              isLoading={dailyActiveUsersIsLoading}
-              tooltipText="Unique users that have performed an action."
-              title="Daily Active Users"
-              data={dailyActiveUsers}
-              period={dailyActiveUsersPeriod}
-              aggregation={dailyActiveUsersAggregation}
-              onPeriodChange={setDailyActiveUsersPeriod}
-              onAggregationChange={setDailyActiveUsersAggregation}
-            />
-          </div>
+        <div className="grid gap-4 lg:grid-cols-4">
+          <div className="shadow-brand border-l-primary gap-4 rounded-md border-2 border-l-8 bg-white p-4 lg:col-span-3">
+            <div className="">
+              <DailyActiveUsersChart
+                isLoading={dailyActiveUsersIsLoading}
+                tooltipText="Unique users that have performed an action."
+                title="Daily Active Users"
+                data={dailyActiveUsers}
+                period={dailyActiveUsersPeriod}
+                aggregation={dailyActiveUsersAggregation}
+                onPeriodChange={setDailyActiveUsersPeriod}
+                onAggregationChange={setDailyActiveUsersAggregation}
+              />
+            </div>
 
-          <div className="flex gap-4 lg:block lg:space-y-4">
-            <div className="flex-1">
-              <StatBox
-                label="Daily (DGR)"
-                value={`${growthRates.daily?.toFixed(1) ?? 0}%`}
-              />
+            <div className="mt-2 flex flex-wrap items-stretch gap-4">
+              <div className="min-w-[calc(33%-0.5rem)] flex-1">
+                <StatBox
+                  label="Daily (DGR)"
+                  value={`${growthRates.daily.percentage.toFixed(2) ?? 0}%`}
+                  subText={`(${growthRates.daily.numerical ?? 0})`}
+                />
+              </div>
+              <div className="min-w-[calc(33%-0.5rem)] flex-1">
+                <StatBox
+                  label="Weekly (WGR)"
+                  value={`${growthRates.weekly.percentage.toFixed(2) ?? 0}%`}
+                  subText={`(${growthRates.weekly.numerical ?? 0})`}
+                />
+              </div>
+              <div className="min-w-[calc(33%-0.5rem)] flex-1">
+                <StatBox
+                  label="Monthly (MGR)"
+                  value={`${growthRates.monthly.percentage.toFixed(2) ?? 0}%`}
+                  subText={`(${growthRates.monthly.numerical ?? 0})`}
+                />
+              </div>
             </div>
-            <div className="flex-1">
-              <StatBox
-                label="Weekly (WGR)"
-                value={`${growthRates.weekly?.toFixed(1) ?? 0}%`}
+          </div>
+          <div>
+            <div className="shadow-brand mx-auto h-full w-full rounded-md border-2 bg-white p-6">
+              <h1 className="mb-6 text-2xl font-bold">
+                &apos;Fun&apos; Growth Tracker
+              </h1>
+
+              <ProgressBar
+                label="Daily Growth"
+                value={growthRateProgress.daily}
               />
-            </div>
-            <div className="flex-1">
-              <StatBox
-                label="Monthly (MGR)"
-                value={`${growthRates.monthly?.toFixed(1) ?? 0}%`}
+              <ProgressBar
+                label="Weekly Growth"
+                value={growthRateProgress.weekly}
               />
+              <ProgressBar
+                label="Monthly Growth"
+                value={growthRateProgress.monthly}
+              />
+
+              {growthRateProgress.daily < 5 && (
+                <p className="mt-4 text-sm text-red-600 italic">
+                  Jiayous buddies
+                </p>
+              )}
             </div>
           </div>
         </div>
