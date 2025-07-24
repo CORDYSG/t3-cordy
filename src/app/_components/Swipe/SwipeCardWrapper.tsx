@@ -283,15 +283,18 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
     };
 
     useEffect(() => {
-      if (!isAuthenticated || pendingSwipes.length < 1) return;
+      if (pendingSwipes.length < 1) return;
 
       const submitSwipes = async () => {
         try {
           pendingSwipes.forEach((swipe) => {
-            mutation.mutate({
-              oppId: BigInt(swipe.oppId),
-              liked: swipe.direction === "right",
-            });
+            if (isAuthenticated) {
+              mutation.mutate({
+                oppId: BigInt(swipe.oppId),
+                liked: swipe.direction === "right",
+              });
+            }
+
             updateAction.mutate({
               oppId: BigInt(swipe.oppId),
               guestId: guestId ?? "",
@@ -320,12 +323,12 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
         const nextSwipeCount = current + 1;
 
         // Update state based on auth
-        if (isAuthenticated) {
-          setPendingSwipes((prev) => [
-            ...prev,
-            { oppId: opp.id, direction: dir },
-          ]);
-        } else if (opp.airtable_id) {
+
+        setPendingSwipes((prev) => [
+          ...prev,
+          { oppId: opp.id, direction: dir },
+        ]);
+        if (!isAuthenticated && opp.airtable_id) {
           // Use hook methods instead of manual localStorage management
           addSeenOpportunity(opp.airtable_id);
           if (dir === "right") {
@@ -360,9 +363,9 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
 
       setTimeout(() => {
         // Update state based on auth
-        if (isAuthenticated) {
-          setPendingSwipes((prev) => prev.slice(0, -1));
-        } else if (lastSwipedOpp.airtable_id) {
+
+        setPendingSwipes((prev) => prev.slice(0, -1));
+        if (!isAuthenticated && lastSwipedOpp.airtable_id) {
           // Use hook methods for undo
           removeSeenOpportunity(lastSwipedOpp.airtable_id);
           if (lastSwipeDirection === "right") {

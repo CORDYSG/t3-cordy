@@ -27,10 +27,10 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
     if (isLoginModalOpen) {
       document.body.style.overflow = "hidden";
       document.addEventListener("touchmove", disableTouchMove, {
-        passive: false, // <--- Important for iOS
+        passive: false,
       });
 
-      confetti({
+      void confetti({
         particleCount: 100,
         spread: 70,
         origin: { y: 0.6 },
@@ -145,7 +145,7 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
                     className="text-center"
                   >
                     <h2 className="mb-1 text-2xl font-black tracking-wide text-black uppercase">
-                      Your choices aren't saved!
+                      Your choices aren&apos;t saved!
                     </h2>
                     <p className="font-gray text-sm font-medium">
                       CORDY can&apos;t remember your likes because he
