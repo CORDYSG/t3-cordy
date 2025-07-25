@@ -41,6 +41,8 @@ import ShareButton from "./ShareButton";
 import { toast } from "sonner";
 import React from "react";
 import { useGuestId } from "@/lib/guest-session";
+import { toZonedTime } from "date-fns-tz";
+import { differenceInCalendarDays } from "date-fns";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -290,13 +292,17 @@ export default function EventCard({
 
   const { guestId } = useGuestId();
 
+  const SGT = "Asia/Singapore";
+
   const daysLeft = useMemo(() => {
     if (!opp.deadline) return null;
-    const now = new Date();
-    const timeDiff = opp.deadline.getTime() - now.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
-  }, [opp.deadline]);
 
+    // Convert both to Singapore timezone
+    const now = toZonedTime(new Date(), SGT);
+    const deadline = toZonedTime(opp.deadline, SGT);
+
+    return differenceInCalendarDays(deadline, now);
+  }, [opp.deadline]);
   const formatDate = useMemo(() => {
     const formatter = new Intl.DateTimeFormat("en-US", {
       year: "numeric",
