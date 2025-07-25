@@ -328,6 +328,7 @@ hasSwipedBefore: publicProcedure
       });
 
       if (existing) {
+     
         return await db.userOpportunity.update({
           where: {
             userId_oppId: {
@@ -411,6 +412,8 @@ updateUserOppMetrics: publicProcedure
           actionType: input.action,
         },
       });
+
+    
 
       // Update aggregated metrics
      const updateData: any = {};

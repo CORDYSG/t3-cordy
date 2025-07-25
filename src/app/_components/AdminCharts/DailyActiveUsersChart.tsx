@@ -59,9 +59,6 @@ const DailyActiveUsersChart = ({
       return formatSGT(dateStr);
     }
   };
-  useEffect(() => {
-    console.log("here isLoading", isLoading);
-  }, [isLoading]);
 
   if (isLoading || !data) {
     return (

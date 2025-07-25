@@ -40,8 +40,12 @@ const ProfilePage = async () => {
 
   // Add error handling for the API call
   let userProfile;
+  let userPreferences;
+  let userCount;
   try {
     userProfile = await api.user.getUserProfile();
+    userPreferences = await api.user.getUserLikedZoneBreakdown();
+    userCount = await api.userOpp.getUserOppMetricCounts();
   } catch (error) {
     // You might want to redirect to an error page or show a fallback
     throw new Error("Failed to load user profile");
@@ -75,12 +79,16 @@ const ProfilePage = async () => {
             aria-label="User Profile"
             className="my-4 grid h-full gap-4 lg:grid-cols-4 lg:gap-2"
           >
-            <div className="lg:col-span-3">
-              <ProfileCard userCheck={userProfile} />
+            <div
+              className={`h-full ${userPreferences.totalLiked > 0 ? "lg:col-span-3" : "lg:col-span-4"}`}
+            >
+              <ProfileCard userCheck={userProfile} userCount={userCount} />
             </div>
-            <div className="">
-              <ProfileBreakdown />
-            </div>
+            {userPreferences.totalLiked > 0 && (
+              <div className="h-full">
+                <ProfileBreakdown />
+              </div>
+            )}
           </section>
 
           <h1 className="sr-only">User Opportunity List</h1>

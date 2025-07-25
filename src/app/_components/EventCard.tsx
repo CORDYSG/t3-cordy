@@ -154,7 +154,7 @@ const EventContent = ({
               {daysLeft !== null ? (
                 <p className="text-primary text-left text-xs font-bold">
                   {daysLeft > 0
-                    ? `${daysLeft} days left`
+                    ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
                     : "Deadline has passed"}
                 </p>
               ) : (
@@ -171,7 +171,9 @@ const EventContent = ({
             </p>
             {daysLeft !== null ? (
               <p className="text-primary text-left text-xs font-bold">
-                {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
+                {daysLeft > 0
+                  ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
+                  : "Deadline has passed"}
               </p>
             ) : (
               <p className="text-left text-xs font-bold text-gray-700">
@@ -255,7 +257,9 @@ const EventContent = ({
         </p>
         {daysLeft !== null ? (
           <p className="text-primary text-md mt-1 text-left font-semibold">
-            {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
+            {daysLeft > 0
+              ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
+              : "Deadline has passed"}
           </p>
         ) : (
           <p className="text-left text-xs font-bold text-gray-700">
@@ -530,7 +534,7 @@ export default function EventCard({
                 {daysLeft !== null ? (
                   <p className="text-primary text-md font-medium">
                     {daysLeft > 0
-                      ? `${daysLeft} days left`
+                      ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
                       : "Deadline has passed"}
                   </p>
                 ) : (
@@ -612,7 +616,7 @@ export default function EventCard({
               {daysLeft !== null ? (
                 <p className="text-primary text-md font-medium">
                   {daysLeft > 0
-                    ? `${daysLeft} days left`
+                    ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
                     : "Deadline has passed"}
                 </p>
               ) : (

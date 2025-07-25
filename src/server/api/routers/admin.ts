@@ -145,7 +145,7 @@ export const adminRouter = createTRPCRouter({
         select: { createdAt: true }
       });
 
-      console.log("DATA>>>" , data)
+      
       // Group by day in SGT and count
       const dailyData = data.reduce((acc, user) => {
         const dayKey = formatDateKey(user.createdAt);
@@ -153,7 +153,7 @@ export const adminRouter = createTRPCRouter({
         return acc;
       }, {} as Record<string, number>);
 
-      console.log(">>>>>>>>>> createddateRange," ,createDateRange(since, until, dailyData))
+
       return createDateRange(since, until, dailyData);
     }),
 

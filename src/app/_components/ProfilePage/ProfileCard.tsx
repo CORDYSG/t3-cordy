@@ -24,12 +24,32 @@ import { useEffect, useState } from "react";
 
 interface ProfileCardProps {
   userCheck: { id: string } | null;
+  userCount: {
+    liked: number;
+    saved: number;
+    clicked: number;
+    applied: number;
+    viewed: number;
+  } | null;
 }
 
-const ProfileCard = ({ userCheck }: ProfileCardProps) => {
+const ProfileCard = ({ userCheck, userCount }: ProfileCardProps) => {
   const router = useRouter();
   const { data: session, status } = useSession();
 
+  const [userCountData, setUserCountData] = useState({
+    viewed: 0,
+    saved: 0,
+    liked: 0,
+    applied: 0,
+    clicked: 0,
+  });
+
+  useEffect(() => {
+    if (userCount) {
+      setUserCountData(userCount);
+    }
+  }, [userCount]);
   // Manual state management
 
   const [profileData, setProfileData] = useState<
@@ -55,12 +75,12 @@ const ProfileCard = ({ userCheck }: ProfileCardProps) => {
       enabled: !!userCheck?.id,
     });
 
-  const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery(
-    undefined,
-    {
-      enabled: !!userCheck?.id,
-    },
-  );
+  // const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery(
+  //   undefined,
+  //   {
+  //     enabled: !!userCheck?.id,
+  //   },
+  // );
 
   // Don't render if not authenticated or no profile
   if (!session?.user || !userCheck?.id) {
@@ -77,7 +97,7 @@ const ProfileCard = ({ userCheck }: ProfileCardProps) => {
     : "U";
 
   return (
-    <div className="shadow-brand flex w-full flex-col rounded-xl border-2 bg-white p-6">
+    <div className="shadow-brand flex h-full w-full flex-col rounded-xl border-2 bg-white p-6">
       <div className="bg-primary h-36 w-full rounded-t-md border-2"></div>
 
       {/* Main content area with profile picture overlapping */}
