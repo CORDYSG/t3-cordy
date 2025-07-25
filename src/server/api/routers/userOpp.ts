@@ -20,7 +20,12 @@ type GuestSessionData = {
   lastFetchTime: number;
   cachedOpportunities: OppWithZoneType[];
 };
+type ZoneType = Awaited<ReturnType<typeof db.zones.findFirst>>;
+type OppType = Awaited<ReturnType<typeof db.opps.findFirst>>;
 
+type EnrichedOpp = OppType & {
+  zones: ZoneType[];
+}
 
 function getActiveOppsFilter() {
   const now = new Date();
@@ -84,7 +89,7 @@ export const userOppRouter = createTRPCRouter({
 
           if (filtered.length > 0) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-            return filtered;
+           return filtered as EnrichedOpp[];
           }
         }
       }
@@ -98,7 +103,7 @@ export const userOppRouter = createTRPCRouter({
           cachedOpportunities: guestSession.cachedOpportunities,
         };
       }
-      let randomOpps = [];
+  let randomOpps: OppType[] = [];
       if (input.seenOppIds && input.seenOppIds.length > 0) {
         const allOpps = await db.opps.findMany({
           where: {
@@ -140,7 +145,7 @@ export const userOppRouter = createTRPCRouter({
       }
 
       const enrichedOpps = randomOpps.map((opp) => {
-        const oppZones = (opp.zone ?? [])
+        const oppZones = (opp?.zone ?? [])
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           .map((zoneName) => zoneMap.get(zoneName))
           .filter(Boolean);
@@ -496,25 +501,34 @@ updateUserOppMetrics: publicProcedure
 // Helper function to get opportunities for authenticated users
 async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
   const interactions = await db.userOpportunity.findMany({
-    where: {
-      userId,
-      OR: [{ liked: true }, { saved: true }, { applied: true }],
-    },
-    select: { oppId: true },
-  });
-  const interactedOppIds = interactions.map((i) => i.oppId);
-
-  const seen = await db.userOpportunity.findMany({
     where: { userId },
-    select: { oppId: true },
+    select: { oppId: true, liked: true, saved: true, applied: true },
   });
-  const seenOppIds = seen.map((i) => i.oppId);
 
+  // Separate positive and negative interactions
+  const positiveInteractionIds = interactions
+    .filter((i) => i.liked === true || i.saved === true || i.applied === true)
+    .map((i) => i.oppId);
+
+  const negativeInteractionIds = interactions
+    .filter((i) => i.liked === false) // Explicitly disliked
+    .map((i) => i.oppId);
+
+  const seenOppIds = interactions.map((i) => i.oppId);
+
+  // Get positive interactions for preference learning
   const likedOpps = await db.opps.findMany({
-    where: { id: { in: interactedOppIds } },
+    where: { id: { in: positiveInteractionIds } },
     select: { type: true, zone: true },
   });
 
+  // Get negative interactions to avoid similar recommendations
+  const dislikedOpps = await db.opps.findMany({
+    where: { id: { in: negativeInteractionIds } },
+    select: { type: true, zone: true },
+  });
+
+  // Count positive preferences
   const typeCounts: Record<string, number> = {};
   const zoneCounts: Record<string, number> = {};
 
@@ -523,61 +537,156 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
     for (const z of opp.zone) zoneCounts[z] = (zoneCounts[z] ?? 0) + 1;
   }
 
-  const topTypes = Object.entries(typeCounts)
+  // Count negative preferences (what user dislikes)
+  const dislikedTypeCounts: Record<string, number> = {};
+  const dislikedZoneCounts: Record<string, number> = {};
+
+  for (const opp of dislikedOpps) {
+    for (const t of opp.type) dislikedTypeCounts[t] = (dislikedTypeCounts[t] ?? 0) + 1;
+    for (const z of opp.zone) dislikedZoneCounts[z] = (dislikedZoneCounts[z] ?? 0) + 1;
+  }
+
+  // Calculate net preference scores (positive - negative)
+  const netTypeScores: Record<string, number> = {};
+  const netZoneScores: Record<string, number> = {};
+
+  // Calculate net scores for types
+  for (const type in typeCounts) {
+    if(typeCounts[type])
+    netTypeScores[type] = typeCounts[type] - (dislikedTypeCounts[type] ?? 0);
+  }
+  // Include heavily disliked types with negative scores
+  for (const type in dislikedTypeCounts) {
+    if (!(type in netTypeScores)) {
+      netTypeScores[type] = -(dislikedTypeCounts[type] ?? 0);
+    }
+  }
+
+  // Calculate net scores for zones
+  for (const zone in zoneCounts) {
+    if(zoneCounts[zone])
+    netZoneScores[zone] = zoneCounts[zone] - (dislikedZoneCounts[zone] ?? 0);
+  }
+  // Include heavily disliked zones with negative scores
+  for (const zone in dislikedZoneCounts) {
+    if (!(zone in netZoneScores)) {
+      netZoneScores[zone] = -(dislikedZoneCounts[zone] ?? 0);
+    }
+  }
+
+  // Get top preferred types/zones (positive net scores only)
+  const topTypes = Object.entries(netTypeScores)
+    .filter(([, score]) => score > 0) // Only positive net scores
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([type]) => type);
 
-  const topZones = Object.entries(zoneCounts)
+  const topZones = Object.entries(netZoneScores)
+    .filter(([, score]) => score > 0) // Only positive net scores
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([zone]) => zone);
 
-  // ✅ Build where clause using array
-  const whereClauses: Prisma.OppsWhereInput[] = [];
+  // Get heavily disliked types/zones for deprioritization (not complete avoidance)
+  const deprioritizeTypes = Object.entries(netTypeScores)
+    .filter(([, score]) => score < -1) // Strongly negative (more than 1 net dislike)
+    .map(([type]) => type);
 
-  whereClauses.push(getActiveOppsFilter());
-  whereClauses.push({ id: { notIn: seenOppIds } });
+  const deprioritizeZones = Object.entries(netZoneScores)
+    .filter(([, score]) => score < -1) // Strongly negative (more than 1 net dislike)
+    .map(([zone]) => zone);
 
+  // Base where clause (no avoidance, just basic filtering)
+  const baseWhere: Prisma.OppsWhereInput = {
+    AND: [
+      getActiveOppsFilter(),
+      { id: { notIn: seenOppIds } }
+    ]
+  };
+
+  // Prefer liked types and zones (only if we have positive preferences)
+  const preferenceClause: Prisma.OppsWhereInput[] = [];
+  
   if (topTypes.length > 0) {
-    whereClauses.push({ type: { hasSome: topTypes } });
+    preferenceClause.push({ type: { hasSome: topTypes } });
   }
 
   if (topZones.length > 0) {
-    whereClauses.push({ zone: { hasSome: topZones } });
+    preferenceClause.push({ zone: { hasSome: topZones } });
   }
 
-  let recommendedOpps = await db.opps.findMany({
-    where: {
-      AND: whereClauses,
-    },
-    take: LIMIT,
-    orderBy: { created_at: "desc" },
-  });
+  let recommendedOpps: any[] = [];
 
-  // Fallback filler
-  if (recommendedOpps.length < LIMIT) {
-    const allfillerOpps = await db.opps.findMany({
+  // Step 1: Get preferred content (majority of recommendations)
+  if (preferenceClause.length > 0) {
+    const preferredOpps = await db.opps.findMany({
       where: {
-        ...getActiveOppsFilter(),
-        id: {
-          notIn: [...interactedOppIds, ...recommendedOpps.map((o) => o.id)],
-        },
+        AND: [
+          baseWhere,
+          { OR: preferenceClause }
+        ],
+      },
+      take: Math.max(1, Math.floor(LIMIT * 0.7)), // 70% preferred content
+      orderBy: { created_at: "desc" },
+    });
+    recommendedOpps.push(...preferredOpps);
+  }
+
+  // Step 2: Add some deprioritized content (1-2 items) to give user a chance to reconsider
+  if (recommendedOpps.length < LIMIT && (deprioritizeTypes.length > 0 || deprioritizeZones.length > 0)) {
+    const excludeIds = [...seenOppIds, ...recommendedOpps.map((o) => o.id)];
+    
+    const deprioritizedClause: Prisma.OppsWhereInput[] = [];
+    if (deprioritizeTypes.length > 0) {
+      deprioritizedClause.push({ type: { hasSome: deprioritizeTypes } });
+    }
+    if (deprioritizeZones.length > 0) {
+      deprioritizedClause.push({ zone: { hasSome: deprioritizeZones } });
+    }
+
+    const deprioritizedOpps = await db.opps.findMany({
+      where: {
+        AND: [
+          getActiveOppsFilter(),
+          { id: { notIn: excludeIds } },
+          { OR: deprioritizedClause }
+        ]
+      },
+      take: Math.min(2, LIMIT - recommendedOpps.length), // Max 2 deprioritized items
+      orderBy: { created_at: "desc" },
+    });
+    
+    recommendedOpps.push(...deprioritizedOpps);
+  }
+
+  // Step 3: Fill remaining slots with neutral content (everything else)
+  if (recommendedOpps.length < LIMIT) {
+    const excludeIds = [...seenOppIds, ...recommendedOpps.map((o) => o.id)];
+    
+    const allRemainingOpps = await db.opps.findMany({
+      where: {
+        AND: [
+          getActiveOppsFilter(),
+          { id: { notIn: excludeIds } }
+        ]
       },
       select: { id: true },
       orderBy: { created_at: "desc" },
     });
 
-    const shuffledIds = allfillerOpps
+    const shuffledIds = allRemainingOpps
       .map((o) => o.id)
       .sort(() => Math.random() - 0.5)
       .slice(0, LIMIT - recommendedOpps.length);
 
     const fillerOpps = await db.opps.findMany({
-      where: { id: { in: shuffledIds }, ...getActiveOppsFilter() },
+      where: { 
+        id: { in: shuffledIds },
+        ...getActiveOppsFilter()
+      },
     });
 
-    recommendedOpps = [...recommendedOpps, ...fillerOpps];
+    recommendedOpps.push(...fillerOpps);
   }
 
   // Enrich with zones
@@ -591,8 +700,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
 
   const enrichedOpps = recommendedOpps.map((opp) => {
     const oppZones = (opp.zone ?? [])
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      .map((zoneName) => zoneMap.get(zoneName))
+      .map((zoneName: string) => zoneMap.get(zoneName))
       .filter(Boolean);
     return {
       ...opp,

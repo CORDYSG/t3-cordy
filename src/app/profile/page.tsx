@@ -6,6 +6,7 @@ import ProfileCard from "../_components/ProfilePage/ProfileCard";
 import ProfileTabs from "../_components/ProfilePage/ProfileTabs";
 import { api } from "@/trpc/server";
 import type { Metadata } from "next";
+import ProfileBreakdown from "../_components/ProfilePage/ProfileBreakdown";
 
 // Generate metadata for the page
 export const metadata: Metadata = {
@@ -72,9 +73,14 @@ const ProfilePage = async () => {
           <h1 className="sr-only">User Profile Card</h1>
           <section
             aria-label="User Profile"
-            className="my-4 flex h-full grid-rows-2 flex-col justify-center text-left font-bold"
+            className="my-4 grid h-full gap-4 lg:grid-cols-4 lg:gap-2"
           >
-            <ProfileCard userCheck={userProfile} />
+            <div className="lg:col-span-3">
+              <ProfileCard userCheck={userProfile} />
+            </div>
+            <div className="">
+              <ProfileBreakdown />
+            </div>
           </section>
 
           <h1 className="sr-only">User Opportunity List</h1>

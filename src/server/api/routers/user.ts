@@ -213,5 +213,47 @@ interests: z.array(z.string()),
 }),
 
 
+  getUserLikedZoneBreakdown: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session?.user?.id;
 
-    })
+    if (!userId) throw new Error("Not authenticated");
+
+    // Fetch all liked opportunities with zone info
+    const likedOpportunities = await ctx.db.userOpportunity.findMany({
+      where: {
+        userId,
+        liked: true,
+      },
+      include: {
+        opportunity: { 
+          select: { 
+            zone:true, 
+            zone_id: true
+          }
+        }
+      },
+    });
+
+
+    // Count zone frequencies
+    const zoneCounts: Record<string, number> = {};
+
+    for (const entry of likedOpportunities) {
+      const zones = entry.opportunity?.zone ?? [];
+ 
+      for (const z of zones) {
+        const zoneName = z
+        zoneCounts[zoneName] = (zoneCounts[zoneName] ?? 0) + 1;
+      }
+    }
+
+    return {
+      totalLiked: likedOpportunities.length,
+      zoneBreakdown: zoneCounts,
+    };
+  }),
+});
+
+
+
+  

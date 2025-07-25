@@ -340,10 +340,10 @@ export default function EventCard({
 
       setOpen(newOpen);
 
-      if (newOpen && !disableInteractions && guestId) {
+      if (newOpen && !disableInteractions) {
         updateActionMutation.mutate({
           oppId: opp.id,
-          guestId,
+          guestId: guestId ?? "",
           action: "CLICK_EXPAND",
         });
       }
@@ -352,14 +352,12 @@ export default function EventCard({
   );
 
   const handleButtonClick = useCallback(() => {
-    if (guestId) {
-      updateActionMutation.mutate({
-        oppId: opp.id,
-        guestId,
-        action: "CLICK",
-      });
-    }
-  }, [guestId, opp.id, updateActionMutation]);
+    updateActionMutation.mutate({
+      oppId: opp.id,
+      guestId: guestId ?? "",
+      action: "CLICK",
+    });
+  }, [opp.id, updateActionMutation]);
 
   const handleLike = useCallback(() => {
     const newLikeStatus = !isLiked;
@@ -382,13 +380,11 @@ export default function EventCard({
 
     userOppMutation.mutate({ oppId: opp.id, saved: newBookmarkStatus });
 
-    if (guestId) {
-      updateActionMutation.mutate({
-        oppId: opp.id,
-        guestId,
-        action: newBookmarkStatus ? "SAVE" : "UNSAVE",
-      });
-    }
+    updateActionMutation.mutate({
+      oppId: opp.id,
+      guestId: guestId ?? "",
+      action: newBookmarkStatus ? "SAVE" : "UNSAVE",
+    });
   }, [isBookmarked, opp.id, guestId, userOppMutation, updateActionMutation]);
 
   // Effects
@@ -418,8 +414,6 @@ export default function EventCard({
       }
     };
   }, []);
-
-  // Debug effect
 
   // Render helpers
   const triggerProps = {
