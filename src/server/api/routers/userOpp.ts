@@ -1,7 +1,9 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-return */
 
+/* eslint-disable @typescript-eslint/no-unsafe-call */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { z } from "zod";
@@ -618,7 +620,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
     preferenceClause.push({ zone: { hasSome: topZones } });
   }
 
-  let recommendedOpps: any[] = [];
+  const recommendedOpps: any[] = [];
 
   // Step 1: Get preferred content (majority of recommendations)
   if (preferenceClause.length > 0) {
