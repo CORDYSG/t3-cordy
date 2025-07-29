@@ -1,21 +1,20 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+
 import { ImageResponse } from "next/og";
 import { NextRequest } from "next/server";
 import React from "react";
 
 export const runtime = "edge";
 
-export const alt = "Profile OG Image";
-export const size = {
-  width: 1200,
-  height: 630,
-};
+
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const userId = params.id;
-
+  const { id: userId } = await params;
   // Fetch user data - adjust based on how you fetch
   // You can't use tRPC directly here (no React context), use direct DB call or REST
   const user = await fetch(

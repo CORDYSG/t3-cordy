@@ -9,14 +9,15 @@ import type { Metadata } from "next";
 export async function generateMetadata({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }): Promise<Metadata> {
+  const { id } = await params;
   return {
-    title: `User Profile - ${params.id}`,
+    title: `User Profile - ${id}`,
     openGraph: {
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${params.id}`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
           width: 1200,
           height: 630,
         },
