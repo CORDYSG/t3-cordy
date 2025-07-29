@@ -27,51 +27,6 @@ model UserOpportunity {
   @@index([oppId])
 }
 
-model UserType {
-  id        String   @id @default(cuid())
-  userId    String
-  typeId    BigInt
-  preferred Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  type      Types    @relation(fields: [typeId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, typeId])
-  @@index([userId])
-  @@index([typeId])
-}
-
-model UserZone {
-  id        String   @id @default(cuid())
-  userId    String
-  zoneId    BigInt
-  preferred Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  zone      Zones    @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, zoneId])
-  @@index([userId])
-  @@index([zoneId])
-}
-
-model OppView {
-  id          String   @id @default(cuid())
-  oppId       BigInt
-  userId      String?
-  viewedAt    DateTime @default(now())
-  duration    Int?
-  source      String?
-  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
-  user        User?    @relation(fields: [userId], references: [id])
-
-  @@index([oppId])
-  @@index([userId])
-  @@index([viewedAt])
-}
-
 model OppMetrics {
   id                      String   @id @default(cuid())
   oppId                   BigInt   @unique
@@ -102,21 +57,6 @@ model OppMetrics {
   @@index([oppId])
 }
 
-model UserRecommendation {
-  id          String    @id @default(cuid())
-  userId      String
-  oppId       BigInt
-  score       Float
-  shown       Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  shownAt     DateTime?
-  opportunity Opps      @relation(fields: [oppId], references: [id], onDelete: Cascade)
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([oppId])
-}
-
 model User {
   id                  String                @id @default(dbgenerated("gen_random_uuid()"))
   username            String?
@@ -129,27 +69,16 @@ model User {
   name                String?
   createdAt           DateTime              @default(now()) @db.Timestamptz(6)
   teleUserid          String?
-  teleUserHandle      String?              
+  teleUserHandle      String?
+  role                UserRole              @default(User)
   accounts            Account[]
-  views               OppView[]
   ReportedOpportunity ReportedOpportunity[]
   sessions            Session[]
   teleUser            TeleUser?             @relation(fields: [teleUserid], references: [id])
   opportunities       UserOpportunity[]
   profile             UserProfile?
-  recommendations     UserRecommendation[]
-  typePreferences     UserType[]
-  zonePreferences     UserZone[]
+  WebsiteFeedback     WebsiteFeedback[]
   userActions         UserAction[]
-  role                  UserRole              @default(User)
-  WebsiteFeedback WebsiteFeedback[]
-}
-
-enum UserRole { 
- 
- User
- CORDY
-
 }
 
 model Account {
@@ -187,34 +116,6 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model OppZone {
-  id          String   @id @default(cuid())
-  oppId       BigInt
-  zoneId      BigInt
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
-  zone        Zones    @relation(fields: [zoneId], references: [id], onDelete: Cascade)
-
-  @@unique([oppId, zoneId])
-  @@index([oppId])
-  @@index([zoneId])
-}
-
-model OppType {
-  id          String   @id @default(cuid())
-  oppId       BigInt
-  typeId      BigInt
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  opportunity Opps     @relation(fields: [oppId], references: [id], onDelete: Cascade)
-  type        Types    @relation(fields: [typeId], references: [id], onDelete: Cascade)
-
-  @@unique([oppId, typeId])
-  @@index([oppId])
-  @@index([typeId])
-}
-
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Opps {
@@ -238,36 +139,27 @@ model Opps {
   status              String?                  @default("null")
   url_source          String?
   metrics             OppMetrics?
-  OppType             OppType[]
-  views               OppView[]
-  OppZone             OppZone[]
   ReportedOpportunity ReportedOpportunity[]
   TeleUserOpportunity TeleUserOpportunity[]
   userInteractions    UserOpportunity[]
-  recommendations     UserRecommendation[]
   userActions         UserAction[]
 }
 
 model Types {
-  id              BigInt     @id(map: "types_pkey") @default(autoincrement())
-  airtable_id     String?    @unique(map: "types_airtable_id_key")
-  created_at      DateTime   @default(now()) @db.Timestamptz(6)
-  name            String?
-  alias           String?
-  opp_id          String[]
-  OppType         OppType[]
-  userPreferences UserType[]
+  id          BigInt   @id(map: "types_pkey") @default(autoincrement())
+  airtable_id String?  @unique(map: "types_airtable_id_key")
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  name        String?
+  alias       String?
+  opp_id      String[]
 }
 
 model Zones {
-  id              BigInt     @id(map: "zones_pkey") @default(autoincrement())
-  created_at      DateTime   @default(now()) @db.Timestamptz(6)
+  id              BigInt            @id(map: "zones_pkey") @default(autoincrement())
+  created_at      DateTime          @default(now()) @db.Timestamptz(6)
   colour          String?
-  airtable_id     String?    @unique(map: "zones_airtable_id_key")
+  airtable_id     String?           @unique(map: "zones_airtable_id_key")
   name            String?
-  OppZone         OppZone[]
-  userPreferences UserZone[]
-
   UserProfileZone UserProfileZone[]
 }
 
@@ -324,12 +216,10 @@ model UserAction {
 }
 
 model UserProfile {
-  id              String             @id @default(cuid())
-  userId          String             @unique
+  id              String            @id @default(cuid())
+  userId          String            @unique
   hearAboutSource HearAboutSource?
-  hearAboutOther  String? 
-  interestZones   UserProfileZone[]
-  
+  hearAboutOther  String?
   interestsOther  String?
   ageRange        AgeRange?
   isStudent       Boolean?
@@ -337,27 +227,28 @@ model UserProfile {
   schoolName      String?
   goals           GoalType[]
   goalsOther      String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  interestZones   UserProfileZone[]
 
   @@index([userId])
 }
 
 model UserProfileZone {
-  id             String       @id @default(cuid())
-  userProfileId  String
-  zoneId         BigInt
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-
-  userProfile    UserProfile  @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
-  zone           Zones        @relation(fields: [zoneId], references: [id], onDelete: Cascade)
+  id            String      @id @default(cuid())
+  userProfileId String
+  zoneId        BigInt
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  userProfile   UserProfile @relation(fields: [userProfileId], references: [id], onDelete: Cascade)
+  zone          Zones       @relation(fields: [zoneId], references: [id], onDelete: Cascade)
 
   @@unique([userProfileId, zoneId])
   @@index([userProfileId])
   @@index([zoneId])
 }
+
 model ReportedOpportunity {
   id          String       @id @default(cuid())
   userId      String
@@ -373,6 +264,24 @@ model ReportedOpportunity {
   @@index([userId])
   @@index([status])
   @@index([oppId])
+}
+
+model WebsiteFeedback {
+  id        String   @id @default(uuid())
+  userId    String
+  message   String
+  email     String?
+  imageType String?
+  createdAt DateTime @default(now())
+  imageUrl  String?
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@map("feedback")
+}
+
+enum UserRole {
+  User
+  CORDY
 }
 
 enum ReportReason {
@@ -482,18 +391,4 @@ enum GoalType {
   COMMUNITY_SERVICE
   PERSONAL_GROWTH
   OTHER_GOALS
-}
-
-
-model WebsiteFeedback {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  message     String
-  email       String?
-  imageUrl    String?   // Store Contentful URL instead of base64
-  imageType   String?   // "image/png" or "image/jpeg"
-  createdAt   DateTime  @default(now())
-
-  @@map("feedback")
 }

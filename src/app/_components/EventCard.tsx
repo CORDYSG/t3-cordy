@@ -41,6 +41,8 @@ import ShareButton from "./ShareButton";
 import { toast } from "sonner";
 import React from "react";
 import { useGuestId } from "@/lib/guest-session";
+import { toZonedTime } from "date-fns-tz";
+import { differenceInCalendarDays } from "date-fns";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -152,7 +154,7 @@ const EventContent = ({
               {daysLeft !== null ? (
                 <p className="text-primary text-left text-xs font-bold">
                   {daysLeft > 0
-                    ? `${daysLeft} days left`
+                    ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
                     : "Deadline has passed"}
                 </p>
               ) : (
@@ -169,7 +171,9 @@ const EventContent = ({
             </p>
             {daysLeft !== null ? (
               <p className="text-primary text-left text-xs font-bold">
-                {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
+                {daysLeft > 0
+                  ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
+                  : "Deadline has passed"}
               </p>
             ) : (
               <p className="text-left text-xs font-bold text-gray-700">
@@ -253,7 +257,9 @@ const EventContent = ({
         </p>
         {daysLeft !== null ? (
           <p className="text-primary text-md mt-1 text-left font-semibold">
-            {daysLeft > 0 ? `${daysLeft} days left` : "Deadline has passed"}
+            {daysLeft > 0
+              ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
+              : "Deadline has passed"}
           </p>
         ) : (
           <p className="text-left text-xs font-bold text-gray-700">
@@ -290,13 +296,17 @@ export default function EventCard({
 
   const { guestId } = useGuestId();
 
+  const SGT = "Asia/Singapore";
+
   const daysLeft = useMemo(() => {
     if (!opp.deadline) return null;
-    const now = new Date();
-    const timeDiff = opp.deadline.getTime() - now.getTime();
-    return Math.ceil(timeDiff / (1000 * 3600 * 24));
-  }, [opp.deadline]);
 
+    // Convert both to Singapore timezone
+    const now = toZonedTime(new Date(), SGT);
+    const deadline = toZonedTime(opp.deadline, SGT);
+
+    return differenceInCalendarDays(deadline, now);
+  }, [opp.deadline]);
   const formatDate = useMemo(() => {
     const formatter = new Intl.DateTimeFormat("en-US", {
       year: "numeric",
@@ -340,10 +350,10 @@ export default function EventCard({
 
       setOpen(newOpen);
 
-      if (newOpen && !disableInteractions && guestId) {
+      if (newOpen && !disableInteractions) {
         updateActionMutation.mutate({
           oppId: opp.id,
-          guestId,
+          guestId: guestId ?? "",
           action: "CLICK_EXPAND",
         });
       }
@@ -352,14 +362,12 @@ export default function EventCard({
   );
 
   const handleButtonClick = useCallback(() => {
-    if (guestId) {
-      updateActionMutation.mutate({
-        oppId: opp.id,
-        guestId,
-        action: "CLICK",
-      });
-    }
-  }, [guestId, opp.id, updateActionMutation]);
+    updateActionMutation.mutate({
+      oppId: opp.id,
+      guestId: guestId ?? "",
+      action: "CLICK",
+    });
+  }, [opp.id, updateActionMutation]);
 
   const handleLike = useCallback(() => {
     const newLikeStatus = !isLiked;
@@ -382,13 +390,11 @@ export default function EventCard({
 
     userOppMutation.mutate({ oppId: opp.id, saved: newBookmarkStatus });
 
-    if (guestId) {
-      updateActionMutation.mutate({
-        oppId: opp.id,
-        guestId,
-        action: newBookmarkStatus ? "SAVE" : "UNSAVE",
-      });
-    }
+    updateActionMutation.mutate({
+      oppId: opp.id,
+      guestId: guestId ?? "",
+      action: newBookmarkStatus ? "SAVE" : "UNSAVE",
+    });
   }, [isBookmarked, opp.id, guestId, userOppMutation, updateActionMutation]);
 
   // Effects
@@ -418,8 +424,6 @@ export default function EventCard({
       }
     };
   }, []);
-
-  // Debug effect
 
   // Render helpers
   const triggerProps = {
@@ -530,7 +534,7 @@ export default function EventCard({
                 {daysLeft !== null ? (
                   <p className="text-primary text-md font-medium">
                     {daysLeft > 0
-                      ? `${daysLeft} days left`
+                      ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
                       : "Deadline has passed"}
                   </p>
                 ) : (
@@ -612,7 +616,7 @@ export default function EventCard({
               {daysLeft !== null ? (
                 <p className="text-primary text-md font-medium">
                   {daysLeft > 0
-                    ? `${daysLeft} days left`
+                    ? `${daysLeft} day${daysLeft > 1 ? "s" : ""} left`
                     : "Deadline has passed"}
                 </p>
               ) : (
