@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Lock, ArrowRight } from "lucide-react";
 import { FaDiscord, FaGoogle } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import Image from "next/image";

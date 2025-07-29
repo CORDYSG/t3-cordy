@@ -213,47 +213,102 @@ interests: z.array(z.string()),
 }),
 
 
-  getUserLikedZoneBreakdown: protectedProcedure.query(async ({ ctx }) => {
-    const userId = ctx.session?.user?.id;
+getUserInterestBreakdown: protectedProcedure.query(async ({ ctx }) => {
+  const userId = ctx.session?.user?.id;
+  if (!userId) throw new Error("Not authenticated");
 
-    if (!userId) throw new Error("Not authenticated");
-
-    // Fetch all liked opportunities with zone info
-    const likedOpportunities = await ctx.db.userOpportunity.findMany({
-      where: {
-        userId,
-        liked: true,
+  // Get all user-opportunity interactions
+  const userOpportunities = await ctx.db.userOpportunity.findMany({
+    where: { userId },
+    include: {
+      opportunity: {
+        select: { zone: true },
       },
-      include: {
-        opportunity: { 
-          select: { 
-            zone:true, 
-            zone_id: true
-          }
-        }
-      },
-    });
+    },
+  });
 
+  // Initialize breakdowns
+  const exploredCounts: Record<string, number> = {};
+  const likedCounts: Record<string, number> = {};
 
-    // Count zone frequencies
-    const zoneCounts: Record<string, number> = {};
+  let totalExplored = 0;
+  let totalLiked = 0;
 
-    for (const entry of likedOpportunities) {
-      const zones = entry.opportunity?.zone ?? [];
- 
-      for (const z of zones) {
-        const zoneName = z
-        zoneCounts[zoneName] = (zoneCounts[zoneName] ?? 0) + 1;
+  for (const entry of userOpportunities) {
+    const zones = entry.opportunity.zone ?? [];
+
+    if (zones.length === 0) continue;
+
+    for (const zone of zones) {
+      // Track all explored zones
+      exploredCounts[zone] = (exploredCounts[zone] ?? 0) + 1;
+      totalExplored += 1;
+
+      // If liked, track liked zones
+      if (entry.liked) {
+        likedCounts[zone] = (likedCounts[zone] ?? 0) + 1;
+        totalLiked += 1;
       }
     }
+  }
 
-    return {
-      totalLiked: likedOpportunities.length,
-      zoneBreakdown: zoneCounts,
-    };
-  }),
+  // Convert both to percentage breakdowns
+  const getPercentages = (
+    counts: Record<string, number>,
+    total: number
+  ): Record<string, number> => {
+    const breakdown: Record<string, number> = {};
+    for (const zone in counts) {
+
+      const score = counts[zone] ?? 0
+      breakdown[zone] = +(score / total * 100).toFixed(1);
+    }
+    return breakdown;
+  };
+
+  return {
+    totalExplored,
+    totalLiked,
+    exploredBreakdown: getPercentages(exploredCounts, totalExplored),
+    likedBreakdown: getPercentages(likedCounts, totalExplored),
+  };
+}),
+
+getUserViewById: publicProcedure
+    .input(z.object({ userId: z.string() }))
+    .query(async ({ ctx, input }) => {
+
+      console.log(">>>>>>>>>>>>entered function, id recevied: ", input.userId)
+      
+    const user = await db.user.findUnique({
+      where: { id: input.userId },
+      select: {
+        id: true,
+        username: true,
+        image: true,
+        lastActive:true,
+        name: true,
+
+
+      },
+
+    
+    });
+
+  if (!user) {
+  throw new TRPCError({
+    code: "NOT_FOUND",
+    message: "User not found",
+  });
+}
+      return user
+
+    }
+
+)
+
+
 });
 
 
 
-  
