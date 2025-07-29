@@ -7,6 +7,7 @@ import ProfileTabs from "../_components/ProfilePage/ProfileTabs";
 import { api } from "@/trpc/server";
 import type { Metadata } from "next";
 import ProfileBreakdown from "../_components/ProfilePage/ProfileBreakdown";
+import ProfileAnalytics from "../_components/ProfilePage/ProfileAnalytics";
 
 // Generate metadata for the page
 export const metadata: Metadata = {
@@ -44,7 +45,7 @@ const ProfilePage = async () => {
   let userCount;
   try {
     userProfile = await api.user.getUserProfile();
-    userPreferences = await api.user.getUserLikedZoneBreakdown();
+    userPreferences = await api.user.getUserInterestBreakdown();
     userCount = await api.userOpp.getUserOppMetricCounts();
   } catch (error) {
     // You might want to redirect to an error page or show a fallback
@@ -71,23 +72,25 @@ const ProfilePage = async () => {
   };
 
   return (
-    <main className="container mx-auto flex flex-col items-center justify-center gap-4 p-8 md:w-5/6">
+    <>
       <div className="w-full space-y-8">
         <Suspense fallback={<LoadingComponent />}>
           <h1 className="sr-only">User Profile Card</h1>
-          <section
-            aria-label="User Profile"
-            className="my-4 grid h-full gap-4 lg:grid-cols-4 lg:gap-2"
-          >
-            <div
-              className={`h-full ${userPreferences.totalLiked > 0 ? "lg:col-span-3" : "lg:col-span-4"}`}
-            >
-              <ProfileCard userCheck={userProfile} userCount={userCount} />
+          <section aria-label="User Profile" className="my-4 h-full space-y-4">
+            <div className={`h-full`}>
+              <ProfileCard
+                userCheck={userProfile}
+                userCount={userCount}
+                vertical={userPreferences.totalLiked > 0}
+              />
             </div>
-            {userPreferences.totalLiked > 0 && (
-              <div className="h-full">
-                <ProfileBreakdown />
-              </div>
+            {userPreferences.totalExplored > 0 && (
+              <>
+                <div className="h-full">
+                  <ProfileBreakdown />
+                </div>
+                {/* <ProfileAnalytics /> */}
+              </>
             )}
           </section>
 
@@ -105,7 +108,7 @@ const ProfilePage = async () => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </main>
+    </>
   );
 };
 

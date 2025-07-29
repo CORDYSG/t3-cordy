@@ -232,31 +232,6 @@ while (currentDate <= untilSGT) {
     });
   }),
 
-  popularZones: adminProcedure.query(async ({ ctx }) => {
-    const zoneCounts = await ctx.db.oppZone.groupBy({
-      by: ["zoneId"],
-      _count: true,
-      orderBy: { _count: { zoneId: "desc" } },
-      take: 5
-    });
-
-    return ctx.db.zones.findMany({
-      where: { id: { in: zoneCounts.map(z => z.zoneId) } }
-    });
-  }),
-
-  leastPopularZones: adminProcedure.query(async ({ ctx }) => {
-    const zoneCounts = await ctx.db.oppZone.groupBy({
-      by: ["zoneId"],
-      _count: true,
-      orderBy: { _count: { zoneId: "asc" } },
-      take: 5
-    });
-
-    return ctx.db.zones.findMany({
-      where: { id: { in: zoneCounts.map(z => z.zoneId) } }
-    });
-  }),
 
   dailyActiveUsers: adminProcedure
     .input(z.object({
