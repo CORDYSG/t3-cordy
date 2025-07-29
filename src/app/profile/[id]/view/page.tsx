@@ -4,6 +4,26 @@
 import PublicProfileCard from "@/app/_components/ProfilePage/PublicProfileCard";
 import { api } from "@/trpc/server";
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  return {
+    title: `User Profile - ${params.id}`,
+    openGraph: {
+      images: [
+        {
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${params.id}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+  };
+}
 
 const ProfilePublicView = async ({
   params,
