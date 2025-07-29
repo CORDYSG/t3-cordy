@@ -15,8 +15,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id: userId } = await params;
-  // Fetch user data - adjust based on how you fetch
-  // You can't use tRPC directly here (no React context), use direct DB call or REST
+
   const user = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL}/api/internal/user?id=${userId}`
   ).then((res) => res.json());
