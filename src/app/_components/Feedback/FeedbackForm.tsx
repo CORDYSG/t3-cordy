@@ -138,7 +138,7 @@ export default function FeedbackForm() {
         <p className="mt-4 text-sm text-gray-600">
           Or you can also email us at{" "}
           <a
-            href={`mailto:teams@cordy.sg?subject=${encodeURIComponent(
+            href={`mailto:team@cordy.sg?subject=${encodeURIComponent(
               "Feedback for CORDY",
             )}&body=${encodeURIComponent(
               `Hi CORDY Team, I would like to share the following feedback: ${message}`,
