@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useEffect, useState } from "react";
+import ConnectTelegramButton from "./ConnectToTelegram";
 
 interface ProfileCardProps {
   userCheck: { id: string } | null;
@@ -34,6 +35,13 @@ interface ProfileCardProps {
   } | null;
 
   vertical?: boolean;
+}
+
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onTelegramAuth?: (user: any) => void;
+  }
 }
 
 const ProfileCard = ({ userCheck, userCount }: ProfileCardProps) => {
@@ -80,13 +88,6 @@ const ProfileCard = ({ userCheck, userCount }: ProfileCardProps) => {
     api.user.getUserData.useQuery(undefined, {
       enabled: !!userCheck?.id,
     });
-
-  // const { data: userCountData } = api.userOpp.getUserOppMetricCounts.useQuery(
-  //   undefined,
-  //   {
-  //     enabled: !!userCheck?.id,
-  //   },
-  // );
 
   // Don't render if not authenticated or no profile
   if (!session?.user || !userCheck?.id) {
@@ -179,6 +180,9 @@ const ProfileCard = ({ userCheck, userCount }: ProfileCardProps) => {
                 className="border-2 font-medium"
                 sideOffset={10}
               >
+                <DropdownMenuItem asChild>
+                  <ConnectTelegramButton />
+                </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link className="text-red" href="/api/auth/signout">
                     Log out

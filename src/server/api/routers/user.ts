@@ -234,9 +234,11 @@ getUserInterestBreakdown: protectedProcedure.query(async ({ ctx }) => {
   let totalExplored = 0;
   let totalLiked = 0;
 
-  for (const entry of userOpportunities) {
-    const zones = entry.opportunity.zone ?? [];
 
+  for (const entry of userOpportunities) {
+
+    const zones = entry.opportunity.zone ?? [];
+   
     if (zones.length === 0) continue;
 
     for (const zone of zones) {
@@ -278,7 +280,6 @@ getUserViewById: publicProcedure
     .input(z.object({ userId: z.string() }))
     .query(async ({ ctx, input }) => {
 
-      console.log(">>>>>>>>>>>>entered function, id recevied: ", input.userId)
       
     const user = await db.user.findUnique({
       where: { id: input.userId },
