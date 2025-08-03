@@ -56,34 +56,54 @@ type EventCardProps = {
 };
 
 // Memoized image component to prevent unnecessary re-renders
-
 const EventImage = React.memo(
   ({
     src,
     alt,
     className,
-    sizes,
+    context = "card", // 'card', 'modal', 'list'
+    priority = false,
     fill = true,
   }: {
     src?: string;
     alt: string;
     className?: string;
-    sizes?: string;
+    context?: "card" | "modal" | "list";
+    priority?: boolean;
     fill?: boolean;
   }) => {
     const fallbackSrc =
       "https://images.ctfassets.net/ayry21z1dzn2/3PwwkABVqMG5SkuSMTCA19/f63c3b883bf2198314e43bd9aa91dfc9/CORDY_Face.svg";
+
+    // Optimize sizes based on context to reduce unnecessary transformations
+    const getSizes = (context: string) => {
+      switch (context) {
+        case "list":
+          return "(max-width: 640px) 96px, (max-width: 768px) 192px, 192px";
+        case "modal":
+          return "(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 400px";
+        case "card":
+        default:
+          return "(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw";
+      }
+    };
 
     if (src) {
       return (
         <Image
           src={src}
           fill={fill}
-          sizes={sizes}
+          sizes={getSizes(context)}
           placeholder="empty"
           alt={alt}
           className={className}
-          priority
+          priority={priority}
+          quality={85} // Reduce from default 75 to 85 for better compression
+          // Add format optimization
+          style={{
+            objectFit: "cover",
+            objectPosition: "center",
+          }}
         />
       );
     }
@@ -96,6 +116,7 @@ const EventImage = React.memo(
           height={64}
           alt="Cordy Face"
           className="object-contain"
+          quality={90} // Higher quality for fallback since it's small
         />
       </div>
     );
@@ -113,6 +134,8 @@ const EventContent = ({
   showZones = true,
   showImage = true,
   layout = "card",
+  imageContext = "card",
+  isAboveFold = false, // New prop to determine priority loading
 }: {
   opp: OppWithZoneType;
   daysLeft: number | null;
@@ -122,6 +145,8 @@ const EventContent = ({
   showZones?: boolean;
   showImage?: boolean;
   layout?: "card" | "list";
+  imageContext?: "card" | "modal" | "list";
+  isAboveFold?: boolean;
 }) => {
   if (layout === "list") {
     return (
@@ -131,12 +156,12 @@ const EventContent = ({
             <EventImage
               src={opp.thumbnail_url}
               alt={opp.name}
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              context="list"
+              priority={isAboveFold}
               className="absolute inset-0 h-full w-full object-cover"
             />
           </div>
         )}
-
         <div className="grid flex-1 grid-cols-2 items-center gap-4 md:grid-cols-4 lg:block lg:space-y-2">
           <div className="col-span-3 flex min-w-0 flex-col justify-center lg:col-span-1">
             <div className="col-span-3 flex min-w-0 flex-col justify-center lg:col-span-1">
@@ -193,7 +218,8 @@ const EventContent = ({
           <EventImage
             src={opp.thumbnail_url}
             alt={opp.name}
-            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
+            context={imageContext}
+            priority={isAboveFold}
             className="absolute inset-0 h-full w-full object-cover"
           />
         </div>
@@ -276,7 +302,10 @@ export default function EventCard({
   disableInteractions = false,
   listView = false,
   isAuthenticated = false,
-}: Readonly<EventCardProps>): JSX.Element {
+  cardIndex = 0,
+}: Readonly<EventCardProps & { cardIndex?: number }>): JSX.Element {
+  const isAboveFold = cardIndex < 6;
+
   // State management
   const [open, setOpen] = useState(false);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -406,7 +435,7 @@ export default function EventCard({
   }, [userMetrics]);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+    const mediaQuery = window.matchMedia("(min-width: 768px)");
     mediaQueryRef.current = mediaQuery;
     const initialIsDesktop = mediaQuery.matches;
     setIsDesktop(initialIsDesktop);
@@ -446,6 +475,8 @@ export default function EventCard({
         zonesRef={zonesRef}
         zonesContainerRef={zonesContainerRef}
         layout={listView ? "list" : "card"}
+        imageContext={listView ? "list" : "card"}
+        isAboveFold={isAboveFold}
       />
       <div className={` ${!listView && "-mt-5"} flex justify-end`}>
         <Maximize2 size={16} />
@@ -479,6 +510,18 @@ export default function EventCard({
     </>
   );
 
+  const ModalImage = () => (
+    <div className="relative min-h-56 w-full rounded-lg border-2 md:max-h-48 md:max-w-3/5">
+      <EventImage
+        src={opp.thumbnail_url}
+        alt={opp.name}
+        context="modal"
+        priority={false}
+        className="absolute inset-0 h-full w-full rounded-md object-cover"
+      />
+    </div>
+  );
+
   if (isDesktop) {
     return (
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -486,18 +529,11 @@ export default function EventCard({
           <TriggerContent />
         </DialogTrigger>
         <DialogContent
-          className="max-w-[425px] rounded-xl border-2 bg-white p-8 md:max-w-[800px]"
+          className="max-w-[425px] rounded-xl border-2 bg-white p-8 md:max-w-[720px]"
           style={{ boxShadow: "4px 4px 0px 0px rgba(0, 0, 0, 1)" }}
         >
           <DialogHeader className="flex w-full flex-row gap-5">
-            <div className="relative min-h-56 w-full rounded-lg border-2 md:max-h-48 md:max-w-3/5">
-              <EventImage
-                src={opp.thumbnail_url}
-                alt={opp.name}
-                sizes="(max-width: 768px) 100vw, 33vw"
-                className="absolute inset-0 h-full w-full rounded-md object-cover"
-              />
-            </div>
+            <ModalImage />
             <div className="flex w-full flex-col justify-between pb-4">
               <div>
                 <DialogTitle
@@ -576,14 +612,7 @@ export default function EventCard({
           }}
         >
           <DrawerHeader>
-            <div className="relative h-36 w-full overflow-hidden rounded-md border-2 md:h-72">
-              <EventImage
-                src={opp.thumbnail_url}
-                alt={opp.name}
-                sizes="100vw"
-                className="absolute inset-0 h-full w-full object-cover"
-              />
-            </div>
+            <ModalImage />
             <DrawerTitle
               className="font-brand mt-4 text-2xl font-bold"
               style={{

@@ -49,6 +49,7 @@ const Wrapper = () => {
       setShowLogin(false); // Never show login for auth users
     } else {
       // Guests
+
       const hasSeenHistory = guestHistory.seenOppIds.length > 0;
       if (!hasSeenHistory) {
         // New guest: show tutorial first

@@ -5,7 +5,7 @@ import Wrapper from "@/app/_components/Swipe/Wrapper";
 
 // Define metadata for the page (Next.js 13+ approach)
 export const metadata: Metadata = {
-  title: "For You - Personalized Opportunities | YourApp",
+  title: "For You - Personalized Opportunities | CORDY",
   description:
     "Discover personalized opportunities tailored to your interests and preferences. Swipe to find your next perfect match.",
   keywords: "opportunities, personalized recommendations, swipe cards",
