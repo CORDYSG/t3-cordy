@@ -30,7 +30,7 @@ linkToTelegram: protectedProcedure
       last_name: z.string().optional(),
       username: z.string().optional(),
       photo_url: z.string().optional(),
-      auth_date: z.string(),
+      auth_date: z.number(),
       hash: z.string(),
     })
   )
