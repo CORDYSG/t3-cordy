@@ -129,6 +129,7 @@ getUserProfile: protectedProcedure
 
    createUserProfile: protectedProcedure
   .input(z.object({
+    knowWhatInterest: z.boolean().optional(),
     ageRange: AgeRangeSchema,
     goals: z.array(GoalTypeSchema),
     goalsOther: z.string().optional(),
@@ -158,6 +159,7 @@ interests: z.array(z.string()),
         isStudent: input.isStudent,
         schoolName: input.schoolName,
         schoolType: input.schoolType,
+        knowWhatInterest: input.knowWhatInterest ?? false,
       },
       update: {
         ageRange: input.ageRange,
@@ -170,6 +172,7 @@ interests: z.array(z.string()),
         schoolName: input.schoolName,
         schoolType: input.schoolType,
         updatedAt: new Date(),
+        knowWhatInterest: input.knowWhatInterest ?? false,
       },
     });
 

@@ -158,7 +158,9 @@ const ProfileQuestionnaire: React.FC = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
+    console.log("Submitting profile data:", profileData);
     createUserProfileMutation.mutate({
+      knowWhatInterest: profileData.knowWhatInterest ?? false,
       ageRange: profileData.ageRange!,
       goals: profileData.goals!,
       goalsOther: profileData.goalsOther,
@@ -362,7 +364,7 @@ const ProfileQuestionnaire: React.FC = () => {
         break;
       case "boolean":
         return (
-          <div className="flex gap-4 space-y-3 md:block">
+          <div className="flex w-full flex-col gap-4 md:flex-col">
             {[true, false].map((bool, i) => (
               <motion.div
                 key={String(bool)}
@@ -375,23 +377,25 @@ const ProfileQuestionnaire: React.FC = () => {
                   damping: 20,
                   bounce: 0.4,
                 }}
-                className="h-full w-full"
+                className="flex-1" // This ensures equal height distribution
               >
                 <button
-                  key={String(bool)}
-                  className={`shadow-brand h-full w-full cursor-pointer rounded-lg border p-4 text-left font-bold transition-colors ${
+                  className={`shadow-brand h-full min-h-[60px] w-full cursor-pointer rounded-lg border p-4 text-left font-bold transition-colors ${
                     profileData[field] === bool
                       ? "bg-primary shadow-brand border-2 text-white"
                       : "border-2 bg-white text-gray-700 hover:bg-gray-100"
                   }`}
                   onClick={() => updateProfileData({ [field]: bool })}
                 >
-                  {bool ? "Yes" : "No"}
+                  {bool
+                    ? currentQuestion.trueText || "Yes"
+                    : currentQuestion.falseText || "No"}
                 </button>
               </motion.div>
             ))}
           </div>
         );
+
       case "static":
         return <></>;
 

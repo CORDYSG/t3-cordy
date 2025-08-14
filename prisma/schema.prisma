@@ -205,7 +205,7 @@ model UserAction {
   oppId      BigInt
   actionType UserActionType
   createdAt  DateTime       @default(now())
-  opp        Opps           @relation(fields: [oppId], references: [id])
+  opp        Opps           @relation(fields: [oppId], references: [id], onDelete: Cascade)
   user       User?          @relation(fields: [userId], references: [id])
 
   @@index([userId, oppId])
@@ -218,6 +218,7 @@ model UserAction {
 model UserProfile {
   id              String            @id @default(cuid())
   userId          String            @unique
+  knowWhatInterest Boolean?         @default(false)
   hearAboutSource HearAboutSource?
   hearAboutOther  String?
   interestsOther  String?
@@ -277,6 +278,31 @@ model WebsiteFeedback {
   user      User     @relation(fields: [userId], references: [id])
 
   @@map("feedback")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Community {
+  id           BigInt   @id @default(autoincrement())
+  created_at   DateTime @default(now()) @db.Timestamptz(6)
+  abbreviation String?
+  name         String?
+  orgs_id      String[]
+  airtable_id  String
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Organisation {
+  id          BigInt   @id @default(autoincrement())
+  created_at  DateTime @default(now()) @db.Timestamptz(6)
+  description String?
+  website     String?
+  facebook    String?
+  instagram   String?
+  youtube     String?
+  linkedin    String?
+  name        String?
+  opps_id     String[]
+  airtable_id String
 }
 
 enum UserRole {

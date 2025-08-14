@@ -15,11 +15,18 @@ export interface Question {
   placeholder?: string
   max?:number
   optionQuery?: string; //
+  trueText?: string; // for boolean questions
+  falseText?: string; // for boolean questions
+  // scrollable-picker options are the same as options, but with a different UI
+  // input options are not used, but can be used for validation or placeholder text
+  // text is a static text field that does not require user input
+  // __static is a special field to indicate static text that does not require user input
   // scro For checkbox/radio options, the Airtable table to fetch options from
 
 }
 
 export interface ProfileData {
+  knowWhatInterest?: boolean;
   hearAboutSource?: HearAboutSource;
   hearAboutOther?: string;
   interests: string[];
@@ -49,6 +56,16 @@ export const questions: Question[] = [
   field: "__static" as keyof ProfileData,
   titleBold: true,
   preventBack: true, // custom flag to block back button here
+},
+    {
+  id: "knowWhatInterest",
+  title: "Which describes you better?",
+  type: "boolean",
+  field: "knowWhatInterest" ,
+  trueText: "I know what I'm interested in.",
+  falseText: "I don't know what I'm interested in.",
+
+
 },
   {
     id: "hearAbout",

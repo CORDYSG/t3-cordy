@@ -12,9 +12,13 @@ declare global {
   }
 }
 
-export default function ConnectTelegramButton() {
-  const [showWidget, setShowWidget] = useState(false);
+interface ConnectTelegramButtonProps {
+  isTelegramConnected?: boolean;
+}
 
+export default function ConnectTelegramButton({
+  isTelegramConnected = false,
+}: ConnectTelegramButtonProps) {
   const telegramLogin = api.user.linkToTelegram.useMutation();
 
   useEffect(() => {
@@ -43,8 +47,6 @@ export default function ConnectTelegramButton() {
   }, [telegramLogin]);
 
   useEffect(() => {
-    if (!showWidget) return;
-
     const container = document.getElementById("telegram-widget-container");
     if (!container) return;
 
@@ -59,20 +61,11 @@ export default function ConnectTelegramButton() {
     script.setAttribute("data-request-access", "write");
     script.setAttribute("data-onauth", "onTelegramAuth(user)");
     container.appendChild(script);
-  }, [showWidget]);
+  }, []);
 
   return (
     <div>
-      {!showWidget ? (
-        <button
-          onClick={() => setShowWidget(true)}
-          className="rounded border-2 px-4 py-2 font-medium"
-        >
-          Connect to Telegram
-        </button>
-      ) : (
-        <div id="telegram-widget-container" className="mt-2" />
-      )}
+      <div id="telegram-widget-container" className="mt-2" />
     </div>
   );
 }

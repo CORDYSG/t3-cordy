@@ -180,9 +180,7 @@ const ProfileCard = ({ userCheck, userCount }: ProfileCardProps) => {
                 className="border-2 font-medium"
                 sideOffset={10}
               >
-                <DropdownMenuItem asChild>
-                  <ConnectTelegramButton />
-                </DropdownMenuItem>
+                <DropdownMenuItem asChild></DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link className="text-red" href="/api/auth/signout">
                     Log out
@@ -190,6 +188,7 @@ const ProfileCard = ({ userCheck, userCount }: ProfileCardProps) => {
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            {/* <ConnectTelegramButton /> */}
           </div>
         </div>
       </div>
