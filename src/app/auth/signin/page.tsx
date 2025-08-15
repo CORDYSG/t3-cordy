@@ -1,13 +1,14 @@
 "use client";
 
 import { signIn } from "next-auth/react";
-import { useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Suspense } from "react";
 import { FaGoogle, FaDiscord } from "react-icons/fa";
 
 // Wrap the component that uses useSearchParams in Suspense
 function SignInContent() {
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const error = searchParams.get("error");
 
@@ -69,7 +70,11 @@ function SignInContent() {
 
             <div className="space-y-4">
               <button
-                onClick={() => signIn("google")}
+                onClick={() =>
+                  signIn("google", {
+                    callbackUrl: `/user-check?from=${encodeURIComponent(pathname)}`,
+                  })
+                }
                 className="flex w-full cursor-pointer items-center justify-center gap-4 rounded-lg border-4 border-black bg-white py-3 font-bold text-black shadow-[4px_4px_0px_0px_black] transition-all hover:bg-gray-100"
               >
                 <FaGoogle size={20} />
@@ -77,7 +82,11 @@ function SignInContent() {
               </button>
 
               <button
-                onClick={() => signIn("discord")}
+                onClick={() =>
+                  signIn("discord", {
+                    callbackUrl: `/user-check?from=${encodeURIComponent(pathname)}`,
+                  })
+                }
                 className="flex w-full cursor-pointer items-center justify-center gap-4 rounded-lg border-4 border-black bg-indigo-400 py-3 font-bold text-white shadow-[4px_4px_0px_0px_black] transition-all hover:bg-indigo-500"
               >
                 <FaDiscord size={20} />

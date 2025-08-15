@@ -15,7 +15,9 @@ import { BookmarkButton } from "../BookmarkButton";
 import ShareButton from "../ShareButton";
 import { useSession } from "next-auth/react";
 import LoginPopup from "../LoginModal";
-import { useGuestId } from "@/lib/guest-session";
+
+import ReportModal from "../Swipe/ReportModal";
+import { useGuest } from "@/contexts/GuestContext";
 
 type Props = {
   opp: OppWithZoneType;
@@ -54,7 +56,7 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
 
-  const { guestId, guestHistory } = useGuestId();
+  const { guestId, guestHistory } = useGuest();
 
   useEffect(() => {
     updateAction.mutate({
@@ -231,25 +233,32 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
             </div>
           )}
         </div>
-        <div className="flex w-full items-center justify-end gap-x-8">
-          <ShareButton
-            opp_airtable_id={opp.airtable_id}
-            oppId={opp.id}
-            opp={opp}
+        <div className="flex w-full items-center justify-between">
+          <ReportModal
+            currentOpportunity={opp}
+            onReportSubmitted={() => {}}
+            flat
           />
-          <BookmarkButton
-            isBookmarked={isBookmarked}
-            handleBookmark={handleSave}
-          />
-          {/* <LikeButton isLiked={mockLike} handleLike={handleLike} /> */}
-          <Link
-            className=""
-            href={opp.url_source}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <button className="btn-brand-primary">Find out more!</button>
-          </Link>
+          <div className="flex items-center gap-x-8">
+            <ShareButton
+              opp_airtable_id={opp.airtable_id}
+              oppId={opp.id}
+              opp={opp}
+            />
+            <BookmarkButton
+              isBookmarked={isBookmarked}
+              handleBookmark={handleSave}
+            />
+            {/* <LikeButton isLiked={mockLike} handleLike={handleLike} /> */}
+            <Link
+              className=""
+              href={opp.url_source}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <button className="btn-brand-primary">Find out more!</button>
+            </Link>
+          </div>
         </div>
       </div>
       <LoginPopup

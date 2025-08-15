@@ -4,6 +4,7 @@ import { FaDiscord, FaGoogle } from "react-icons/fa";
 import { signIn } from "next-auth/react";
 import Image from "next/image";
 import confetti from "canvas-confetti";
+import { usePathname } from "next/navigation";
 
 type LoginPopupProps = {
   isLoginModalOpen: boolean;
@@ -16,6 +17,7 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
   onCloseLoginModal,
   showSwipeLogin,
 }) => {
+  const pathname = usePathname();
   useEffect(() => {
     const disableTouchMove = (e: TouchEvent) => {
       if (isLoginModalOpen) {
@@ -163,7 +165,11 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
               >
                 <div className="relative">
                   <button
-                    onClick={() => signIn("google")}
+                    onClick={() =>
+                      signIn("google", {
+                        callbackUrl: `/user-check?from=${encodeURIComponent(pathname)}`,
+                      })
+                    }
                     className="flex w-full cursor-pointer items-center justify-center gap-4 rounded-lg border-4 border-black bg-white py-3 font-bold text-black shadow-[4px_4px_0px_0px_black] transition-all hover:bg-gray-100 active:bg-gray-200"
                   >
                     <FaGoogle size={20} />
@@ -173,7 +179,11 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
 
                 <div className="relative">
                   <button
-                    onClick={() => signIn("discord")}
+                    onClick={() =>
+                      signIn("discord", {
+                        callbackUrl: `/user-check?from=${encodeURIComponent(pathname)}`,
+                      })
+                    }
                     className="flex w-full cursor-pointer items-center justify-center gap-4 rounded-lg border-4 border-black bg-indigo-400 py-3 font-bold text-white shadow-[4px_4px_0px_0px_black] transition-all hover:bg-indigo-500 active:bg-indigo-600"
                   >
                     <FaDiscord size={20} />

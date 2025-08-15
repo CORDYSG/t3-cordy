@@ -9,11 +9,13 @@ import LoadingComponent from "../LoadingComponent";
 type ProfileOppListProps = {
   likedOpps?: boolean;
   savedOpps?: boolean;
+  historyOpps?: boolean;
 };
 
 export default function ProfileOppList({
   likedOpps = false,
   savedOpps = false,
+  historyOpps = false,
 }: Readonly<ProfileOppListProps>): JSX.Element {
   const likedOppsQuery = api.opp.getUserLikedOpps.useQuery(undefined, {
     enabled: likedOpps,
@@ -21,10 +23,14 @@ export default function ProfileOppList({
   const savedOppsQuery = api.opp.getUserSavedOpps.useQuery(undefined, {
     enabled: savedOpps,
   });
+  const likedOppsHistoryQuery = api.opp.getUserOppHistory.useQuery(undefined, {
+    enabled: historyOpps,
+  });
 
   const isLoading =
     (likedOpps && likedOppsQuery.isLoading) ||
-    (savedOpps && savedOppsQuery.isLoading);
+    (savedOpps && savedOppsQuery.isLoading) ||
+    (historyOpps && likedOppsHistoryQuery.isLoading);
 
   const opps = useMemo(() => {
     if (likedOpps && likedOppsQuery.data) {
@@ -33,8 +39,18 @@ export default function ProfileOppList({
     if (savedOpps && savedOppsQuery.data) {
       return savedOppsQuery.data.opps;
     }
+    if (historyOpps && likedOppsHistoryQuery.data) {
+      return likedOppsHistoryQuery.data.opps;
+    }
     return [];
-  }, [likedOpps, savedOpps, likedOppsQuery.data, savedOppsQuery.data]);
+  }, [
+    likedOpps,
+    savedOpps,
+    likedOppsQuery.data,
+    savedOppsQuery.data,
+    historyOpps,
+    likedOppsHistoryQuery.data,
+  ]);
 
   const expiredCount = useMemo(() => {
     if (likedOpps && likedOppsQuery.data) {
@@ -43,6 +59,7 @@ export default function ProfileOppList({
     if (savedOpps && savedOppsQuery.data) {
       return savedOppsQuery.data.expiredCount;
     }
+
     return [];
   }, [likedOpps, savedOpps, likedOppsQuery.data, savedOppsQuery.data]);
 
@@ -52,15 +69,13 @@ export default function ProfileOppList({
 
   return (
     <div className="w-full space-y-4">
-      {opps.map((opp) => (
-        // @ts-expect-error - opp type may not exactly match EventCard props but works in practice
-
+      {opps.map((opp: OppWithZoneType) => (
         <EventCard key={opp.id} opp={opp} listView />
       ))}
       {opps.length == 0 && (
         <p className="font-medium italic">It&apos;s a bit empty here...</p>
       )}
-      {opps.length > 0 && (
+      {!historyOpps && opps.length > 0 && (
         <div>
           <p className="font-brand mt-8 text-center font-medium text-gray-500 italic">
             Showing active opportunities only.{" "}

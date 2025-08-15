@@ -22,12 +22,14 @@ interface ReportModalProps {
   currentOpportunity: Opportunity | null;
   onReportSubmitted: () => void; // Callback to handle the swipe after report
   disabled?: boolean;
+  flat?: boolean;
 }
 
 const ReportModal = ({
   currentOpportunity,
   onReportSubmitted,
   disabled = false,
+  flat = false,
 }: ReportModalProps) => {
   type ReportReason =
     | "SPAM"
@@ -94,17 +96,23 @@ const ReportModal = ({
         if (!open) resetForm(); // Reset form when dialog closes
       }}
     >
-      <DialogTrigger asChild>
-        <button
-          className={`btn-brand-white flex items-center gap-2 px-4 font-semibold uppercase transition-all duration-200 ${
-            disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-          }`}
-          disabled={disabled}
-        >
-          <span className="sr-only">Report</span>
-          <FlagIcon size={24} color="black" />
-        </button>
-      </DialogTrigger>
+      {flat ? (
+        <DialogTrigger className="-mx-2 cursor-pointer rounded-md p-2 hover:bg-slate-100">
+          <FlagIcon size={24} className="text-gray-400" />
+        </DialogTrigger>
+      ) : (
+        <DialogTrigger asChild>
+          <button
+            className={`btn-brand-white flex items-center gap-2 px-4 font-semibold uppercase transition-all duration-200 ${
+              disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+            } }`}
+            disabled={disabled}
+          >
+            <span className="sr-only">Report</span>
+            <FlagIcon size={24} color="black" />
+          </button>
+        </DialogTrigger>
+      )}
 
       <DialogContent
         className="shadow-brand rounded-lg border-2 bg-white"
@@ -119,10 +127,10 @@ const ReportModal = ({
           </DialogDescription>
         </DialogHeader>
 
-        <form
-          onSubmit={handleReportSubmit}
-          className="mt-4 flex flex-col gap-4"
-        >
+        <h3 className="text-primary font-semibold">
+          {currentOpportunity?.name || ""}
+        </h3>
+        <form onSubmit={handleReportSubmit} className="flex flex-col gap-4">
           <label className="text-sm font-medium">
             Reason
             <select

@@ -6,8 +6,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import GalaxyLidIndicator from "./GalaxyLid";
-import CordyLogo from "./CordyLogo";
+import GalaxyLidIndicator from "../GalaxyLid";
+import CordyLogo from "../CordyLogo";
 
 interface NavbarProps {
   session?: Session | null;
@@ -19,6 +19,7 @@ const NewNavbar: React.FC<NavbarProps> = ({ session }) => {
   const lastSegment = segments[segments.length - 1] ?? "";
 
   // Determine active tab
+
   const isForYouActive = lastSegment.startsWith("for-you");
   const isAllActive =
     lastSegment.startsWith("opportunities") &&

@@ -11,7 +11,7 @@ import { useSearchParams } from "next/navigation";
 import LoginPopup from "../LoginModal";
 
 import SwipeTutorialModal from "./SwipeModal";
-import { useGuestId } from "@/lib/guest-session";
+import { useGuest } from "@/contexts/GuestContext";
 
 type SwipeWrapperRef = {
   swipeLeft: () => void;
@@ -25,53 +25,67 @@ const Wrapper = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [showLogin, setShowLogin] = useState(false);
   const [showSwipeLogin, setShowSwipeLogin] = useState(false);
+  const [swipeCount, setSwipeCount] = useState(0);
+  const [hasShownLogin, setHasShownLogin] = useState(false); // NEW
 
-  const { guestId, guestHistory, isGuest } = useGuestId();
-
+  const { guestId, guestHistory, isGuest } = useGuest();
   const { data: session } = useSession();
-
   const isAuthenticated = !!session?.user;
 
   const hasSwipedBefore = api.userOpp.hasSwipedBefore.useQuery({
     guestId: guestId ?? "",
   });
 
+  // Track swipes for guests
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setSwipeCount(guestHistory.seenOppIds.length);
+    }
+  }, [guestHistory.seenOppIds.length, isAuthenticated]);
+
+  // Initial tutorial/login logic
   useEffect(() => {
     if (hasSwipedBefore.isLoading || guestId === undefined) return;
 
     if (isAuthenticated) {
-      // Authenticated users: show tutorial only if they haven't swiped
       if (hasSwipedBefore.data?.hasSwipedBefore === false) {
         setShowTutorial(true);
       } else {
         setShowTutorial(false);
       }
-      setShowLogin(false); // Never show login for auth users
+      setShowLogin(false);
     } else {
-      // Guests
-
       const hasSeenHistory = guestHistory.seenOppIds.length > 0;
       if (!hasSeenHistory) {
-        // New guest: show tutorial first
         setShowTutorial(true);
-      } else {
-        // Guest with history: show login immediately
+      } else if (!hasShownLogin) {
+        // Only on first load
         setShowLogin(true);
+        setHasShownLogin(true);
       }
     }
   }, [
     isAuthenticated,
     guestId,
-    guestHistory,
+    guestHistory.seenOppIds.length,
     hasSwipedBefore.data,
     hasSwipedBefore.isLoading,
+    hasShownLogin, // dependency for flag
   ]);
+
+  // Show login after 3 swipes if not already shown
+  useEffect(() => {
+    if (!isAuthenticated && swipeCount >= 2 && !hasShownLogin) {
+      setShowLogin(true);
+      setHasShownLogin(true);
+    }
+  }, [swipeCount, isAuthenticated, hasShownLogin]);
 
   const handleSetShowTutorial = (show: boolean) => {
     setShowTutorial(show);
-
-    if (!show && !isAuthenticated) {
+    if (!show && !isAuthenticated && !hasShownLogin) {
       setShowLogin(true);
+      setHasShownLogin(true);
     }
   };
 

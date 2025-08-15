@@ -11,6 +11,7 @@ import Head from "next/head";
 import { auth } from "@/server/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import ReportModal from "@/app/_components/Swipe/ReportModal";
 
 const OpportunityDetail = async ({
   params,

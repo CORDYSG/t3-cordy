@@ -23,7 +23,6 @@ export default function ConnectTelegramButton({
 
   useEffect(() => {
     window.onTelegramAuth = function (user: any) {
-      console.log("telegram payload", user);
       // explicitly ignore the promise return to satisfy lint
       void (async () => {
         try {

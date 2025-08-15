@@ -187,6 +187,57 @@ export const oppRouter = createTRPCRouter({
       expiredCount,
     };
   }),
+   getUserOppHistory: protectedProcedure
+  .query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) {
+      return { opps: [], expiredCount: 0 };
+    }
+
+    const userOpps = await db.userOpportunity.findMany({
+    where: {
+    userId,
+    opportunity: {
+      deadline: { lt: new Date() }, // inactive
+    },
+    OR: [
+      { liked: true },
+      { saved: true },
+    ],
+  },
+      select: {
+        updatedAt: true,
+        opportunity: { 
+          select: {
+            id: true,
+            name: true,
+            organisation: true,
+            information: true,
+            deadline: true,
+            caption: true,
+            thumbnail_url: true,
+            airtable_id: true,
+            zone: true,
+          },
+        }
+      },
+      orderBy: {
+        updatedAt: "desc",
+      }
+    });
+
+    const expiredCount = 0
+  
+    const zones = await fetchAllZones();
+    const zoneMap = buildZoneMap(zones);
+
+    const enrichedOpps = enrichOppsWithZones(userOpps.map(item => item.opportunity), zoneMap);
+
+    return {
+      opps: enrichedOpps,
+      expiredCount,
+    };
+  }),
 
   
   getOppById: publicProcedure
@@ -196,7 +247,7 @@ export const oppRouter = createTRPCRouter({
         db.opps.findFirst({
           where: {
             airtable_id: input.oppId,
-            ...activeOppsFilter,
+      
           },
         }),
         fetchAllZones(),

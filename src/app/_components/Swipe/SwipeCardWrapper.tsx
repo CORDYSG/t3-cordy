@@ -32,7 +32,7 @@ import { v4 as uuidv4 } from "uuid";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import ShareButton from "../ShareButton";
-import { useGuestId } from "@/lib/guest-session"; // Import your hook
+import { useGuest } from "@/contexts/GuestContext";
 
 type SwipeDirection = "left" | "right";
 
@@ -78,7 +78,7 @@ const OpportunitiesPage = forwardRef<SwipeWrapperRef, OpportunitiesPageProps>(
       removeSeenOpportunity,
       removeLikedOpportunity,
       isGuest,
-    } = useGuestId();
+    } = useGuest();
 
     const [loginPromptShown, setLoginPromptShown] = useState(false);
     const [isLoadingMore, setIsLoadingMore] = useState(true);

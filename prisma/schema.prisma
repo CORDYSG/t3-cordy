@@ -79,6 +79,8 @@ model User {
   profile             UserProfile?
   WebsiteFeedback     WebsiteFeedback[]
   userActions         UserAction[]
+
+  Activity Activity[]
 }
 
 model Account {
@@ -303,6 +305,22 @@ model Organisation {
   name        String?
   opps_id     String[]
   airtable_id String
+}
+
+model Activity {
+  id           String   @id @default(cuid())
+  userId       String?  // Null for guest users
+  guestId      String?  // Null for authenticated users
+  activityType String   // 'page_view', 'click', etc.
+  url          String
+  metadata     Json?    // Store additional data
+  timestamp    DateTime @default(now())
+  
+  user User? @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@index([userId])
+  @@index([guestId])
+  @@index([timestamp])
 }
 
 enum UserRole {

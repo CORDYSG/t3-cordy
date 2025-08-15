@@ -4,7 +4,7 @@ import { type Metadata } from "next";
 import { DM_Sans, Patrick_Hand } from "next/font/google";
 import { TRPCReactProvider } from "@/trpc/react";
 import { auth } from "@/server/auth";
-import NewNavbar from "./_components/NewNavbar";
+
 import Footer from "./_components/Footer";
 import { SessionProvider } from "next-auth/react";
 import localFont from "next/font/local";
@@ -12,6 +12,9 @@ import { Suspense } from "react";
 import Loading from "./loading";
 import { Toaster } from "@/components/ui/sonner";
 import DarkReaderOverride from "./_components/DarkModeOverride";
+import NavbarWrapper from "./_components/Navbar/NavbarWrapper";
+import { ActivityTracker } from "./_components/ActivityTracker";
+import { GuestProvider } from "../contexts/GuestContext";
 
 export const viewport = {
   colorScheme: "light", // ✅ correct place
@@ -172,11 +175,14 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <DarkReaderOverride />
         <TRPCReactProvider>
           <SessionProvider session={session}>
-            <NewNavbar session={session} />
-            <div className="min-h-[90vh]">
-              <Suspense fallback={<Loading />}>{children}</Suspense>
-            </div>
-            <Footer />
+            <GuestProvider>
+              <ActivityTracker />
+              <NavbarWrapper session={session} />
+              <div className="min-h-[90vh]">
+                <Suspense fallback={<Loading />}>{children}</Suspense>
+              </div>
+              <Footer />
+            </GuestProvider>
             <Toaster />
           </SessionProvider>
         </TRPCReactProvider>

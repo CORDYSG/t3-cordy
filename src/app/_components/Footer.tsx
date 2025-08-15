@@ -6,12 +6,12 @@ import CordyLogo from "./CordyLogo";
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-dark-muted h-auto w-full px-8 py-8 pt-16 lg:pt-8">
+    <footer className="h-auto w-full bg-black px-8 py-8 pt-16 lg:pt-8">
       <div className="container mx-auto flex w-11/12 items-start justify-between">
         {/* Left side - Links */}
         <div className="flex flex-col space-y-4">
           <div className="flex-shrink-0">
-            <CordyLogo fixWidth />
+            <CordyLogo fixWidth bnw />
             <p className="text-md mt-4 font-bold text-white uppercase md:text-xl">
               YOUTH-LED NON-PROFIT
             </p>

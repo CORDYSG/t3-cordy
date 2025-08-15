@@ -40,9 +40,10 @@ import { BookmarkButton } from "./BookmarkButton";
 import ShareButton from "./ShareButton";
 import { toast } from "sonner";
 import React from "react";
-import { useGuestId } from "@/lib/guest-session";
+
 import { toZonedTime } from "date-fns-tz";
 import { differenceInCalendarDays } from "date-fns";
+import { useGuest } from "@/contexts/GuestContext";
 
 type EventCardProps = {
   opp: OppWithZoneType;
@@ -323,7 +324,7 @@ export default function EventCard({
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const mediaQueryRef = useRef<MediaQueryList | null>(null);
 
-  const { guestId } = useGuestId();
+  const { guestId } = useGuest();
 
   const SGT = "Asia/Singapore";
 

@@ -7,6 +7,8 @@ import { userRouter } from "./routers/user";
 import { feedbackRouter } from "./routers/feedback";
 import { adminRouter } from "./routers/admin";
 import { analyticsRouter } from "./routers/analytics";
+import { activityRouter } from "./routers/activity";
+import { act } from "react";
 
 /**
  * This is the primary router for your server.
@@ -14,6 +16,7 @@ import { analyticsRouter } from "./routers/analytics";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
+  activity: activityRouter,
   analytics: analyticsRouter,
   opp: oppRouter,
   zone: zoneRouter,

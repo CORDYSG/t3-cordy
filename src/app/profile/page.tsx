@@ -36,7 +36,7 @@ const ProfilePage = async () => {
   const session = await auth();
 
   if (!session) {
-    redirect("/api/auth/signin");
+    redirect("/api/auth/signin?callbackUrl=/profile");
   }
 
   // Add error handling for the API call

@@ -158,7 +158,6 @@ const ProfileQuestionnaire: React.FC = () => {
   const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    console.log("Submitting profile data:", profileData);
     createUserProfileMutation.mutate({
       knowWhatInterest: profileData.knowWhatInterest ?? false,
       ageRange: profileData.ageRange!,

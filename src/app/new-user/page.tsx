@@ -9,7 +9,7 @@ const NewUserPage = async () => {
   const session = await auth();
 
   if (!session) {
-    redirect("/api/auth/signin");
+    redirect("/api/auth/signin?callbackUrl=/new-user");
   }
 
   // Get user profile - let any errors bubble up naturally
