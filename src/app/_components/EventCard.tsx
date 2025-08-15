@@ -42,7 +42,7 @@ import { toast } from "sonner";
 import React from "react";
 
 import { toZonedTime } from "date-fns-tz";
-import { differenceInCalendarDays } from "date-fns";
+import { differenceInCalendarDays, set } from "date-fns";
 import { useGuest } from "@/contexts/GuestContext";
 
 type EventCardProps = {
@@ -54,6 +54,7 @@ type EventCardProps = {
   pauseQueries?: (paused: boolean) => void;
   disableInteractions?: boolean;
   listView?: boolean;
+  organisationShortName?: string;
 };
 
 // Memoized image component to prevent unnecessary re-renders
@@ -304,6 +305,7 @@ export default function EventCard({
   listView = false,
   isAuthenticated = false,
   cardIndex = 0,
+  organisationShortName,
 }: Readonly<EventCardProps & { cardIndex?: number }>): JSX.Element {
   const isAboveFold = cardIndex < 6;
 
@@ -313,6 +315,7 @@ export default function EventCard({
   const [isDesktop, setIsDesktop] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
+  const [expandLink, setExpandLink] = useState("");
 
   // Refs
   const zonesContainerRef = useRef<HTMLDivElement>(
@@ -361,6 +364,17 @@ export default function EventCard({
     },
   });
 
+  useEffect(() => {
+    if (organisationShortName) {
+      setExpandLink(
+        `/c/${organisationShortName}/opp/${opp.airtable_id}?utm_source=cordy&utm_medium=card&utm_campaign=${organisationShortName}`,
+      );
+    } else {
+      setExpandLink(
+        `/opportunities/${opp.airtable_id}?utm_source=cordy&utm_medium=card&utm_campaign=${organisationShortName ?? "CORDY"}`,
+      );
+    }
+  }, [opp.airtable_id, organisationShortName]);
   // Callbacks
   const handleScroll = useCallback(() => {
     setIsScrolling(true);
@@ -385,6 +399,7 @@ export default function EventCard({
           oppId: opp.id,
           guestId: guestId ?? "",
           action: "CLICK_EXPAND",
+          page: organisationShortName ?? "CORDY",
         });
       }
     },
@@ -396,6 +411,7 @@ export default function EventCard({
       oppId: opp.id,
       guestId: guestId ?? "",
       action: "CLICK",
+      page: organisationShortName ?? "CORDY",
     });
   }, [opp.id, updateActionMutation]);
 
@@ -410,6 +426,7 @@ export default function EventCard({
         oppId: opp.id,
         guestId,
         action: newLikeStatus ? "LIKE" : "UNLIKE",
+        page: organisationShortName ?? "CORDY",
       });
     }
   }, [isLiked, opp.id, guestId, userOppMutation, updateActionMutation]);
@@ -424,6 +441,7 @@ export default function EventCard({
       oppId: opp.id,
       guestId: guestId ?? "",
       action: newBookmarkStatus ? "SAVE" : "UNSAVE",
+      page: organisationShortName ?? "CORDY",
     });
   }, [isBookmarked, opp.id, guestId, userOppMutation, updateActionMutation]);
 
@@ -498,11 +516,7 @@ export default function EventCard({
           handleBookmark={handleBookmark}
         />
         {/* <LikeButton isLiked={isLiked} handleLike={handleLike} /> */}
-        <Link
-          href={`/opportunities/${opp.airtable_id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <Link href={expandLink} target="_blank" rel="noopener noreferrer">
           <button onClick={handleButtonClick} className="btn-brand-primary">
             View more!
           </button>
@@ -680,7 +694,7 @@ export default function EventCard({
             </div>
             <Link
               className="flex w-full"
-              href={`/opportunities/${opp.airtable_id}`}
+              href={expandLink}
               target="_blank"
               rel="noopener noreferrer"
             >

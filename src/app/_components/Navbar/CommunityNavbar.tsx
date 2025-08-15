@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 
 import GalaxyLidIndicator from "../GalaxyLid";
 import CordyLogo from "../CordyLogo";
+import { api } from "@/trpc/react";
 
 interface NavbarProps {
   session?: Session | null;
@@ -15,6 +16,14 @@ const CommunityNavbar: React.FC<NavbarProps> = ({ session }) => {
   const pathName = usePathname();
   const segments = pathName.split("/").filter(Boolean);
   const communityName = segments[1] ?? "Community";
+
+  const community = api.community.getCommunity.useQuery({
+    organisationShortName: segments[1] ?? "default",
+  });
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <nav
@@ -37,9 +46,24 @@ const CommunityNavbar: React.FC<NavbarProps> = ({ session }) => {
       >
         <div className="absolute -top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2">
           <div className="shadow-brand relative flex items-center overflow-hidden rounded-full border-2 bg-white">
-            <p className="px-5 text-center text-sm font-bold uppercase">
-              {communityName}
-            </p>
+            <Link
+              href={pathName}
+              onClick={scrollToTop}
+              className="block md:hidden"
+            >
+              <p className="px-5 pt-[0.5] text-center text-sm font-bold uppercase">
+                {community.data?.abbreviation ?? "..."}
+              </p>
+            </Link>
+            <Link
+              href={pathName}
+              onClick={scrollToTop}
+              className="hidden md:block"
+            >
+              <p className="px-5 pt-[0.5] text-center text-sm font-bold uppercase">
+                {community.data?.name ?? "..."}
+              </p>
+            </Link>
           </div>
         </div>
       </div>

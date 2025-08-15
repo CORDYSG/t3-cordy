@@ -1,4 +1,3 @@
-
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
@@ -27,7 +26,7 @@ type OppType = Awaited<ReturnType<typeof db.opps.findFirst>>;
 
 type EnrichedOpp = OppType & {
   zones: ZoneType[];
-}
+};
 
 function getActiveOppsFilter() {
   const now = new Date();
@@ -91,7 +90,7 @@ export const userOppRouter = createTRPCRouter({
 
           if (filtered.length > 0) {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-           return filtered as EnrichedOpp[];
+            return filtered as EnrichedOpp[];
           }
         }
       }
@@ -105,7 +104,7 @@ export const userOppRouter = createTRPCRouter({
           cachedOpportunities: guestSession.cachedOpportunities,
         };
       }
-  let randomOpps: OppType[] = [];
+      let randomOpps: OppType[] = [];
       if (input.seenOppIds && input.seenOppIds.length > 0) {
         const allOpps = await db.opps.findMany({
           where: {
@@ -166,78 +165,70 @@ export const userOppRouter = createTRPCRouter({
       return enrichedOpps;
     }),
 
-    // Add this procedure to your userOppRouter
+  // Add this procedure to your userOppRouter
 
-hasSwipedBefore: publicProcedure
-  .input(
-    z.object({
-      guestId: z.string().optional(), // For guest users
-    })
-  )
-  .query(async ({ ctx, input }) => {
-    const isAuthenticated = !!ctx.session?.user;
+  hasSwipedBefore: publicProcedure
+    .input(
+      z.object({
+        guestId: z.string().optional(), // For guest users
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const isAuthenticated = !!ctx.session?.user;
 
-    // For authenticated users, check database
-    if (isAuthenticated && ctx.session) {
-      const userId = ctx.session.user.id;
-      
-      // Also check if user has any recorded actions
-      const userActions = await db.userAction.findFirst({
+      // For authenticated users, check database
+      if (isAuthenticated && ctx.session) {
+        const userId = ctx.session.user.id;
+
+        // Also check if user has any recorded actions
+        const userActions = await db.userAction.findFirst({
+          where: {
+            userId,
+            actionType: {
+              in: [UserActionType.LIKE, UserActionType.UNLIKE],
+            },
+          },
+        });
+
+        return {
+          hasSwipedBefore: !!userActions,
+          isAuthenticated: true,
+        };
+      }
+
+      // For guest users, check in-memory session
+      if (!input.guestId) {
+        return {
+          hasSwipedBefore: false,
+          isAuthenticated: false,
+        };
+      }
+
+      const guestSession = guestSessions.get(input.guestId);
+
+      if (!guestSession) {
+        return {
+          hasSwipedBefore: false,
+          isAuthenticated: false,
+        };
+      }
+
+      // Check if guest has any recorded actions
+      const guestActions = await db.userAction.findFirst({
         where: {
-          userId,
+          guestId: input.guestId,
           actionType: {
-            in: [
-              UserActionType.LIKE,
-              UserActionType.UNLIKE,
-            ],
+            in: [UserActionType.LIKE, UserActionType.UNLIKE],
           },
         },
       });
 
       return {
-        hasSwipedBefore: !!(userActions),
-        isAuthenticated: true,
-      };
-    }
-
-    // For guest users, check in-memory session
-    if (!input.guestId) {
-      return {
-        hasSwipedBefore: false,
+        hasSwipedBefore: !!guestActions,
         isAuthenticated: false,
       };
-    }
+    }),
 
-    const guestSession = guestSessions.get(input.guestId);
-    
-    if (!guestSession) {
-      return {
-        hasSwipedBefore: false,
-        isAuthenticated: false,
-      };
-    }
-
-    // Check if guest has any recorded actions
-    const guestActions = await db.userAction.findFirst({
-      where: {
-        guestId: input.guestId,
-        actionType: {
-          in: [
-            UserActionType.LIKE,
-            UserActionType.UNLIKE,
-          ],
-        },
-      },
-    });
-
-    return {
-      hasSwipedBefore: !!guestActions,
-      isAuthenticated: false,
-    };
-  }),
-
-    
-    
   // Keep the original protected procedures
   getFYOpps: protectedProcedure
     .input(z.object({ limit: z.number().min(1).max(100).optional() }))
@@ -280,32 +271,30 @@ hasSwipedBefore: publicProcedure
         applied: userOpp.applied,
       };
     }),
-   getUserOppMetricCounts: protectedProcedure
-    .query(async ({ ctx }) => {
-      const userId = ctx.session.user.id;
-      if (!userId) {
-        return null;
-      }
-      const metrics = await db.userOpportunity.findMany({
-        where: { userId },
-       
-      });
-      const counts = {
-        liked: 0,
-        saved: 0,
-        clicked: 0,
-        applied: 0,
-        viewed: 0,
-      };
-      metrics.forEach((metric) => {
-        if (metric.liked) counts.liked += 1;
-        if (metric.saved) counts.saved += 1;
-        if (metric.clicked) counts.clicked += 1;
-        if (metric.applied) counts.applied += 1;
-        counts.viewed += 1; 
-      });
-      return counts;
-    }),
+  getUserOppMetricCounts: protectedProcedure.query(async ({ ctx }) => {
+    const userId = ctx.session.user.id;
+    if (!userId) {
+      return null;
+    }
+    const metrics = await db.userOpportunity.findMany({
+      where: { userId },
+    });
+    const counts = {
+      liked: 0,
+      saved: 0,
+      clicked: 0,
+      applied: 0,
+      viewed: 0,
+    };
+    metrics.forEach((metric) => {
+      if (metric.liked) counts.liked += 1;
+      if (metric.saved) counts.saved += 1;
+      if (metric.clicked) counts.clicked += 1;
+      if (metric.applied) counts.applied += 1;
+      counts.viewed += 1;
+    });
+    return counts;
+  }),
 
   createOrUpdate: protectedProcedure
     .input(
@@ -319,7 +308,9 @@ hasSwipedBefore: publicProcedure
     )
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id;
-      if (!userId) { throw new TRPCError({ code: "UNAUTHORIZED" }); }
+      if (!userId) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
+      }
       const existing = await db.userOpportunity.findUnique({
         where: {
           userId_oppId: {
@@ -330,7 +321,6 @@ hasSwipedBefore: publicProcedure
       });
 
       if (existing) {
-     
         return await db.userOpportunity.update({
           where: {
             userId_oppId: {
@@ -359,10 +349,10 @@ hasSwipedBefore: publicProcedure
       });
     }),
 
-createReportOpp: protectedProcedure
+  createReportOpp: protectedProcedure
     .input(
       z.object({
-       oppId: z.union([z.number(), z.bigint()]),
+        oppId: z.union([z.number(), z.bigint()]),
         reason: z.enum([
           "SPAM",
           "SCAM",
@@ -372,12 +362,12 @@ createReportOpp: protectedProcedure
           "OTHER_REPORT",
         ]),
         description: z.string().optional(),
-      })
+      }),
     )
     .mutation(async ({ ctx, input }) => {
       const { user } = ctx.session;
-      if (!user){ 
-     throw new TRPCError({ code: "UNAUTHORIZED" });
+      if (!user) {
+        throw new TRPCError({ code: "UNAUTHORIZED" });
       }
       const report = await ctx.db.reportedOpportunity.create({
         data: {
@@ -390,117 +380,123 @@ createReportOpp: protectedProcedure
 
       return report;
     }),
-    
-updateUserOppMetrics: publicProcedure
-  .input(
-    z.object({
-      oppId: z.union([z.number(), z.bigint()]),
-      action: z.nativeEnum(UserActionType),
-      guestId: z.string().optional(), 
+
+  updateUserOppMetrics: publicProcedure
+    .input(
+      z.object({
+        page: z.string().optional(), // Optional page parameter for context
+        oppId: z.union([z.number(), z.bigint()]),
+        action: z.nativeEnum(UserActionType),
+        guestId: z.string().optional(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const userId = ctx.session?.user.id;
+
+      const guestId = input.guestId ?? null;
+
+      return await db.$transaction(async (tx) => {
+        // Log the action
+        const action = await tx.userAction.create({
+          data: {
+            userId,
+            guestId,
+            oppId: BigInt(input.oppId),
+            actionType: input.action,
+            page: input.page ?? "CORDY", // Default to "CORDY" if not provided
+          },
+        });
+
+        // Update aggregated metrics
+        const updateData: any = {};
+        const createData: any = { oppId: input.oppId };
+        const isGuest = !userId;
+
+        switch (input.action) {
+          case UserActionType.VIEW:
+            const viewField = isGuest ? "guestViewCount" : "viewCount";
+            updateData[viewField] = { increment: 1 };
+            createData[viewField] = 1;
+            break;
+          case UserActionType.LIKE:
+            const likeField = isGuest ? "guestLikeCount" : "likeCount";
+            updateData[likeField] = { increment: 1 };
+            createData[likeField] = 1;
+            break;
+          case UserActionType.UNLIKE:
+            const unlikeField = isGuest ? "guestLikeCount" : "likeCount";
+            updateData[unlikeField] = { decrement: 1 };
+            createData[unlikeField] = 0; // Start at 0 since we're decrementing
+            break;
+          case UserActionType.SAVE:
+            const saveField = isGuest ? "guestSaveCount" : "saveCount";
+            updateData[saveField] = { increment: 1 };
+            createData[saveField] = 1;
+            break;
+          case UserActionType.UNSAVE:
+            const unsaveField = isGuest ? "guestSaveCount" : "saveCount";
+            updateData[unsaveField] = { decrement: 1 };
+            createData[unsaveField] = 0;
+            break;
+          case UserActionType.CLICK:
+            const clickField = isGuest ? "guestClickCount" : "clickCount";
+            updateData[clickField] = { increment: 1 };
+            createData[clickField] = 1;
+            break;
+          case UserActionType.CLICK_EXPAND:
+            const clickExpandField = isGuest
+              ? "guestClickExpandCount"
+              : "clickExpandCount";
+            updateData[clickExpandField] = { increment: 1 };
+            createData[clickExpandField] = 1;
+            break;
+          case UserActionType.APPLY:
+            const applyField = isGuest ? "guestApplyCount" : "clickApplyCount";
+            updateData[applyField] = { increment: 1 };
+            createData[applyField] = 1;
+            break;
+          case UserActionType.SHARE_TELEGRAM:
+            const telegramField = isGuest
+              ? "guestShareTelegramCount"
+              : "shareTelegramCount";
+            updateData[telegramField] = { increment: 1 };
+            createData[telegramField] = 1;
+            break;
+          case UserActionType.SHARE_WHATSAPP:
+            const whatsappField = isGuest
+              ? "guestShareWhatsAppCount"
+              : "shareWhatsAppCount";
+            updateData[whatsappField] = { increment: 1 };
+            createData[whatsappField] = 1;
+            break;
+          case UserActionType.SHARE_EMAIL:
+            const emailField = isGuest
+              ? "guestShareEmailCount"
+              : "shareEmailCount";
+            updateData[emailField] = { increment: 1 };
+            createData[emailField] = 1;
+            break;
+          case UserActionType.SHARE_LINK:
+            const linkField = isGuest
+              ? "guestShareLinkCount"
+              : "shareLinkCount";
+            updateData[linkField] = { increment: 1 };
+            createData[linkField] = 1;
+            break;
+          default:
+            // If the action type is unknown, throw an error
+            throw new Error(`Unknown action type: ${String(input.action)}`);
+        }
+
+        await tx.oppMetrics.upsert({
+          where: { oppId: input.oppId },
+          create: createData,
+          update: updateData,
+        });
+
+        return { action, guestId };
+      });
     }),
-  )
-  .mutation(async ({ ctx, input }) => {
-    const userId = ctx.session?.user.id;
-
-       const guestId =  input.guestId ?? null;
-
-    return await db.$transaction(async (tx) => {
-      // Log the action
-      const action = await tx.userAction.create({
-        data: {
-          userId,
-          guestId,
-          oppId: BigInt(input.oppId),
-          actionType: input.action,
-        },
-      });
-
-    
-
-      // Update aggregated metrics
-     const updateData: any = {};
-      const createData: any = { oppId: input.oppId };
-      const isGuest = !userId;
-      
-      switch (input.action) {
-        case UserActionType.VIEW:
-          const viewField = isGuest ? 'guestViewCount' : 'viewCount';
-          updateData[viewField] = { increment: 1 };
-          createData[viewField] = 1;
-          break;
-        case UserActionType.LIKE:
-          const likeField = isGuest ? 'guestLikeCount' : 'likeCount';
-          updateData[likeField] = { increment: 1 };
-          createData[likeField] = 1;
-          break;
-        case UserActionType.UNLIKE:
-          const unlikeField = isGuest ? 'guestLikeCount' : 'likeCount';
-          updateData[unlikeField] = { decrement: 1 };
-          createData[unlikeField] = 0; // Start at 0 since we're decrementing
-          break;
-        case UserActionType.SAVE:
-          const saveField = isGuest ? 'guestSaveCount' : 'saveCount';
-          updateData[saveField] = { increment: 1 };
-          createData[saveField] = 1;
-          break;
-        case UserActionType.UNSAVE:
-          const unsaveField = isGuest ? 'guestSaveCount' : 'saveCount';
-          updateData[unsaveField] = { decrement: 1 };
-          createData[unsaveField] = 0;
-          break;
-        case UserActionType.CLICK:
-          const clickField = isGuest ? 'guestClickCount' : 'clickCount';
-          updateData[clickField] = { increment: 1 };
-          createData[clickField] = 1;
-          break;
-        case UserActionType.CLICK_EXPAND:
-          const clickExpandField = isGuest ? 'guestClickExpandCount' : 'clickExpandCount';
-          updateData[clickExpandField] = { increment: 1 };
-          createData[clickExpandField] = 1;
-          break;
-        case UserActionType.APPLY:
-          const applyField = isGuest ? 'guestApplyCount' : 'clickApplyCount';
-          updateData[applyField] = { increment: 1 };
-          createData[applyField] = 1;
-          break;
-        case UserActionType.SHARE_TELEGRAM:
-          const telegramField = isGuest ? 'guestShareTelegramCount' : 'shareTelegramCount';
-          updateData[telegramField] = { increment: 1 };
-          createData[telegramField] = 1;
-          break;
-        case UserActionType.SHARE_WHATSAPP:
-          const whatsappField = isGuest ? 'guestShareWhatsAppCount' : 'shareWhatsAppCount';
-          updateData[whatsappField] = { increment: 1 };
-          createData[whatsappField] = 1;
-          break;
-        case UserActionType.SHARE_EMAIL:
-          const emailField = isGuest ? 'guestShareEmailCount' : 'shareEmailCount';
-          updateData[emailField] = { increment: 1 };
-          createData[emailField] = 1;
-          break;
-        case UserActionType.SHARE_LINK:
-          const linkField = isGuest ? 'guestShareLinkCount' : 'shareLinkCount';
-          updateData[linkField] = { increment: 1 };
-          createData[linkField] = 1;
-          break;
-        default:
-          // If the action type is unknown, throw an error
-          throw new Error(`Unknown action type: ${String(input.action)}`);
-      }
-
-
-       await tx.oppMetrics.upsert({
-    where: { oppId: input.oppId },
-        create: createData,
-        update: updateData,
-      });
-
-      return { action, guestId };
-    });
-
-  }),
-
-    
 });
 
 // Helper function to get opportunities for authenticated users
@@ -547,8 +543,10 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
   const dislikedZoneCounts: Record<string, number> = {};
 
   for (const opp of dislikedOpps) {
-    for (const t of opp.type) dislikedTypeCounts[t] = (dislikedTypeCounts[t] ?? 0) + 1;
-    for (const z of opp.zone) dislikedZoneCounts[z] = (dislikedZoneCounts[z] ?? 0) + 1;
+    for (const t of opp.type)
+      dislikedTypeCounts[t] = (dislikedTypeCounts[t] ?? 0) + 1;
+    for (const z of opp.zone)
+      dislikedZoneCounts[z] = (dislikedZoneCounts[z] ?? 0) + 1;
   }
 
   // Calculate net preference scores (positive - negative)
@@ -557,8 +555,8 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
 
   // Calculate net scores for types
   for (const type in typeCounts) {
-    if(typeCounts[type])
-    netTypeScores[type] = typeCounts[type] - (dislikedTypeCounts[type] ?? 0);
+    if (typeCounts[type])
+      netTypeScores[type] = typeCounts[type] - (dislikedTypeCounts[type] ?? 0);
   }
   // Include heavily disliked types with negative scores
   for (const type in dislikedTypeCounts) {
@@ -569,8 +567,8 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
 
   // Calculate net scores for zones
   for (const zone in zoneCounts) {
-    if(zoneCounts[zone])
-    netZoneScores[zone] = zoneCounts[zone] - (dislikedZoneCounts[zone] ?? 0);
+    if (zoneCounts[zone])
+      netZoneScores[zone] = zoneCounts[zone] - (dislikedZoneCounts[zone] ?? 0);
   }
   // Include heavily disliked zones with negative scores
   for (const zone in dislikedZoneCounts) {
@@ -603,15 +601,12 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
 
   // Base where clause (no avoidance, just basic filtering)
   const baseWhere: Prisma.OppsWhereInput = {
-    AND: [
-      getActiveOppsFilter(),
-      { id: { notIn: seenOppIds } }
-    ]
+    AND: [getActiveOppsFilter(), { id: { notIn: seenOppIds } }],
   };
 
   // Prefer liked types and zones (only if we have positive preferences)
   const preferenceClause: Prisma.OppsWhereInput[] = [];
-  
+
   if (topTypes.length > 0) {
     preferenceClause.push({ type: { hasSome: topTypes } });
   }
@@ -626,10 +621,7 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
   if (preferenceClause.length > 0) {
     const preferredOpps = await db.opps.findMany({
       where: {
-        AND: [
-          baseWhere,
-          { OR: preferenceClause }
-        ],
+        AND: [baseWhere, { OR: preferenceClause }],
       },
       take: Math.max(1, Math.floor(LIMIT * 0.7)), // 70% preferred content
       orderBy: { created_at: "desc" },
@@ -638,9 +630,12 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
   }
 
   // Step 2: Add some deprioritized content (1-2 items) to give user a chance to reconsider
-  if (recommendedOpps.length < LIMIT && (deprioritizeTypes.length > 0 || deprioritizeZones.length > 0)) {
+  if (
+    recommendedOpps.length < LIMIT &&
+    (deprioritizeTypes.length > 0 || deprioritizeZones.length > 0)
+  ) {
     const excludeIds = [...seenOppIds, ...recommendedOpps.map((o) => o.id)];
-    
+
     const deprioritizedClause: Prisma.OppsWhereInput[] = [];
     if (deprioritizeTypes.length > 0) {
       deprioritizedClause.push({ type: { hasSome: deprioritizeTypes } });
@@ -654,26 +649,23 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
         AND: [
           getActiveOppsFilter(),
           { id: { notIn: excludeIds } },
-          { OR: deprioritizedClause }
-        ]
+          { OR: deprioritizedClause },
+        ],
       },
       take: Math.min(2, LIMIT - recommendedOpps.length), // Max 2 deprioritized items
       orderBy: { created_at: "desc" },
     });
-    
+
     recommendedOpps.push(...deprioritizedOpps);
   }
 
   // Step 3: Fill remaining slots with neutral content (everything else)
   if (recommendedOpps.length < LIMIT) {
     const excludeIds = [...seenOppIds, ...recommendedOpps.map((o) => o.id)];
-    
+
     const allRemainingOpps = await db.opps.findMany({
       where: {
-        AND: [
-          getActiveOppsFilter(),
-          { id: { notIn: excludeIds } }
-        ]
+        AND: [getActiveOppsFilter(), { id: { notIn: excludeIds } }],
       },
       select: { id: true },
       orderBy: { created_at: "desc" },
@@ -685,9 +677,9 @@ async function getFYOppsForAuthenticatedUser(userId: string, LIMIT: number) {
       .slice(0, LIMIT - recommendedOpps.length);
 
     const fillerOpps = await db.opps.findMany({
-      where: { 
+      where: {
         id: { in: shuffledIds },
-        ...getActiveOppsFilter()
+        ...getActiveOppsFilter(),
       },
     });
 

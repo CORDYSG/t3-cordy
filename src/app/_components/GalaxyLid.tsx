@@ -65,7 +65,7 @@ export default function GalaxyLidIndicator({ session }: { session?: any }) {
       onMouseLeave={() => setHovered(false)}
       onTouchStart={() => setHovered(true)}
       onTouchEnd={() => setTimeout(() => setHovered(false), 500)}
-      className="relative w-max cursor-pointer outline-none select-none perspective-[800px]"
+      className="relative w-max scale-95 cursor-pointer outline-none select-none perspective-[800px] md:scale-100"
       style={{ outline: "none" }}
       initial={{}}
       whileHover={{}}

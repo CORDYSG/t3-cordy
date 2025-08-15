@@ -209,6 +209,7 @@ model UserAction {
   createdAt  DateTime       @default(now())
   opp        Opps           @relation(fields: [oppId], references: [id], onDelete: Cascade)
   user       User?          @relation(fields: [userId], references: [id])
+  page       String?        @default ("CORDY")
 
   @@index([userId, oppId])
   @@index([guestId, oppId])

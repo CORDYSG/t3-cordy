@@ -68,7 +68,7 @@ export default function ProfileOppList({
   }
 
   return (
-    <div className="w-full space-y-4">
+    <div className="flex min-h-48 w-full flex-col items-center justify-center space-y-4">
       {opps.map((opp: OppWithZoneType) => (
         <EventCard key={opp.id} opp={opp} listView />
       ))}

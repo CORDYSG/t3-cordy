@@ -9,6 +9,7 @@ import { adminRouter } from "./routers/admin";
 import { analyticsRouter } from "./routers/analytics";
 import { activityRouter } from "./routers/activity";
 import { act } from "react";
+import { communityOppRouter } from "./routers/community";
 
 /**
  * This is the primary router for your server.
@@ -24,7 +25,8 @@ export const appRouter = createTRPCRouter({
   userOpp: userOppRouter,
   user: userRouter,
   feedback: feedbackRouter,
-  admin: adminRouter
+  admin: adminRouter,
+  community: communityOppRouter,
 });
 
 // export type definition of API

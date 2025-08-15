@@ -74,14 +74,6 @@ const LoginPopup: React.FC<LoginPopupProps> = ({
             }}
             className="relative w-80 rounded-lg border-4 border-black bg-white p-6 shadow-[8px_8px_0px_0px_#000]"
           >
-            {/* Close Button */}
-            {/* <button
-              onClick={onCloseLoginModal}
-              className="absolute -top-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-black bg-red-500 shadow-[4px_4px_0px_0px_#000] transition-all duration-100 hover:translate-x-1 hover:translate-y-1 hover:shadow-[2px_2px_0px_0px_#000]"
-            >
-              <X className="h-4 w-4 text-white" strokeWidth={3} />
-            </button> */}
-
             {/* Content */}
             <div className="space-y-4">
               {!showSwipeLogin ? (

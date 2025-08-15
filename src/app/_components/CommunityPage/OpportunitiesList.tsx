@@ -5,13 +5,14 @@ import LoadingComponent from "../LoadingComponent";
 import EventCard from "../EventCard";
 import { motion } from "framer-motion";
 import { useSession } from "next-auth/react";
+import { o } from "node_modules/framer-motion/dist/types.d-Bq-Qm38R";
 
 type OpportunitiesListProps = {
+  organisationShortName?: string;
   opps: OppWithZoneType[];
   isLoading: boolean;
   filterDescription: string;
   setIsNavigating: (value: boolean) => void;
-  organisationShortName?: string;
 };
 
 const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
@@ -56,6 +57,7 @@ const OpportunitiesList: React.FC<OpportunitiesListProps> = ({
                   isAuthenticated={
                     session?.user?.id !== undefined && session?.user.id !== null
                   }
+                  organisationShortName={organisationShortName}
                 />
               </motion.div>
             </li>
