@@ -128,7 +128,7 @@ const ReportModal = ({
         </DialogHeader>
 
         <h3 className="text-primary font-semibold">
-          {currentOpportunity?.name || ""}
+          {currentOpportunity?.name ?? ""}
         </h3>
         <form onSubmit={handleReportSubmit} className="flex flex-col gap-4">
           <label className="text-sm font-medium">

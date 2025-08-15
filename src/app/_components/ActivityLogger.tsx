@@ -8,6 +8,7 @@ import { api } from "@/trpc/react";
 
 interface ActivityLoggerProps {
   activityType: "page_view" | "click" | "interaction";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   metadata?: Record<string, any>;
 }
 
@@ -28,7 +29,7 @@ export function ActivityLogger({
 
     if (session?.user || guestId) {
       logActivity.mutate({
-        guestId: guestId || undefined,
+        guestId: guestId ?? undefined,
         activityType,
         url: pathname,
         metadata: {

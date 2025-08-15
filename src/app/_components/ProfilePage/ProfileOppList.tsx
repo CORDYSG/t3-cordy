@@ -70,6 +70,7 @@ export default function ProfileOppList({
   return (
     <div className="flex min-h-48 w-full flex-col items-center justify-center space-y-4">
       {opps.map((opp: OppWithZoneType) => (
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         <EventCard key={opp.id} opp={opp} listView />
       ))}
       {opps.length == 0 && (

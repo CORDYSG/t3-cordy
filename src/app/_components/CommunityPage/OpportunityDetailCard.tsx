@@ -236,7 +236,9 @@ const OpportunityDetailCard = ({ opp, types }: Readonly<Props>) => {
         <div className="flex w-full items-center justify-between">
           <ReportModal
             currentOpportunity={opp}
-            onReportSubmitted={() => {}}
+            onReportSubmitted={() => {
+              // Optionally handle report submission, e.g., show a toast or update UI
+            }}
             flat
           />
           <div className="flex items-center gap-x-8">

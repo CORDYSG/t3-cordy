@@ -64,7 +64,7 @@ export const communityOppRouter = createTRPCRouter({
     .input(z.object({ organisationShortName: z.string() }))
     .query(async ({ input }) => {
       const { organisationShortName } = input;
-      console.log("<>>>>>> Fetching community for:", organisationShortName);
+
       const community = await db.community.findFirst({
         where: {
           abbreviation: { equals: organisationShortName, mode: "insensitive" },
@@ -169,17 +169,7 @@ export const communityOppRouter = createTRPCRouter({
         sortBy,
       } = input;
       const skip = (page - 1) * limit;
-      console.log("Searching community opportunities with params:", {
-        organisationFullName,
-        organisationShortName,
-        search,
-        type,
-        zoneIds,
-        page,
-        limit,
-        excludeOppIds,
-        sortBy,
-      });
+
       const orgFilter: Prisma.OppsWhereInput = {
         OR: [
           {
@@ -235,8 +225,6 @@ export const communityOppRouter = createTRPCRouter({
       // Get zones first since we need them for filtering
       const zones = await fetchAllZones();
       const zoneMap = buildZoneMap(zones);
-
-      console.log();
 
       // Use a single count + findMany query with proper pagination
       const [totalOpps, opps] = await Promise.all([
