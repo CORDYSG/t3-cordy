@@ -8,7 +8,7 @@ import Image from "next/image";
 import EventZone from "../EventZone";
 import Link from "next/link";
 import { api } from "@/trpc/react";
-import { Info, InfoIcon } from "lucide-react";
+import { InfoIcon } from "lucide-react";
 
 import { LikeButton } from "../LikeButton";
 import { BookmarkButton } from "../BookmarkButton";

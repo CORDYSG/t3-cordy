@@ -6,6 +6,7 @@ import {
   publicProcedure,
 } from "@/server/api/trpc";
 import type { Prisma } from "@prisma/client";
+import { get } from "http";
 
 const activeOppsFilter = {
   AND: [
@@ -60,6 +61,26 @@ function enrichOppsWithZones(
 }
 
 export const oppRouter = createTRPCRouter({
+  getAllOpportunities: publicProcedure.query(async () => {
+    const [opps] = await Promise.all([
+      db.opps.findMany({
+        where: activeOppsFilter,
+        select: {
+          id: true,
+          airtable_id: true,
+          name: true,
+          organisation: true,
+          caption: true,
+          information: true,
+          deadline: true,
+          url_source: true,
+          created_at: true,
+        },
+      }),
+    ]);
+    return opps;
+  }),
+
   getAllOpportunitiesWithZones: publicProcedure.query(async () => {
     const [opps, zones] = await Promise.all([
       db.opps.findMany({

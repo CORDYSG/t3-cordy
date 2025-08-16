@@ -60,6 +60,9 @@ function enrichOppsWithZones(
 }
 
 export const communityOppRouter = createTRPCRouter({
+  getAllCommunities: publicProcedure.query(async () => {
+    return await db.community.findMany({});
+  }),
   getCommunity: publicProcedure
     .input(z.object({ organisationShortName: z.string() }))
     .query(async ({ input }) => {

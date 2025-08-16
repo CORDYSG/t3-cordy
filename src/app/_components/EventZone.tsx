@@ -13,7 +13,6 @@ const EventTag: React.FC<EventTagProps> = ({
   interactive,
   onClickZone,
   active,
-  truncate,
 }) => {
   const defaultBg = zone.colour as React.CSSProperties["backgroundColor"];
 

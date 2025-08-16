@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# Block admin and API routes
+Disallow: /cordy-admin/
+Disallow: /api/auth/
+Disallow: /_next/
+Disallow: /profile/
+
+
+
+Sitemap: https://app.cordy.sg/sitemap.xml
