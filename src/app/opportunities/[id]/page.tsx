@@ -46,7 +46,7 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/opp/${id}`,
           width: 1200,
           height: 630,
         },
@@ -59,7 +59,7 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/opp/${id}`,
           width: 1200,
           height: 630,
         },
