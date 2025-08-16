@@ -29,7 +29,7 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/1bbf34d7a1f60446174cfbe771376e04/Frame_229.png?h=250",
+          url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/befa24256b49c1c5540a818b984ecc48/Frame_230__1_.png?h=250",
           width: 1200,
           height: 630,
           alt: "Opportunities illustration",
@@ -39,7 +39,7 @@ export async function generateMetadata({
     twitter: {
       images: [
         {
-          url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/1bbf34d7a1f60446174cfbe771376e04/Frame_229.png?h=250",
+          url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/befa24256b49c1c5540a818b984ecc48/Frame_230__1_.png?h=250",
           width: 1200,
           height: 630,
           alt: "Opportunities illustration",
