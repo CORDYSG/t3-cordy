@@ -2,7 +2,7 @@
 
 import type { Session } from "next-auth";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, redirect } from "next/navigation";
 
 import GalaxyLidIndicator from "../GalaxyLid";
 import CordyLogo from "../CordyLogo";
@@ -17,9 +17,15 @@ const CommunityNavbar: React.FC<NavbarProps> = ({ session }) => {
   const segments = pathName.split("/").filter(Boolean);
   const communityName = segments[1] ?? "Community";
 
-  const community = api.community.getCommunity.useQuery({
-    organisationShortName: segments[1] ?? "default",
-  });
+  let community;
+  if (segments[0] === "c" && segments[1]) {
+    community = api.community.getCommunity.useQuery({
+      organisationShortName: segments[1],
+    });
+  } else {
+    console.log("Community not found in path segments, redirecting...");
+    redirect("/opportunities");
+  }
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });

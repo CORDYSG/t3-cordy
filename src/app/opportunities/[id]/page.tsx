@@ -1,17 +1,63 @@
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { Suspense } from "react";
 import LoadingComponent from "../../_components/LoadingComponent";
 import { api } from "@/trpc/server";
 import OpportunityDetailCard from "../../_components/Opportunities/OpportunityDetailCard";
 import EventCard from "../../_components/EventCard";
-import Head from "next/head";
 import { auth } from "@/server/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReportModal from "@/app/_components/Swipe/ReportModal";
+import type { Metadata } from "next";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+  const opp: OppWithZoneType = await api.opp.getOppById({ oppId: id });
+
+  if (!opp?.id) {
+    return { title: "Opportunity not found" };
+  }
+
+  const title = opp?.name ?? "Opportunity Details";
+  const description = opp?.caption
+    ? opp.caption.length > 160
+      ? opp.caption.substring(0, 157) + "..."
+      : opp.caption
+    : "View detailed information about this opportunity and find similar opportunities.";
+  const imageUrl = opp?.thumbnail_url ?? "";
+  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
+  const zoneKeywords =
+    opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
+
+  return {
+    title: `${title} | Opportunity Details`,
+    description,
+    keywords: `opportunity, ${typeKeywords}, ${zoneKeywords}`,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url:
+            opp?.thumbnail_url ??
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [imageUrl],
+    },
+  };
+}
 
 const OpportunityDetail = async ({
   params,
@@ -24,17 +70,9 @@ const OpportunityDetail = async ({
 
   const opp: OppWithZoneType = await api.opp.getOppById({ oppId: id });
 
-  // Dynamically generate metadata content
-  const title = opp?.name ?? "Opportunity Details";
-  const description = opp?.caption
-    ? opp.caption.length > 160
-      ? opp.caption.substring(0, 157) + "..."
-      : opp.caption
-    : "View detailed information about this opportunity and find similar opportunities.";
-  const imageUrl = opp?.thumbnail_url ?? "";
-  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
-  const zoneKeywords =
-    opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
+  if (!opp?.id) {
+    notFound();
+  }
 
   const types = opp?.type_id
     ? await Promise.all(
@@ -43,10 +81,6 @@ const OpportunityDetail = async ({
         }),
       )
     : [];
-
-  if (!opp?.id) {
-    notFound();
-  }
 
   const { opps = [] } = await api.opp.searchOpportunities({
     search: "",
@@ -88,23 +122,6 @@ const OpportunityDetail = async ({
 
   return (
     <main className="container mx-auto flex flex-col items-center justify-center gap-4 p-8 md:w-5/6">
-      <Head>
-        <title>{`${title} | Opportunity Details`}</title>
-        <meta name="description" content={description} />
-        <meta
-          name="keywords"
-          content={`opportunity, ${typeKeywords}, ${zoneKeywords}`}
-        />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:image" content={imageUrl} />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={imageUrl} />
-      </Head>
-
       <Suspense fallback={<LoadingComponent />}>
         <h1 className="sr-only">{opp?.name} - Opportunity Details</h1>
 
