@@ -30,7 +30,7 @@ export const metadata: Metadata = {
     siteName: "CORDY",
     images: [
       {
-        url: "https://images.ctfassets.net/ayry21z1dzn2/34TCgC9EvR51gzdSpY3WJ8/6c4b4a3ccaceff0f765e65714b042489/Mask_group.jpg?h=250",
+        url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/1bbf34d7a1f60446174cfbe771376e04/Frame_229.png?h=250",
         width: 1200,
         height: 630,
         alt: "CORDY - Opportunity Platform Thumbnail",
@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     title: "CORDY – Explore Opportunities.",
     description: "Explore opportunities with Cordy, find your passion",
     images: [
-      "https://images.ctfassets.net/ayry21z1dzn2/34TCgC9EvR51gzdSpY3WJ8/6c4b4a3ccaceff0f765e65714b042489/Mask_group.jpg?h=250",
+      "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/1bbf34d7a1f60446174cfbe771376e04/Frame_229.png?h=250",
     ],
   },
   icons: {

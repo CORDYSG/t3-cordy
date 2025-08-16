@@ -12,6 +12,67 @@ import { auth } from "@/server/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import ReportModal from "@/app/_components/Swipe/ReportModal";
+import type { Metadata } from "next/types";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; organisationShortName: string }>;
+}): Promise<Metadata> {
+  const { id, organisationShortName } = await params;
+  const opp: OppWithZoneType = await api.opp.getOppById({ oppId: id });
+
+  if (!opp?.id) {
+    return { title: "Opportunity not found" };
+  }
+
+  const title = opp?.name
+    ? `${organisationShortName} | ${opp?.name}`
+    : ` ${organisationShortName} | Opportunity Details`;
+  const description = opp?.caption
+    ? opp.caption.length > 160
+      ? opp.caption.substring(0, 157) + "..."
+      : opp.caption
+    : "View detailed information about this opportunity and find similar opportunities.";
+
+  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
+  const zoneKeywords =
+    opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
+
+  return {
+    title: `${title}`,
+    description,
+    keywords: `opportunity, ${typeKeywords}, ${zoneKeywords}`,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url:
+            opp?.thumbnail_url ??
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/${organisationShortName}/opp/${id}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [
+        {
+          url:
+            opp?.thumbnail_url ??
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/${organisationShortName}/opp/${id}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+  };
+}
 
 const OpportunityDetail = async ({
   params,
@@ -25,16 +86,6 @@ const OpportunityDetail = async ({
   const opp: OppWithZoneType = await api.opp.getOppById({ oppId: id });
 
   // Dynamically generate metadata content
-  const title = opp?.name ?? "Opportunity Details";
-  const description = opp?.caption
-    ? opp.caption.length > 160
-      ? opp.caption.substring(0, 157) + "..."
-      : opp.caption
-    : "View detailed information about this opportunity and find similar opportunities.";
-  const imageUrl = opp?.thumbnail_url ?? "";
-  const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
-  const zoneKeywords =
-    opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
 
   const types = opp?.type_id
     ? await Promise.all(
@@ -79,12 +130,7 @@ const OpportunityDetail = async ({
       "@type": "Place",
       name: opp?.zones?.map((z: ZoneType) => z.name).join(", "),
     },
-    offers: {
-      "@type": "Offer",
-      availability: "https://schema.org/InStock",
-      price: "0",
-      priceCurrency: "USD",
-    },
+
     organizer: {
       "@type": "Organization",
       name: "Your Organization Name",
@@ -94,23 +140,6 @@ const OpportunityDetail = async ({
 
   return (
     <main className="container mx-auto flex flex-col items-center justify-center gap-4 p-8 md:w-5/6">
-      <Head>
-        <title>{`${title} | Opportunity Details`}</title>
-        <meta name="description" content={description} />
-        <meta
-          name="keywords"
-          content={`opportunity, ${typeKeywords}, ${zoneKeywords}`}
-        />
-        <meta property="og:title" content={title} />
-        <meta property="og:description" content={description} />
-        <meta property="og:image" content={imageUrl} />
-        <meta property="og:type" content="article" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={imageUrl} />
-      </Head>
-
       <Suspense fallback={<LoadingComponent />}>
         <h1 className="sr-only">
           {organisationShortName} | {opp?.name} - Opportunity Details

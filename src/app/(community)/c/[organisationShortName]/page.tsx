@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+
 import CommunityHeader from "@/app/_components/CommunityPage/CommunityHeader";
 import OpportunitiesClient from "@/app/_components/CommunityPage/OpportunitiesClient";
 import LoadingComponent from "@/app/_components/LoadingComponent";
@@ -6,6 +8,61 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string; organisationShortName: string }>;
+}): Promise<Metadata> {
+  const { id, organisationShortName } = await params;
+
+  let community;
+  try {
+    community = await api.community.getCommunity({
+      organisationShortName,
+    });
+  } catch (error) {
+    return { title: "Community not found" };
+  }
+
+  const title = `${organisationShortName} | View All Opportunities`;
+
+  const description = `View all opportunties in ${organisationShortName}.`;
+
+  return {
+    title: `${title}`,
+    description,
+    keywords: `opportunities, ${community?.abbreviation}, ${community?.name}`,
+    openGraph: {
+      title,
+      description,
+      images: [
+        {
+          url:
+            organisationShortName ??
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/${organisationShortName}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [
+        {
+          url:
+            organisationShortName ??
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/${organisationShortName}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
+  };
+}
 
 const CommunityPage = async ({
   params,

@@ -1,3 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+
 import { Suspense } from "react";
 import LoadingComponent from "../../_components/LoadingComponent";
 import { api } from "@/trpc/server";
@@ -6,7 +11,7 @@ import EventCard from "../../_components/EventCard";
 import { auth } from "@/server/auth";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import ReportModal from "@/app/_components/Swipe/ReportModal";
+
 import type { Metadata } from "next";
 
 export async function generateMetadata({
@@ -54,7 +59,15 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: [imageUrl],
+      images: [
+        {
+          url:
+            opp?.thumbnail_url ??
+            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
   };
 }
