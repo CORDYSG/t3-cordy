@@ -29,14 +29,22 @@ export async function generateMetadata({
       type: "website",
       images: [
         {
-          url: "https://images.ctfassets.net/ayry21z1dzn2/3lJGKozj6dds5YDrNPmgha/756d620548c99faa2fa4622b3eb2e5b4/Toilet_Bowl.svg",
-          width: 400,
-          height: 400,
+          url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/1bbf34d7a1f60446174cfbe771376e04/Frame_229.png?h=250",
+          width: 1200,
+          height: 630,
           alt: "Opportunities illustration",
         },
       ],
     },
     twitter: {
+      images: [
+        {
+          url: "https://images.ctfassets.net/ayry21z1dzn2/lToBBbbBZaSz1i4NtT4Yp/1bbf34d7a1f60446174cfbe771376e04/Frame_229.png?h=250",
+          width: 1200,
+          height: 630,
+          alt: "Opportunities illustration",
+        },
+      ],
       card: "summary_large_image",
       title: "Explore All Opportunities | Find Your Next Passion Project",
       description:
