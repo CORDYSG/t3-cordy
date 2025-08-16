@@ -32,7 +32,7 @@ export async function generateMetadata({
       ? opp.caption.substring(0, 157) + "..."
       : opp.caption
     : "View detailed information about this opportunity and find similar opportunities.";
-  const imageUrl = opp?.thumbnail_url ?? "";
+
   const typeKeywords = opp?.types?.map((t: TagType) => t.name).join(", ") ?? "";
   const zoneKeywords =
     opp?.zones?.map((z: ZoneType) => z.name).join(", ") ?? "";
@@ -46,9 +46,7 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url:
-            opp?.thumbnail_url ??
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
           width: 1200,
           height: 630,
         },
@@ -61,9 +59,7 @@ export async function generateMetadata({
       description,
       images: [
         {
-          url:
-            opp?.thumbnail_url ??
-            `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
+          url: `${process.env.NEXT_PUBLIC_BASE_URL}/api/og/profile/${id}`,
           width: 1200,
           height: 630,
         },
