@@ -40,9 +40,11 @@ type ShareContent = {
   titleOnly?: boolean;
   disabled?: boolean;
   opp?: OppWithZoneType;
+  organisationShortName?: string;
 };
 
 const ShareButton = ({
+  organisationShortName,
   title = "Check this out! - Cordy",
   text = "I found an interesting opportunity!",
   oppId,
@@ -55,8 +57,14 @@ const ShareButton = ({
   const [showTooltip, setShowTooltip] = useState(false);
   const [sharedUrl, setSharedUrl] = useState<string>("");
   useEffect(() => {
-    if (opp_airtable_id) {
-      setSharedUrl(`https://app.cordy.sg/opportunities/${opp_airtable_id}`);
+    if (organisationShortName) {
+      setSharedUrl(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/c/${organisationShortName}/opp/${opp_airtable_id}`,
+      );
+    } else if (opp_airtable_id) {
+      setSharedUrl(
+        `${process.env.NEXT_PUBLIC_BASE_URL}/opportunities/${opp_airtable_id}`,
+      );
     } else {
       setSharedUrl(window.location.href);
     }

@@ -507,6 +507,7 @@ export default function EventCard({
     <>
       <div className="flex w-full items-center justify-end gap-8">
         <ShareButton
+          organisationShortName={organisationShortName}
           opp_airtable_id={opp.airtable_id}
           oppId={opp.id}
           opp={opp}

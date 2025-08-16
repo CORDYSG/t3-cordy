@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { db } from "@/server/db";
-import { createTRPCRouter, protectedProcedure, publicProcedure } from "@/server/api/trpc";
+import {
+  createTRPCRouter,
+  protectedProcedure,
+  publicProcedure,
+} from "@/server/api/trpc";
 import type { Prisma } from "@prisma/client";
 
 const activeOppsFilter = {
@@ -73,8 +77,7 @@ export const oppRouter = createTRPCRouter({
     const zoneMap = buildZoneMap(zones);
     return enrichOppsWithZones(opps, zoneMap);
   }),
- getUserLikedOpps: protectedProcedure
-  .query(async ({ ctx }) => {
+  getUserLikedOpps: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     if (!userId) {
       return { opps: [], expiredCount: 0 };
@@ -90,7 +93,7 @@ export const oppRouter = createTRPCRouter({
       },
       select: {
         updatedAt: true,
-        opportunity: { 
+        opportunity: {
           select: {
             id: true,
             name: true,
@@ -102,11 +105,11 @@ export const oppRouter = createTRPCRouter({
             airtable_id: true,
             zone: true,
           },
-        }
+        },
       },
       orderBy: {
         updatedAt: "desc",
-      }
+      },
     });
 
     const expiredCount = await db.userOpportunity.count({
@@ -122,7 +125,10 @@ export const oppRouter = createTRPCRouter({
     const zones = await fetchAllZones();
     const zoneMap = buildZoneMap(zones);
 
-    const enrichedOpps = enrichOppsWithZones(likedOpps.map(item => item.opportunity), zoneMap);
+    const enrichedOpps = enrichOppsWithZones(
+      likedOpps.map((item) => item.opportunity),
+      zoneMap,
+    );
 
     return {
       opps: enrichedOpps,
@@ -130,9 +136,7 @@ export const oppRouter = createTRPCRouter({
     };
   }),
 
-  
-  getUserSavedOpps: protectedProcedure
-  .query(async ({ ctx }) => {
+  getUserSavedOpps: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     if (!userId) {
       return { opps: [], expiredCount: 0 };
@@ -148,7 +152,7 @@ export const oppRouter = createTRPCRouter({
       },
       select: {
         updatedAt: true,
-        opportunity: { 
+        opportunity: {
           select: {
             id: true,
             name: true,
@@ -160,11 +164,11 @@ export const oppRouter = createTRPCRouter({
             airtable_id: true,
             zone: true,
           },
-        }
+        },
       },
       orderBy: {
         updatedAt: "desc",
-      }
+      },
     });
 
     const expiredCount = await db.userOpportunity.count({
@@ -180,34 +184,33 @@ export const oppRouter = createTRPCRouter({
     const zones = await fetchAllZones();
     const zoneMap = buildZoneMap(zones);
 
-    const enrichedOpps = enrichOppsWithZones(savedOpps.map(item => item.opportunity), zoneMap);
+    const enrichedOpps = enrichOppsWithZones(
+      savedOpps.map((item) => item.opportunity),
+      zoneMap,
+    );
 
     return {
       opps: enrichedOpps,
       expiredCount,
     };
   }),
-   getUserOppHistory: protectedProcedure
-  .query(async ({ ctx }) => {
+  getUserOppHistory: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id;
     if (!userId) {
       return { opps: [], expiredCount: 0 };
     }
 
     const userOpps = await db.userOpportunity.findMany({
-    where: {
-    userId,
-    opportunity: {
-      deadline: { lt: new Date() }, // inactive
-    },
-    OR: [
-      { liked: true },
-      { saved: true },
-    ],
-  },
+      where: {
+        userId,
+        opportunity: {
+          deadline: { lt: new Date() }, // inactive
+        },
+        OR: [{ liked: true }, { saved: true }],
+      },
       select: {
         updatedAt: true,
-        opportunity: { 
+        opportunity: {
           select: {
             id: true,
             name: true,
@@ -219,19 +222,22 @@ export const oppRouter = createTRPCRouter({
             airtable_id: true,
             zone: true,
           },
-        }
+        },
       },
       orderBy: {
         updatedAt: "desc",
-      }
+      },
     });
 
-    const expiredCount = 0
-  
+    const expiredCount = 0;
+
     const zones = await fetchAllZones();
     const zoneMap = buildZoneMap(zones);
 
-    const enrichedOpps = enrichOppsWithZones(userOpps.map(item => item.opportunity), zoneMap);
+    const enrichedOpps = enrichOppsWithZones(
+      userOpps.map((item) => item.opportunity),
+      zoneMap,
+    );
 
     return {
       opps: enrichedOpps,
@@ -239,7 +245,6 @@ export const oppRouter = createTRPCRouter({
     };
   }),
 
-  
   getOppById: publicProcedure
     .input(z.object({ oppId: z.string() }))
     .query(async ({ input }) => {
@@ -247,7 +252,7 @@ export const oppRouter = createTRPCRouter({
         db.opps.findFirst({
           where: {
             airtable_id: input.oppId,
-      
+            status: { not: "Rejected" },
           },
         }),
         fetchAllZones(),
@@ -295,79 +300,84 @@ export const oppRouter = createTRPCRouter({
       return { opps: enrichedOpps, totalOpps };
     }),
 
- searchOpportunities: publicProcedure
-  .input(
-    z.object({
-      search: z.string().optional().default(""),
-      type: z.array(z.string().max(20)).optional().default([]),
-      zoneIds: z.array(z.string().max(20)).optional().default([]), //zone names
-      page: z.number().optional().default(1),
-      limit: z.number().optional().default(8),
-      excludeOppIds: z.array(z.string()).optional().default([]),
-      sortBy: z.enum(["newest", "oldest", "deadline-asc", "deadline-desc"]).optional().default("newest"),
-    }),
-  )
-  .query(async ({ ctx, input }) => {
-    const { search, type, zoneIds, page, limit, excludeOppIds, sortBy } = input;
-    const skip = (page - 1) * limit;
-
-    // Build the where clause more efficiently
-    const whereClause: Prisma.OppsWhereInput = {
-      status: "Active",
-      deadline: { gt: new Date() },
-      ...(excludeOppIds.length > 0 && {
-        airtable_id: { notIn: excludeOppIds },
+  searchOpportunities: publicProcedure
+    .input(
+      z.object({
+        search: z.string().optional().default(""),
+        type: z.array(z.string().max(20)).optional().default([]),
+        zoneIds: z.array(z.string().max(20)).optional().default([]), //zone names
+        page: z.number().optional().default(1),
+        limit: z.number().optional().default(8),
+        excludeOppIds: z.array(z.string()).optional().default([]),
+        sortBy: z
+          .enum(["newest", "oldest", "deadline-asc", "deadline-desc"])
+          .optional()
+          .default("newest"),
       }),
-      ...(search && {
-        OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { caption: { contains: search, mode: "insensitive" } },
-        ],
-      }),
-      ...(type.length > 0 && { type: { hasSome: type } }),
-      ...(zoneIds.length > 0 && { zone: { hasSome: zoneIds } }),
-    };
+    )
+    .query(async ({ ctx, input }) => {
+      const { search, type, zoneIds, page, limit, excludeOppIds, sortBy } =
+        input;
+      const skip = (page - 1) * limit;
 
-    // Build the orderBy clause based on sortBy parameter
-    const getOrderByClause = (sortBy: string): Prisma.OppsOrderByWithRelationInput => {
-      switch (sortBy) {
-        case "newest":
-          return { created_at: "desc" };
-        case "oldest":
-          return { created_at: "asc" };
-        case "deadline-asc":
-          return { deadline: "asc" };
-        case "deadline-desc":
-          return { deadline: "desc" };
-        default:
-          return { created_at: "desc" };
+      // Build the where clause more efficiently
+      const whereClause: Prisma.OppsWhereInput = {
+        status: "Active",
+        deadline: { gt: new Date() },
+        ...(excludeOppIds.length > 0 && {
+          airtable_id: { notIn: excludeOppIds },
+        }),
+        ...(search && {
+          OR: [
+            { name: { contains: search, mode: "insensitive" } },
+            { caption: { contains: search, mode: "insensitive" } },
+          ],
+        }),
+        ...(type.length > 0 && { type: { hasSome: type } }),
+        ...(zoneIds.length > 0 && { zone: { hasSome: zoneIds } }),
+      };
+
+      // Build the orderBy clause based on sortBy parameter
+      const getOrderByClause = (
+        sortBy: string,
+      ): Prisma.OppsOrderByWithRelationInput => {
+        switch (sortBy) {
+          case "newest":
+            return { created_at: "desc" };
+          case "oldest":
+            return { created_at: "asc" };
+          case "deadline-asc":
+            return { deadline: "asc" };
+          case "deadline-desc":
+            return { deadline: "desc" };
+          default:
+            return { created_at: "desc" };
+        }
+      };
+
+      // Get zones first since we need them for filtering
+      const zones = await fetchAllZones();
+      const zoneMap = buildZoneMap(zones);
+
+      // Use a single count + findMany query with proper pagination
+      const [totalOpps, opps] = await Promise.all([
+        db.opps.count({ where: whereClause }),
+        db.opps.findMany({
+          where: whereClause,
+          take: limit,
+          skip,
+          orderBy: getOrderByClause(sortBy),
+        }),
+      ]);
+
+      // Early return if no results
+      if (opps.length === 0) {
+        return { opps: [], totalOpps };
       }
-    };
 
-    // Get zones first since we need them for filtering
-    const zones = await fetchAllZones();
-    const zoneMap = buildZoneMap(zones);
-
-    // Use a single count + findMany query with proper pagination
-    const [totalOpps, opps] = await Promise.all([
-      db.opps.count({ where: whereClause }),
-      db.opps.findMany({
-        where: whereClause,
-        take: limit,
-        skip,
-        orderBy: getOrderByClause(sortBy),
-      }),
-    ]);
-
-    // Early return if no results
-    if (opps.length === 0) {
-      return { opps: [], totalOpps };
-    }
-
-    return {
-      opps: enrichOppsWithZones(opps, zoneMap),
-      totalOpps,
-    };
-  }),
-    
+      return {
+        opps: enrichOppsWithZones(opps, zoneMap),
+        totalOpps,
+      };
+    }),
 });
