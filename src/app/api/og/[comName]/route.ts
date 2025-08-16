@@ -132,6 +132,7 @@ export async function GET(
           {
             style: {
               display: "flex",
+              marginTop: "40px",
               flexDirection: "column",
               alignItems: "center",
               justifyContent: "center",
