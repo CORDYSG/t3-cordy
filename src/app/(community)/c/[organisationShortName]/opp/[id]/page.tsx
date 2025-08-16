@@ -26,9 +26,10 @@ export async function generateMetadata({
     return { title: "Opportunity not found" };
   }
 
+  const capitalisedShortName = organisationShortName.toUpperCase();
   const title = opp?.name
-    ? `${organisationShortName} | ${opp?.name}`
-    : ` ${organisationShortName} | Opportunity Details`;
+    ? `${capitalisedShortName} | ${opp?.name}`
+    : ` ${capitalisedShortName} | Opportunity Details`;
   const description = opp?.caption
     ? opp.caption.length > 160
       ? opp.caption.substring(0, 157) + "..."
@@ -116,9 +117,8 @@ const OpportunityDetail = async ({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: opp?.name,
+    name: opp?.name + " | CORDY",
     description: opp?.description,
-    image: opp?.image_url,
     url:
       `${process.env.NEXT_PUBLIC_SITE_URL}/c/${organisationShortName}/opp/${id}` ||
       `https://app.cordy.sg/c/${organisationShortName}/opp/${id}`,

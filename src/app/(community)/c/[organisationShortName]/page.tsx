@@ -25,7 +25,8 @@ export async function generateMetadata({
     return { title: "Community not found" };
   }
 
-  const title = `${organisationShortName} | View All Opportunities`;
+  const capitalisedShortName = organisationShortName.toUpperCase();
+  const title = `${capitalisedShortName} | View All Opportunities`;
 
   const description = `View all opportunties in ${organisationShortName}.`;
 

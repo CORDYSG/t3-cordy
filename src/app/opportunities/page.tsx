@@ -106,7 +106,7 @@ const OpportunitiesPage = async ({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
-    name: "Opportunities Directory",
+    name: "CORDY | View All Opportunities",
     description:
       "Browse and discover a wide range of opportunities tailored to your interests.",
     url: `${process.env.NEXT_PUBLIC_SITE_URL}/opportunities${page > 1 ? `?page=${page}` : ""}`,

@@ -106,9 +106,8 @@ const OpportunityDetail = async ({
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Event",
-    name: opp?.name,
+    name: opp?.name + " | CORDY",
     description: opp?.description,
-    image: opp?.image_url,
     url:
       `${process.env.NEXT_PUBLIC_SITE_URL}/opportunities/${id}` ||
       `https://app.cordy.sg/opportunities/${id}`,
